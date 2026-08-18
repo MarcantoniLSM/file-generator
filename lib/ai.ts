@@ -36,6 +36,41 @@ function getOpenAIModel() {
   return process.env.OPENAI_MODEL || "gpt-4.1-mini";
 }
 
+function extractOpenAIText(data: unknown) {
+  if (!data || typeof data !== "object") return null;
+
+  const responseData = data as {
+    output_text?: unknown;
+    output?: Array<{
+      content?: Array<{
+        text?: unknown;
+      }>;
+    }>;
+  };
+
+  const directText = responseData.output_text;
+  if (typeof directText === "string" && directText.trim()) {
+    return directText;
+  }
+
+  const output = responseData.output;
+  if (!Array.isArray(output)) return null;
+
+  const parts = output.flatMap((item) => {
+    if (!Array.isArray(item.content)) {
+      return [];
+    }
+
+    return item.content
+      .map((content) => {
+        return typeof content.text === "string" ? content.text : null;
+      })
+      .filter((text): text is string => Boolean(text?.trim()));
+  });
+
+  return parts.length ? parts.join("\n\n") : null;
+}
+
 async function callOpenAI(prompt: string): Promise<AIResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   const model = getOpenAIModel();
@@ -81,7 +116,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
       };
     }
 
-    const text = data?.output_text;
+    const text = extractOpenAIText(data);
 
     if (typeof text !== "string" || !text.trim()) {
       return {
