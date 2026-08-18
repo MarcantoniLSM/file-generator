@@ -11,34 +11,109 @@ type ReviewInput = {
   text: string;
 };
 
-async function callOpenAI(prompt: string) {
+type AIResult =
+  | {
+      text: string;
+      source: "openai";
+      debug: {
+        model: string;
+        responseId?: string;
+      };
+    }
+  | {
+      text: null;
+      source: "local";
+      debug: {
+        reason: string;
+        model?: string;
+        status?: number;
+        errorCode?: string;
+        errorMessage?: string;
+      };
+    };
+
+function getOpenAIModel() {
+  return process.env.OPENAI_MODEL || "gpt-4.1-mini";
+}
+
+async function callOpenAI(prompt: string): Promise<AIResult> {
   const apiKey = process.env.OPENAI_API_KEY;
+  const model = getOpenAIModel();
 
   if (!apiKey) {
-    return null;
+    return {
+      text: null,
+      source: "local",
+      debug: {
+        reason: "OPENAI_API_KEY ausente no ambiente do servidor.",
+        model
+      }
+    };
   }
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-      input: prompt,
-      temperature: 0.2
-    })
-  });
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        input: prompt,
+        temperature: 0.2
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error("Nao foi possivel gerar a resposta com IA.");
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        text: null,
+        source: "local",
+        debug: {
+          reason: "A OpenAI retornou erro HTTP.",
+          model,
+          status: response.status,
+          errorCode: data?.error?.code,
+          errorMessage: data?.error?.message || response.statusText
+        }
+      };
+    }
+
+    const text = data?.output_text;
+
+    if (typeof text !== "string" || !text.trim()) {
+      return {
+        text: null,
+        source: "local",
+        debug: {
+          reason: "A resposta da OpenAI nao trouxe output_text utilizavel.",
+          model,
+          errorMessage: data ? JSON.stringify(data).slice(0, 600) : "Resposta vazia ou invalida."
+        }
+      };
+    }
+
+    return {
+      text,
+      source: "openai",
+      debug: {
+        model,
+        responseId: data?.id
+      }
+    };
+  } catch (error) {
+    return {
+      text: null,
+      source: "local",
+      debug: {
+        reason: "Falha ao conectar com a OpenAI.",
+        model,
+        errorMessage: error instanceof Error ? error.message : "Erro desconhecido."
+      }
+    };
   }
-
-  const data = await response.json();
-  const text = data.output_text;
-
-  return typeof text === "string" ? text : null;
 }
 
 export async function generateDraft(input: GenerateInput) {
@@ -59,9 +134,11 @@ export async function generateDraft(input: GenerateInput) {
   ].join("\n");
 
   const generated = await callOpenAI(prompt);
+
   return {
-    text: generated || generateLocalDraft(input),
-    source: generated ? "openai" : "local"
+    text: generated.text || generateLocalDraft(input),
+    source: generated.source,
+    debug: generated.debug
   };
 }
 
@@ -81,10 +158,11 @@ export async function reviewDraft(input: ReviewInput) {
 
   const generated = await callOpenAI(prompt);
 
-  if (generated) {
+  if (generated.text) {
     return {
-      text: generated,
-      source: "openai"
+      text: generated.text,
+      source: "openai",
+      debug: generated.debug
     };
   }
 
@@ -103,5 +181,34 @@ export async function reviewDraft(input: ReviewInput) {
     "_Revisao automatica preliminar. Validacao humana obrigatoria._"
   ].join("\n");
 
-  return { text, source: "local" };
+  return { text, source: "local", debug: generated.debug };
+}
+
+export async function checkAIStatus() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  const model = getOpenAIModel();
+
+  if (!apiKey) {
+    return {
+      ok: false,
+      provider: "openai",
+      model,
+      keyConfigured: false,
+      reason: "OPENAI_API_KEY nao esta disponivel no ambiente do servidor."
+    };
+  }
+
+  const result = await callOpenAI("Responda apenas: OK");
+
+  return {
+    ok: result.source === "openai",
+    provider: "openai",
+    model,
+    keyConfigured: true,
+    responseId: result.source === "openai" ? result.debug.responseId : undefined,
+    reason: result.source === "openai" ? "Chamada concluida com sucesso." : result.debug.reason,
+    status: result.source === "local" ? result.debug.status : undefined,
+    errorCode: result.source === "local" ? result.debug.errorCode : undefined,
+    errorMessage: result.source === "local" ? result.debug.errorMessage : undefined
+  };
 }

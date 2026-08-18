@@ -1,10 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Clipboard, Download, FileSearch, FileText, Loader2, Wand2 } from "lucide-react";
+import { Check, Clipboard, Download, FileSearch, FileText, Loader2, PlugZap, Wand2 } from "lucide-react";
 import { DocumentKind, documentDefinitions, documentKinds } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
+type DebugInfo = {
+  reason?: string;
+  model?: string;
+  status?: number;
+  errorCode?: string;
+  errorMessage?: string;
+  responseId?: string;
+};
+type AIStatus = {
+  ok: boolean;
+  model: string;
+  keyConfigured: boolean;
+  reason: string;
+  status?: number;
+  errorCode?: string;
+  errorMessage?: string;
+  responseId?: string;
+};
 
 const initialKind: DocumentKind = "dfd";
 
@@ -15,6 +33,9 @@ export default function Home() {
   const [reviewText, setReviewText] = useState("");
   const [output, setOutput] = useState("");
   const [source, setSource] = useState<"openai" | "local" | null>(null);
+  const [debug, setDebug] = useState<DebugInfo | null>(null);
+  const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
+  const [checkingAI, setCheckingAI] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const definition = documentDefinitions[kind];
@@ -31,6 +52,7 @@ export default function Home() {
   async function generate() {
     setLoading(true);
     setOutput("");
+    setDebug(null);
 
     try {
       const response = await fetch("/api/generate", {
@@ -46,6 +68,7 @@ export default function Home() {
 
       setOutput(data.text);
       setSource(data.source);
+      setDebug(data.debug || null);
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
     } finally {
@@ -56,6 +79,7 @@ export default function Home() {
   async function review() {
     setLoading(true);
     setOutput("");
+    setDebug(null);
 
     try {
       const response = await fetch("/api/review", {
@@ -71,10 +95,30 @@ export default function Home() {
 
       setOutput(data.text);
       setSource(data.source);
+      setDebug(data.debug || null);
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function checkAI() {
+    setCheckingAI(true);
+
+    try {
+      const response = await fetch("/api/ai-status", { cache: "no-store" });
+      const data = await response.json();
+      setAiStatus(data);
+    } catch (error) {
+      setAiStatus({
+        ok: false,
+        model: "desconhecido",
+        keyConfigured: false,
+        reason: error instanceof Error ? error.message : "Nao foi possivel testar a IA."
+      });
+    } finally {
+      setCheckingAI(false);
     }
   }
 
@@ -105,8 +149,20 @@ export default function Home() {
             <p className="text-sm font-semibold uppercase tracking-wide text-civic">Gestao Publica</p>
             <h1 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">Gerador de minutas com IA</h1>
           </div>
-          <div className="rounded-md border border-line bg-paper px-3 py-2 text-sm text-slate-700">
-            Minuta preliminar. Revisao humana obrigatoria.
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={checkAI}
+              disabled={checkingAI}
+              className="flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink disabled:cursor-wait disabled:text-slate-400"
+              title="Testar conexao com a OpenAI"
+            >
+              {checkingAI ? <Loader2 className="animate-spin" size={16} /> : <PlugZap size={16} />}
+              Testar IA
+            </button>
+            <div className="rounded-md border border-line bg-paper px-3 py-2 text-sm text-slate-700">
+              Minuta preliminar. Revisao humana obrigatoria.
+            </div>
           </div>
         </div>
       </header>
@@ -114,6 +170,23 @@ export default function Home() {
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[420px_1fr]">
         <aside className="space-y-5">
           <div className="rounded-md border border-line bg-white p-4">
+            {aiStatus ? (
+              <div
+                className={`mb-4 rounded-md border px-3 py-2 text-sm ${
+                  aiStatus.ok
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : "border-amber-200 bg-amber-50 text-amber-950"
+                }`}
+              >
+                <p className="font-semibold">{aiStatus.ok ? "IA conectada" : "IA indisponivel"}</p>
+                <p className="mt-1">Modelo: {aiStatus.model}</p>
+                <p>Chave no servidor: {aiStatus.keyConfigured ? "sim" : "nao"}</p>
+                <p>{aiStatus.reason}</p>
+                {aiStatus.status ? <p>Status HTTP: {aiStatus.status}</p> : null}
+                {aiStatus.errorCode ? <p>Codigo: {aiStatus.errorCode}</p> : null}
+                {aiStatus.errorMessage ? <p>Erro: {aiStatus.errorMessage}</p> : null}
+              </div>
+            ) : null}
             <label className="text-sm font-semibold text-ink" htmlFor="kind">
               Tipo documental
             </label>
@@ -239,9 +312,20 @@ export default function Home() {
                 {source === "openai"
                   ? "Gerado com provedor de IA configurado."
                   : source === "local"
-                    ? "Gerado pelo template local porque a chave de IA nao esta configurada."
+                    ? "Gerado pelo template local. Veja o diagnostico abaixo para entender o motivo."
                     : "A minuta aparecera aqui."}
               </p>
+              {debug ? (
+                <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                  <p className="font-semibold">Diagnostico da IA</p>
+                  {debug.model ? <p>Modelo: {debug.model}</p> : null}
+                  {debug.responseId ? <p>Resposta: {debug.responseId}</p> : null}
+                  {debug.reason ? <p>Motivo: {debug.reason}</p> : null}
+                  {debug.status ? <p>Status HTTP: {debug.status}</p> : null}
+                  {debug.errorCode ? <p>Codigo: {debug.errorCode}</p> : null}
+                  {debug.errorMessage ? <p>Erro: {debug.errorMessage}</p> : null}
+                </div>
+              ) : null}
             </div>
             <div className="flex gap-2">
               <button
