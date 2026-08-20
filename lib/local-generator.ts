@@ -3,72 +3,60 @@ import { DocumentKind, documentDefinitions } from "./document-types";
 type GenerateInput = {
   kind: DocumentKind;
   values: Record<string, string>;
+  institution?: Record<string, string>;
 };
 
-const getValue = (values: Record<string, string>, key: string, fallback = "Nao informado") => {
-  const value = values[key]?.trim();
+const getValue = (values: Record<string, string> | undefined, key: string, fallback = "Nao informado") => {
+  const value = values?.[key]?.trim();
   return value ? value : fallback;
 };
 
-export function generateLocalDraft({ kind, values }: GenerateInput) {
-  if (kind === "dfd") {
-    return [
-      "# Documento de Formalizacao da Demanda",
-      "",
-      "## 1. Identificacao da demanda",
-      `Orgao/setor solicitante: ${getValue(values, "orgao")}`,
-      `Objeto: ${getValue(values, "objeto")}`,
-      "",
-      "## 2. Justificativa da necessidade",
-      getValue(values, "problema"),
-      "",
-      "## 3. Publico beneficiado e resultados esperados",
-      `A demanda beneficiara: ${getValue(values, "beneficiarios")}. Espera-se apoiar a continuidade, melhoria ou ampliacao dos servicos publicos relacionados ao objeto informado.`,
-      "",
-      "## 4. Estimativa preliminar",
-      `Quantidade estimada: ${getValue(values, "quantidade")}.`,
-      `Prazo desejado: ${getValue(values, "prazo")}.`,
-      "",
-      "## 5. Informacoes complementares",
-      getValue(values, "observacoes", "Nao foram registradas informacoes complementares nesta etapa."),
-      "",
-      "## 6. Encaminhamento",
-      "Diante da necessidade apresentada, recomenda-se o encaminhamento da demanda para avaliacao da area competente e, se cabivel, elaboracao dos estudos tecnicos e demais artefatos preparatorios.",
-      "",
-      "_Minuta gerada para revisao do agente publico responsavel._"
-    ].join("\n");
-  }
+function header(institution?: Record<string, string>) {
+  const lines = [
+    getValue(institution, "prefeitura", ""),
+    getValue(institution, "secretaria", ""),
+    getValue(institution, "municipioUf", ""),
+    getValue(institution, "cnpj", "")
+  ].filter(Boolean);
+
+  return lines.length ? ["**" + lines.join("**\n**") + "**", ""].join("\n") : "";
+}
+
+export function generateLocalDraft({ kind, values, institution }: GenerateInput) {
+  const definition = documentDefinitions[kind];
 
   return [
-    "# Estudo Tecnico Preliminar",
+    header(institution),
+    `# ${definition.name}`,
     "",
-    "## 1. Descricao da necessidade",
-    `Orgao/setor responsavel: ${getValue(values, "orgao")}`,
+    "## 1. Identificacao",
+    `Orgao/setor: ${getValue(values, "orgao", getValue(institution, "secretaria"))}`,
+    `Objeto/assunto: ${getValue(values, "objeto", getValue(values, "assunto", getValue(values, "pedido")))}`,
     "",
-    getValue(values, "necessidade"),
+    "## 2. Contextualizacao",
+    getValue(values, "problema", getValue(values, "conteudo", getValue(values, "justificativa"))),
     "",
-    "## 2. Requisitos da contratacao",
-    getValue(values, "requisitos", "Os requisitos deverao ser detalhados pela area demandante antes da formalizacao definitiva da contratacao."),
+    "## 3. Desenvolvimento",
+    `A presente minuta registra demanda de interesse da Administracao Municipal relacionada a ${getValue(
+      values,
+      "objeto",
+      "materia informada"
+    )}. Os elementos apresentados deverao ser conferidos pela area competente, especialmente quanto a quantidades, prazos, valores, disponibilidade orcamentaria e adequacao tecnica.`,
     "",
-    "## 3. Levantamento de alternativas",
-    getValue(values, "alternativas", "Nao foram registradas alternativas nesta versao inicial. Recomenda-se complementar o estudo com pesquisa de solucoes disponiveis."),
+    "## 4. Dados preliminares",
+    `Quantidade/dimensao: ${getValue(values, "quantidade")}`,
+    `Prazo: ${getValue(values, "prazo")}`,
+    `Valor estimado: ${getValue(values, "valor")}`,
     "",
-    "## 4. Descricao da solucao proposta",
-    getValue(values, "solucao", "A solucao proposta devera ser consolidada apos a avaliacao das alternativas e da viabilidade administrativa."),
+    "## 5. Pendencias para revisao",
+    "- Complementar informacoes tecnicas especificas, quando aplicavel.",
+    "- Confirmar disponibilidade orcamentaria e responsaveis pela validacao.",
+    "- Revisar a minuta pela area demandante e pela assessoria competente.",
     "",
-    "## 5. Estimativa de quantidades",
-    getValue(values, "quantidade"),
+    "## 6. Encaminhamento",
+    "Encaminhe-se a presente minuta para analise, complementacao e providencias cabiveis no ambito da Prefeitura.",
     "",
-    "## 6. Resultados pretendidos",
-    getValue(values, "resultados", "Espera-se atender a necessidade administrativa descrita, com ganhos de eficiencia, continuidade e qualidade na prestacao do servico publico."),
-    "",
-    "## 7. Riscos e providencias",
-    getValue(values, "riscos", "Nao foram identificados riscos especificos nesta etapa. Recomenda-se revisao pela area tecnica."),
-    "",
-    "## 8. Conclusao",
-    "Com base nas informacoes apresentadas, a contratacao mostra-se potencialmente pertinente, condicionada a revisao tecnica, validacao juridica quando aplicavel e complementacao dos dados ausentes.",
-    "",
-    "_Minuta gerada para revisao do agente publico responsavel._"
+    "_Minuta preliminar gerada para revisao do agente publico responsavel._"
   ].join("\n");
 }
 
@@ -92,9 +80,11 @@ export function reviewLocalText(kind: DocumentKind, text: string) {
   });
 
   const suggestions = [
+    "Desenvolver melhor a justificativa do interesse publico municipal.",
     "Confirmar se todos os fatos administrativos foram informados pelo setor responsavel.",
+    "Registrar memoria de calculo para quantidades e valores estimados.",
     "Evitar conclusoes juridicas definitivas na minuta gerada por IA.",
-    "Registrar justificativas objetivas para quantidades, prazos e escolha da solucao."
+    "Indicar pendencias de revisao tecnica, orcamentaria e juridica quando faltarem dados."
   ];
 
   return { findings, suggestions };

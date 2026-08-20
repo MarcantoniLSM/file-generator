@@ -11,7 +11,8 @@ export async function POST(request: Request) {
   }
 
   const values = typeof body.values === "object" && body.values ? body.values : {};
-  const result = await generateDraft({ kind, values });
+  const institution = typeof body.institution === "object" && body.institution ? body.institution : {};
+  const result = await generateDraft({ kind, values, institution });
 
   return NextResponse.json(result);
 }

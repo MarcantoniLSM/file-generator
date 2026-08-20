@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,9 +14,24 @@
 
 body {
   margin: 0;
-  background: #f7f8fa;
-  color: #17202a;
-  font-family: Arial, Helvetica, sans-serif;
+  background: #f6f5f8;
+  color: #171a21;
+  font-family: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+  font-feature-settings: "kern" 1;
+}
+
+::selection {
+  background: #b9a7de;
+  color: #171a21;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid #4a2e7f;
+  outline-offset: 3px;
 }
 
 button,

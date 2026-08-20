@@ -9,11 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#17202A",
-        line: "#D7DEE8",
-        paper: "#F7F8FA",
-        civic: "#0F766E",
-        accent: "#B45309"
+        ink: "#171A21",
+        muted: "#5C6470",
+        line: "#E2E0EA",
+        paper: "#F6F5F8",
+        civic: "#4A2E7F",
+        lilac: "#B9A7DE",
+        success: "#16704F",
+        accent: "#8A5600",
+        danger: "#9E2621"
+      },
+      fontFamily: {
+        sans: ["IBM Plex Sans", "Segoe UI", "Helvetica", "Arial", "sans-serif"],
+        serif: ["Spectral", "Georgia", "Times New Roman", "serif"],
+        mono: ["IBM Plex Mono", "SF Mono", "Consolas", "monospace"]
       }
     }
   },

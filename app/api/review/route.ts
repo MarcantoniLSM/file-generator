@@ -11,12 +11,13 @@ export async function POST(request: Request) {
   }
 
   const text = typeof body.text === "string" ? body.text : "";
+  const institution = typeof body.institution === "object" && body.institution ? body.institution : {};
 
   if (!text.trim()) {
     return NextResponse.json({ error: "Informe um texto para revisar." }, { status: 400 });
   }
 
-  const result = await reviewDraft({ kind, text });
+  const result = await reviewDraft({ kind, text, institution });
 
   return NextResponse.json(result);
 }
