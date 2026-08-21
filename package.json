@@ -4,11 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "rm -f .next/dev/lock && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
   },
   "dependencies": {
+    "@tiptap/extension-placeholder": "^3.30.2",
+    "@tiptap/extension-text-align": "^3.30.2",
+    "@tiptap/react": "^3.30.2",
+    "@tiptap/starter-kit": "^3.30.2",
     "@types/node": "20.14.10",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",

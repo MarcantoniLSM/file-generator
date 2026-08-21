@@ -46,7 +46,7 @@ function PageGroup({
 }) {
   return (
     <section className="border-t border-line py-14">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto max-w-6xl px-6 md:px-10">
         <div className="mb-7 grid gap-3 md:grid-cols-[320px_1fr]">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-civic">{eyebrow}</p>
@@ -83,81 +83,124 @@ function PageGroup({
 export default function Home() {
   return (
     <main className="min-h-screen bg-paper text-ink">
-      <div className="fixed left-0 top-0 z-20 h-full w-2 bg-civic md:w-3" aria-hidden="true" />
-
-      <header className="border-b border-white/10 bg-ink text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
-          <Link href="/" className="font-serif text-xl font-semibold">
-            Gerador de Documentos Publicos
+      <header className="sticky top-0 z-50 border-b border-line bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 md:px-10">
+          <Link href="/" className="flex items-center gap-3">
+            <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center">
+              <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                <path d="M0 26 L18 0 L18 82 L76 82 L76 100 L0 100 Z" fill="#4A2E7F" />
+                <rect x="34" y="16" width="66" height="11" fill="#171A21" />
+                <rect x="34" y="42" width="42" height="11" fill="#171A21" />
+              </svg>
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
+                Gerador de
+              </span>
+              <span className="font-serif text-base font-semibold text-ink">Documentos Publicos</span>
+            </span>
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-white/70 md:flex">
+          <nav className="hidden items-center gap-8 text-[15px] font-medium text-ink md:flex">
             <a href="#documentos">Documentos</a>
             <a href="#como-funciona">Como funciona</a>
             <Link href="/modelos">Modelos</Link>
-            <Link href="/gerador" className="border border-white/25 px-4 py-2 font-semibold text-white">
+            <Link href="/gerador" className="rounded-lg bg-civic px-5 py-2.5 text-sm font-semibold text-white">
               Abrir gerador
             </Link>
           </nav>
         </div>
       </header>
 
-      <section className="bg-ink text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-16 pt-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24 lg:pt-20">
+      <section className="border-b border-line bg-white">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-10 md:grid-cols-[1.1fr_0.9fr] md:items-center md:px-10 md:py-14 lg:py-16">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-lilac">IA para gestao publica municipal</p>
-            <h1 className="mt-6 max-w-4xl font-serif text-5xl font-semibold leading-[1.02] sm:text-6xl lg:text-7xl">
-              Minutas publicas mais completas, conferiveis e adaptadas a cada Prefeitura.
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">Gerador de Documentos Publicos</p>
+            <h1 className="mt-5 max-w-3xl font-serif text-[2rem] font-semibold leading-[1.15] text-ink sm:text-4xl lg:text-[2.75rem]">
+              Minutas prontas para a revisão do jurídico.
             </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-white/72">
-              Gere documentos de compras, licitacoes, contratos, atos administrativos e proposicoes legislativas com
-              formularios guiados, cabecalho institucional e revisao humana obrigatoria.
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+              Editais, termos de referência, DFDs, ETPs e proposições legislativas montados a partir de roteiros
+              objetivos, com cabeçalho do órgão e pontos de revisão destacados.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link href="/gerador" className="bg-white px-5 py-3 text-sm font-bold text-ink">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link href="/gerador" className="rounded-lg bg-civic px-7 py-3 text-base font-medium text-white">
                 Abrir gerador
               </Link>
-              <a href="#documentos" className="border border-white/25 px-5 py-3 text-sm font-bold text-white">
-                Ver documentos
+              <a href="#documentos" className="rounded-lg border border-ink px-7 py-3 text-base font-medium text-ink hover:bg-paper">
+                Ver documentos disponíveis
               </a>
+            </div>
+            <div className="mt-6 flex gap-3 border-l-[3px] border-accent bg-paper p-4">
+              <p className="text-sm leading-relaxed text-ink">
+                <span className="font-medium">Ferramenta de apoio à elaboração de minutas.</span> Não substitui a
+                revisão técnica e jurídica do órgão.
+              </p>
             </div>
           </div>
 
-          <div className="border border-white/15 bg-white p-5 text-ink">
-            <div className="border-b border-line pb-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-civic">Minuta gerada</p>
-              <h2 className="mt-2 font-serif text-2xl font-semibold">Documento de Formalizacao da Demanda</h2>
+          <div className="mx-auto w-full max-w-sm border border-line bg-white p-6 text-ink sm:p-8 md:max-w-none">
+            <div className="flex items-start gap-4 border-b border-ink pb-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-dashed border-muted text-center">
+                <span className="font-mono text-[8px] font-medium uppercase leading-tight tracking-wide text-muted">
+                  Brasão
+                  <br />
+                  [espaço reservado]
+                </span>
+              </div>
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="h-2 w-40 bg-ink/80" />
+                <div className="h-2 w-28 bg-muted/50" />
+              </div>
             </div>
-            <div className="space-y-4 py-5 font-serif text-sm leading-7 text-muted">
-              <p className="text-center font-semibold uppercase tracking-wide text-ink">
-                Prefeitura Municipal
-                <br />
-                Secretaria Municipal de Administracao
-              </p>
-              <p>
-                <b className="text-ink">1. Descricao da necessidade.</b> A presente demanda decorre da necessidade de
-                garantir condicoes adequadas de trabalho aos servidores municipais, com impacto direto na continuidade
-                das atividades administrativas.
-              </p>
-              <p>
-                <b className="text-ink">2. Interesse publico.</b> A contratacao pretendida devera ser analisada pela
-                area competente, considerando economicidade, padronizacao, disponibilidade orcamentaria e aderencia ao
-                planejamento do orgao.
+            <div className="mt-5 space-y-2">
+              <div className="h-2 w-24 bg-lilacLight" />
+              <p className="font-serif text-[13px] italic leading-relaxed text-muted">
+                Dispõe sobre a abertura de processo administrativo para contratação do objeto especificado no termo de
+                referência.
               </p>
             </div>
-            <div className="border-t border-line pt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-muted">
-              Minuta sujeita a revisao do agente publico responsavel
+            <div className="mt-5 space-y-2.5">
+              <div className="h-1.5 w-full bg-lilac" />
+              <div className="h-1.5 w-full bg-lilac" />
+              <div className="h-1.5 w-5/6 bg-lilac" />
+              <div className="h-1.5 w-full bg-lilac" />
+              <div className="h-1.5 w-3/4 bg-lilac" />
+            </div>
+            <div className="mt-6 flex items-center justify-between border-t border-line pt-3">
+              <span className="font-mono text-[9px] uppercase tracking-wide text-muted">Minuta — para revisão</span>
+              <span className="font-mono text-[9px] uppercase tracking-wide text-muted">Editável</span>
             </div>
           </div>
         </div>
       </section>
 
+      <nav className="border-b border-line bg-white" aria-label="Resumo da proposta">
+        <div className="mx-auto grid max-w-6xl gap-0 px-6 py-6 md:grid-cols-4 md:px-10">
+          {[
+            ["01", "Documentos gerados"],
+            ["02", "Como funciona"],
+            ["03", "Executivo municipal"],
+            ["04", "Legislativo municipal"]
+          ].map(([number, label]) => (
+            <a
+              key={number}
+              href={number === "01" ? "#documentos" : number === "02" ? "#como-funciona" : "#documentos"}
+              className="flex gap-4 border-b border-line py-3 md:border-b-0 md:border-r md:px-4 md:last:border-r-0"
+            >
+              <span className="font-mono text-xs text-civic">{number}</span>
+              <span className="font-serif text-lg">{label}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+
       <section id="documentos" className="py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl px-6 md:px-10">
           <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-civic">Documentos gerados</p>
-              <h2 className="mt-3 font-serif text-4xl font-semibold leading-tight">
-                Um centro de redacao assistida para rotinas municipais.
+              <h2 className="mt-3 font-serif text-3xl font-semibold leading-tight">
+                Um catálogo para as duas frentes do órgão.
               </h2>
               <p className="mt-4 leading-7 text-muted">
                 O produto deve atender tanto o Executivo quanto o Legislativo, mantendo a promessa central: a IA redige
@@ -177,10 +220,10 @@ export default function Home() {
       </section>
 
       <section id="como-funciona" className="border-y border-line bg-white py-14">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto max-w-6xl px-6 md:px-10">
           <div className="mb-8">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-civic">Como funciona</p>
-            <h2 className="mt-3 font-serif text-4xl font-semibold">Da demanda ate a minuta revisavel.</h2>
+            <h2 className="mt-3 font-serif text-3xl font-semibold">Do roteiro à exportação, em quatro etapas.</h2>
           </div>
           <div className="grid gap-3 md:grid-cols-4">
             {steps.map((step, index) => (
@@ -199,8 +242,8 @@ export default function Home() {
       <PageGroup title="Modelos prontos e captura" eyebrow="Biblioteca" pages={modelPages} basePath="/modelos" />
       <PageGroup title="Ferramentas gratuitas" eyebrow="Trafego e validacao" pages={toolPages} basePath="/ferramentas" />
 
-      <section className="bg-ink py-16 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1fr_420px]">
+      <section className="border-y border-line bg-civic py-16 text-white">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 md:px-10 lg:grid-cols-[1fr_420px]">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-lilac">Limite institucional</p>
             <h2 className="mt-3 max-w-3xl font-serif text-4xl font-semibold leading-tight">

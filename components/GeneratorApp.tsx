@@ -1,8 +1,24 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Clipboard, Download, FileSearch, FileText, Loader2, PlugZap, Wand2 } from "lucide-react";
-import { DocumentKind, documentDefinitions, documentKinds } from "@/lib/document-types";
+import Link from "next/link";
+import {
+  Check,
+  Clipboard,
+  Download,
+  FileSearch,
+  FileText,
+  FolderKanban,
+  Gavel,
+  Home,
+  Landmark,
+  Loader2,
+  PlugZap,
+  Settings2,
+  Wand2
+} from "lucide-react";
+import DocumentEditor from "@/components/DocumentEditor";
+import { DocumentCategory, DocumentKind, documentCatalog, documentDefinitions } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
 type DebugInfo = {
@@ -21,44 +37,46 @@ type AIStatus = {
   status?: number;
   errorCode?: string;
   errorMessage?: string;
-  responseId?: string;
+};
+type NavItem = {
+  label: string;
+  description: string;
+  kind: DocumentKind;
+  maturity: "stable" | "beta";
 };
 
-const initialKind: DocumentKind = "dfd";
+const initialKind: DocumentKind = "etp";
 const institutionFields = [
-  {
-    key: "prefeitura",
-    label: "Prefeitura",
-    placeholder: "Prefeitura Municipal de Exemplo"
-  },
-  {
-    key: "secretaria",
-    label: "Secretaria/Orgao",
-    placeholder: "Secretaria Municipal de Administracao"
-  },
-  {
-    key: "municipioUf",
-    label: "Municipio/UF",
-    placeholder: "Exemplo/CE"
-  },
-  {
-    key: "cnpj",
-    label: "CNPJ",
-    placeholder: "00.000.000/0001-00"
-  },
-  {
-    key: "responsavel",
-    label: "Responsavel",
-    placeholder: "Nome do responsavel pela demanda"
-  },
-  {
-    key: "cargo",
-    label: "Cargo",
-    placeholder: "Secretario Municipal / Diretor / Coordenador"
-  }
+  ["prefeitura", "Prefeitura", "Prefeitura Municipal de Exemplo"],
+  ["secretaria", "Secretaria/Orgao", "Secretaria Municipal de Administracao"],
+  ["municipioUf", "Municipio/UF", "Exemplo/CE"],
+  ["cnpj", "CNPJ", "00.000.000/0001-00"],
+  ["responsavel", "Responsavel", "Nome do responsavel pela demanda"],
+  ["cargo", "Cargo", "Secretario Municipal / Diretor / Coordenador"]
 ];
 
-export default function Home() {
+const groupIcons: Record<DocumentCategory, typeof FolderKanban> = {
+  "Compras e licitacoes": FolderKanban,
+  "Atos administrativos": Landmark,
+  Legislativo: Gavel
+};
+
+const documentGroups = (["Compras e licitacoes", "Atos administrativos", "Legislativo"] as DocumentCategory[]).map(
+  (category) => ({
+    title: category,
+    icon: groupIcons[category],
+    items: documentCatalog
+      .filter((document) => document.category === category)
+      .map((document) => ({
+        label: document.shortName,
+        description: document.name,
+        kind: document.kind,
+        maturity: document.maturity
+      }))
+  })
+);
+
+export default function GeneratorApp() {
   const [kind, setKind] = useState<DocumentKind>(initialKind);
   const [mode, setMode] = useState<Mode>("generate");
   const [values, setValues] = useState<Record<string, string>>({});
@@ -77,6 +95,13 @@ export default function Home() {
     () => definition.fields.filter((field) => field.required && !values[field.key]?.trim()),
     [definition.fields, values]
   );
+
+  function selectDocument(item: NavItem) {
+    setKind(item.kind);
+    setOutput("");
+    setSource(null);
+    setDebug(null);
+  }
 
   function updateValue(key: string, value: string) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -179,245 +204,291 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen">
-      <header className="border-b border-line bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-civic">Gestao Publica</p>
-            <h1 className="mt-1 text-2xl font-bold text-ink sm:text-3xl">Gerador de minutas com IA</h1>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={checkAI}
-              disabled={checkingAI}
-              className="flex h-10 items-center justify-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink disabled:cursor-wait disabled:text-slate-400"
-              title="Testar conexao com a OpenAI"
-            >
-              {checkingAI ? <Loader2 className="animate-spin" size={16} /> : <PlugZap size={16} />}
-              Testar IA
-            </button>
-            <div className="rounded-md border border-line bg-paper px-3 py-2 text-sm text-slate-700">
-              Minuta preliminar. Revisao humana obrigatoria.
+    <main className="min-h-screen bg-paper text-ink">
+      <div className="grid min-h-screen lg:grid-cols-[292px_1fr]">
+        <aside className="border-r border-line bg-white text-ink">
+          <div className="sticky top-0 flex h-screen flex-col">
+            <div className="border-b border-line p-5">
+              <Link href="/" className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center text-civic">
+                  <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                    <path d="M0 26 L18 0 L18 82 L76 82 L76 100 L0 100 Z" fill="#4A2E7F" />
+                    <rect x="34" y="16" width="66" height="11" fill="#171A21" />
+                    <rect x="34" y="42" width="42" height="11" fill="#171A21" />
+                  </svg>
+                </span>
+                <span>
+                  <span className="block font-serif text-lg font-semibold leading-5">Gerador</span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                    Documentos Publicos
+                  </span>
+                </span>
+              </Link>
             </div>
-          </div>
-        </div>
-      </header>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[420px_1fr]">
-        <aside className="space-y-5">
-          <div className="rounded-md border border-line bg-white p-4">
-            <div>
-              <h2 className="text-base font-bold text-ink">Configuracao da Prefeitura</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Estes dados entram no cabecalho e ajudam a IA a adaptar a minuta ao orgao municipal.
-              </p>
-            </div>
-            <div className="mt-4 grid gap-3">
-              {institutionFields.map((field) => (
-                <label key={field.key} className="block">
-                  <span className="text-sm font-semibold text-ink">{field.label}</span>
-                  <input
-                    value={institution[field.key] || ""}
-                    onChange={(event) => updateInstitution(field.key, event.target.value)}
-                    placeholder={field.placeholder}
-                    className="mt-2 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-civic"
-                  />
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-md border border-line bg-white p-4">
-            {aiStatus ? (
-              <div
-                className={`mb-4 rounded-md border px-3 py-2 text-sm ${
-                  aiStatus.ok
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : "border-amber-200 bg-amber-50 text-amber-950"
-                }`}
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
+              <Link
+                href="/"
+                className="mb-4 flex items-center gap-2 border border-line bg-paper px-3 py-2 text-sm text-muted hover:text-ink"
               >
-                <p className="font-semibold">{aiStatus.ok ? "IA conectada" : "IA indisponivel"}</p>
-                <p className="mt-1">Modelo: {aiStatus.model}</p>
-                <p>Chave no servidor: {aiStatus.keyConfigured ? "sim" : "nao"}</p>
-                <p>{aiStatus.reason}</p>
-                {aiStatus.status ? <p>Status HTTP: {aiStatus.status}</p> : null}
-                {aiStatus.errorCode ? <p>Codigo: {aiStatus.errorCode}</p> : null}
-                {aiStatus.errorMessage ? <p>Erro: {aiStatus.errorMessage}</p> : null}
+                <Home size={16} />
+                Landing page
+              </Link>
+
+              <div className="space-y-5">
+                {documentGroups.map((group) => {
+                  const Icon = group.icon;
+                  return (
+                    <div key={group.title}>
+                      <div className="mb-2 flex items-center gap-2 px-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
+                        <Icon size={14} />
+                        {group.title}
+                      </div>
+                      <div className="space-y-1">
+                        {group.items.map((item) => {
+                          const active = item.kind === kind;
+                          return (
+                            <button
+                              key={item.label}
+                              type="button"
+                              onClick={() => selectDocument(item)}
+                              className={`w-full border px-3 py-2 text-left transition ${
+                                active
+                                  ? "border-civic bg-paper text-ink"
+                                  : "border-transparent text-muted hover:border-line hover:bg-paper hover:text-ink"
+                              }`}
+                            >
+                              <span className="flex items-center justify-between gap-2">
+                                <span className="text-sm font-semibold">{item.label}</span>
+                                {item.maturity === "beta" ? (
+                                  <span className="border border-line bg-white px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-accent">
+                                    Beta
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span className="mt-0.5 block text-xs opacity-70">{item.description}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ) : null}
-            <label className="text-sm font-semibold text-ink" htmlFor="kind">
-              Tipo documental
-            </label>
-            <select
-              id="kind"
-              value={kind}
-              onChange={(event) => {
-                setKind(event.target.value as DocumentKind);
-                setOutput("");
-                setSource(null);
-              }}
-              className="mt-2 w-full rounded-md border border-line bg-white px-3 py-2 text-sm outline-none focus:border-civic"
-            >
-              {documentKinds.map((item) => (
-                <option key={item} value={item}>
-                  {documentDefinitions[item].shortName} - {documentDefinitions[item].name}
-                </option>
-              ))}
-            </select>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{definition.description}</p>
+            </nav>
           </div>
-
-          <div className="grid grid-cols-2 gap-2 rounded-md border border-line bg-white p-2">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("generate");
-                setOutput("");
-              }}
-              className={`flex h-10 items-center justify-center gap-2 rounded px-3 text-sm font-semibold ${
-                mode === "generate" ? "bg-civic text-white" : "text-slate-700 hover:bg-paper"
-              }`}
-            >
-              <FileText size={16} />
-              Criar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("review");
-                setOutput("");
-              }}
-              className={`flex h-10 items-center justify-center gap-2 rounded px-3 text-sm font-semibold ${
-                mode === "review" ? "bg-civic text-white" : "text-slate-700 hover:bg-paper"
-              }`}
-            >
-              <FileSearch size={16} />
-              Revisar
-            </button>
-          </div>
-
-          {mode === "generate" ? (
-            <div className="rounded-md border border-line bg-white p-4">
-              <div className="space-y-4">
-                {definition.fields.map((field) => (
-                  <label key={field.key} className="block">
-                    <span className="text-sm font-semibold text-ink">
-                      {field.label}
-                      {field.required ? <span className="text-accent"> *</span> : null}
-                    </span>
-                    {field.type === "textarea" ? (
-                      <textarea
-                        value={values[field.key] || ""}
-                        onChange={(event) => updateValue(field.key, event.target.value)}
-                        placeholder={field.placeholder}
-                        rows={4}
-                        className="mt-2 w-full rounded-md border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
-                      />
-                    ) : (
-                      <input
-                        value={values[field.key] || ""}
-                        onChange={(event) => updateValue(field.key, event.target.value)}
-                        placeholder={field.placeholder}
-                        className="mt-2 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-civic"
-                      />
-                    )}
-                  </label>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={generate}
-                disabled={loading || missingRequired.length > 0}
-                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-md bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : <Wand2 size={18} />}
-                Gerar minuta
-              </button>
-              {missingRequired.length > 0 ? (
-                <p className="mt-3 text-sm text-accent">Preencha os campos obrigatorios para gerar.</p>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-md border border-line bg-white p-4">
-              <label className="block">
-                <span className="text-sm font-semibold text-ink">Texto para revisao</span>
-                <textarea
-                  value={reviewText}
-                  onChange={(event) => setReviewText(event.target.value)}
-                  placeholder="Cole aqui a minuta existente para receber uma revisao preliminar."
-                  rows={14}
-                  className="mt-2 w-full rounded-md border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
-                />
-              </label>
-              <button
-                type="button"
-                onClick={review}
-                disabled={loading || !reviewText.trim()}
-                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-md bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : <FileSearch size={18} />}
-                Revisar documento
-              </button>
-            </div>
-          )}
         </aside>
 
-        <section className="min-h-[640px] rounded-md border border-line bg-white">
-          <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-ink">Resultado</h2>
-              <p className="text-sm text-slate-600">
-                {source === "openai"
-                  ? "Gerado com provedor de IA configurado."
-                  : source === "local"
-                    ? "Gerado pelo template local. Veja o diagnostico abaixo para entender o motivo."
-                    : "A minuta aparecera aqui."}
-              </p>
-              {debug ? (
-                <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-                  <p className="font-semibold">Diagnostico da IA</p>
-                  {debug.model ? <p>Modelo: {debug.model}</p> : null}
-                  {debug.responseId ? <p>Resposta: {debug.responseId}</p> : null}
-                  {debug.reason ? <p>Motivo: {debug.reason}</p> : null}
-                  {debug.status ? <p>Status HTTP: {debug.status}</p> : null}
-                  {debug.errorCode ? <p>Codigo: {debug.errorCode}</p> : null}
-                  {debug.errorMessage ? <p>Erro: {debug.errorMessage}</p> : null}
+        <section className="min-w-0">
+          <header className="border-b border-line bg-white">
+            <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Area interna</p>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
+                  <h1 className="font-serif text-3xl font-semibold leading-tight">{definition.name}</h1>
+                  {definition.maturity === "beta" ? (
+                    <span className="border border-line bg-paper px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+                      Beta
+                    </span>
+                  ) : null}
                 </div>
-              ) : null}
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{definition.description}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={checkAI}
+                  disabled={checkingAI}
+                  className="flex h-10 items-center gap-2 border border-line bg-white px-3 text-sm font-semibold disabled:cursor-wait disabled:text-muted"
+                >
+                  {checkingAI ? <Loader2 className="animate-spin" size={16} /> : <PlugZap size={16} />}
+                  Testar IA
+                </button>
+                <div className="border border-line bg-paper px-3 py-2 text-sm text-muted">
+                  Minuta preliminar. Revisao humana obrigatoria.
+                </div>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={copyOutput}
-                disabled={!output}
-                className="flex h-10 items-center justify-center gap-2 rounded-md border border-line px-3 text-sm font-semibold text-ink disabled:cursor-not-allowed disabled:text-slate-300"
-                title="Copiar resultado"
-              >
-                {copied ? <Check size={16} /> : <Clipboard size={16} />}
-                {copied ? "Copiado" : "Copiar"}
-              </button>
-              <button
-                type="button"
-                onClick={downloadOutput}
-                disabled={!output}
-                className="flex h-10 items-center justify-center gap-2 rounded-md border border-line px-3 text-sm font-semibold text-ink disabled:cursor-not-allowed disabled:text-slate-300"
-                title="Baixar em TXT"
-              >
-                <Download size={16} />
-                TXT
-              </button>
-            </div>
-          </div>
+          </header>
 
-          <textarea
-            value={output}
-            onChange={(event) => setOutput(event.target.value)}
-            placeholder="Preencha o formulario ou cole um texto para revisao."
-            className="h-[calc(100%-81px)] min-h-[560px] w-full border-0 bg-white p-5 font-mono text-sm leading-6 text-ink outline-none"
-          />
+          <div className="grid gap-5 p-4 sm:p-6 xl:grid-cols-[430px_1fr]">
+            <div className="space-y-5">
+              <section className="border border-line bg-white">
+                <div className="border-b border-line px-4 py-3">
+                  <h2 className="flex items-center gap-2 text-base font-bold">
+                    <Settings2 size={17} />
+                    Prefeitura e cabecalho
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-muted">
+                    Dados institucionais usados no cabecalho e no contexto da minuta.
+                  </p>
+                </div>
+                <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-1">
+                  {institutionFields.map(([key, label, placeholder]) => (
+                    <label key={key} className="block">
+                      <span className="text-sm font-semibold">{label}</span>
+                      <input
+                        value={institution[key] || ""}
+                        onChange={(event) => updateInstitution(key, event.target.value)}
+                        placeholder={placeholder}
+                        className="mt-2 w-full border border-line px-3 py-2 text-sm outline-none focus:border-civic"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <section className="border border-line bg-white">
+                <div className="grid grid-cols-2 gap-2 border-b border-line p-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("generate");
+                      setOutput("");
+                    }}
+                    className={`flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold ${
+                      mode === "generate" ? "bg-civic text-white" : "text-muted hover:bg-paper"
+                    }`}
+                  >
+                    <FileText size={16} />
+                    Criar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("review");
+                      setOutput("");
+                    }}
+                    className={`flex h-10 items-center justify-center gap-2 px-3 text-sm font-semibold ${
+                      mode === "review" ? "bg-civic text-white" : "text-muted hover:bg-paper"
+                    }`}
+                  >
+                    <FileSearch size={16} />
+                    Revisar
+                  </button>
+                </div>
+
+                {mode === "generate" ? (
+                  <div className="space-y-4 p-4">
+                    {definition.fields.map((field) => (
+                      <label key={field.key} className="block">
+                        <span className="text-sm font-semibold">
+                          {field.label}
+                          {field.required ? <span className="text-accent"> *</span> : null}
+                        </span>
+                        {field.type === "textarea" ? (
+                          <textarea
+                            value={values[field.key] || ""}
+                            onChange={(event) => updateValue(field.key, event.target.value)}
+                            placeholder={field.placeholder}
+                            rows={4}
+                            className="mt-2 w-full border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
+                          />
+                        ) : (
+                          <input
+                            value={values[field.key] || ""}
+                            onChange={(event) => updateValue(field.key, event.target.value)}
+                            placeholder={field.placeholder}
+                            className="mt-2 w-full border border-line px-3 py-2 text-sm outline-none focus:border-civic"
+                          />
+                        )}
+                      </label>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={generate}
+                      disabled={loading || missingRequired.length > 0}
+                      className="flex h-11 w-full items-center justify-center gap-2 bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : <Wand2 size={18} />}
+                      Gerar minuta
+                    </button>
+                    {missingRequired.length > 0 ? (
+                      <p className="text-sm text-accent">Preencha os campos obrigatorios para gerar.</p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <label className="block">
+                      <span className="text-sm font-semibold">Texto para revisao</span>
+                      <textarea
+                        value={reviewText}
+                        onChange={(event) => setReviewText(event.target.value)}
+                        placeholder="Cole aqui a minuta existente para receber uma revisao preliminar."
+                        rows={16}
+                        className="mt-2 w-full border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={review}
+                      disabled={loading || !reviewText.trim()}
+                      className="mt-4 flex h-11 w-full items-center justify-center gap-2 bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : <FileSearch size={18} />}
+                      Revisar documento
+                    </button>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            <section className="min-h-[720px] border border-line bg-white">
+              <div className="flex flex-col gap-3 border-b border-line px-4 py-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <h2 className="text-lg font-bold">Documento em edicao</h2>
+                  <p className="text-sm text-muted">
+                    {source === "openai"
+                      ? "Gerado com provedor de IA configurado."
+                      : source === "local"
+                        ? "Gerado pelo template local. Veja o diagnostico abaixo."
+                        : "Selecione um documento na sidebar e preencha os dados para gerar."}
+                  </p>
+                  {aiStatus ? (
+                    <p className={`mt-2 text-sm ${aiStatus.ok ? "text-success" : "text-accent"}`}>
+                      IA: {aiStatus.ok ? "conectada" : "indisponivel"} | Modelo: {aiStatus.model} | Chave:{" "}
+                      {aiStatus.keyConfigured ? "sim" : "nao"}
+                    </p>
+                  ) : null}
+                  {debug ? (
+                    <div className="mt-2 border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                      <p className="font-semibold">Diagnostico da IA</p>
+                      {debug.model ? <p>Modelo: {debug.model}</p> : null}
+                      {debug.responseId ? <p>Resposta: {debug.responseId}</p> : null}
+                      {debug.reason ? <p>Motivo: {debug.reason}</p> : null}
+                      {debug.status ? <p>Status HTTP: {debug.status}</p> : null}
+                      {debug.errorCode ? <p>Codigo: {debug.errorCode}</p> : null}
+                      {debug.errorMessage ? <p>Erro: {debug.errorMessage}</p> : null}
+                    </div>
+                  ) : null}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={copyOutput}
+                    disabled={!output}
+                    className="flex h-10 items-center gap-2 border border-line px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    {copied ? <Check size={16} /> : <Clipboard size={16} />}
+                    {copied ? "Copiado" : "Copiar"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={downloadOutput}
+                    disabled={!output}
+                    className="flex h-10 items-center gap-2 border border-line px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
+                  >
+                    <Download size={16} />
+                    TXT
+                  </button>
+                </div>
+              </div>
+
+              <DocumentEditor value={output} onChange={setOutput} placeholder="A minuta gerada aparecera aqui." />
+            </section>
+          </div>
         </section>
-      </section>
+      </div>
     </main>
   );
 }

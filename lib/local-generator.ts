@@ -1,4 +1,5 @@
 import { DocumentKind, documentDefinitions } from "./document-types";
+import { runDocumentChecklist } from "./document-checklists";
 
 type GenerateInput = {
   kind: DocumentKind;
@@ -61,31 +62,15 @@ export function generateLocalDraft({ kind, values, institution }: GenerateInput)
 }
 
 export function reviewLocalText(kind: DocumentKind, text: string) {
-  const definition = documentDefinitions[kind];
-  const normalized = text.toLowerCase();
-  const findings = definition.sections.map((section) => {
-    const keyWords = section
-      .toLowerCase()
-      .split(" ")
-      .filter((word) => word.length > 3);
-    const found = keyWords.some((word) => normalized.includes(word));
-
-    return {
-      status: found ? "OK" : "PENDENTE",
-      title: section,
-      detail: found
-        ? "Foi identificado conteudo relacionado a esta secao."
-        : "Nao foi identificado conteudo claro para esta secao do template minimo."
-    };
-  });
+  const checklist = runDocumentChecklist(kind, text);
 
   const suggestions = [
-    "Desenvolver melhor a justificativa do interesse publico municipal.",
-    "Confirmar se todos os fatos administrativos foram informados pelo setor responsavel.",
-    "Registrar memoria de calculo para quantidades e valores estimados.",
-    "Evitar conclusoes juridicas definitivas na minuta gerada por IA.",
-    "Indicar pendencias de revisao tecnica, orcamentaria e juridica quando faltarem dados."
+    `Status geral do checklist: ${checklist.status}.`,
+    "Priorizar os itens marcados como PENDENTE antes de usar a minuta oficialmente.",
+    "Revisar itens ATENCAO para evitar conclusoes indevidas ou dados sensiveis sem comprovacao.",
+    "Complementar dados tecnicos, orcamentarios, juridicos ou legislativos conforme a natureza do documento.",
+    "Manter revisao humana obrigatoria pela area competente."
   ];
 
-  return { findings, suggestions };
+  return { findings: checklist.findings, suggestions };
 }

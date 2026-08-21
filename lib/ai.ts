@@ -1,4 +1,6 @@
 import { DocumentKind, documentDefinitions } from "./document-types";
+import { buildGeneratePrompt, buildReviewPrompt } from "./document-prompts";
+import { formatChecklistMarkdown } from "./document-checklists";
 import { generateLocalDraft, reviewLocalText } from "./local-generator";
 
 type GenerateInput = {
@@ -154,44 +156,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
 }
 
 export async function generateDraft(input: GenerateInput) {
-  const definition = documentDefinitions[input.kind];
-  const prompt = [
-    "Voce e um especialista em redacao administrativa para Prefeituras brasileiras.",
-    "Seu trabalho e produzir minutas publicas bem desenvolvidas, formais, coerentes e prontas para revisao por servidores municipais.",
-    "A minuta deve parecer um documento institucional de Prefeitura, nao uma resposta curta de chat.",
-    "",
-    "Regras obrigatorias:",
-    "- Gere uma minuta completa e desenvolvida, com paragrafos substantivos em cada secao.",
-    "- Use linguagem formal, impessoal e adequada a administracao publica municipal.",
-    "- Foque em Prefeituras, secretarias municipais, gabinetes, fundos municipais e unidades administrativas.",
-    "- Nao faca analise juridica conclusiva nem afirme regularidade/legalidade definitiva.",
-    "- Nao invente leis municipais, decretos locais, numeros de processo, dotacao, datas, pareceres, fontes ou valores nao informados.",
-    "- Quando faltar dado relevante, inclua '[PENDENTE: ...]' no ponto adequado do documento.",
-    "- Se o pedido do usuario tiver termos informais, traduza para linguagem administrativa adequada, preservando os fatos informados.",
-    "- Evite texto generico. Relacione justificativas, riscos, resultados e encaminhamentos ao objeto informado.",
-    "- Inclua cabecalho institucional quando houver dados configurados.",
-    "- Finalize com observacao de que se trata de minuta sujeita a revisao pela area competente.",
-    "",
-    `Tipo documental: ${definition.name}`,
-    `Orientacao especifica: ${definition.context}`,
-    `Secoes esperadas: ${definition.sections.join("; ")}`,
-    "",
-    "Configuracao da Prefeitura/Orgao:",
-    JSON.stringify(input.institution || {}, null, 2),
-    "",
-    "Dados informados:",
-    JSON.stringify(input.values, null, 2),
-    "",
-    "Formato de saida:",
-    "- Use Markdown.",
-    "- Comece pelo cabecalho institucional quando houver informacoes suficientes.",
-    "- Use titulo principal com o nome do documento.",
-    "- Organize com secoes numeradas.",
-    "- Em documentos de compras, inclua justificativa, interesse publico, quantitativo, valor estimado quando informado, riscos, pendencias e encaminhamento.",
-    "- Em documentos de comunicacao, inclua destinatario, assunto, corpo desenvolvido, pedido/encaminhamento e fecho.",
-    "- Nao seja economico demais: desenvolva a minuta com profundidade proporcional aos dados fornecidos."
-  ].join("\n");
-
+  const prompt = buildGeneratePrompt(input);
   const generated = await callOpenAI(prompt);
 
   return {
@@ -203,27 +168,12 @@ export async function generateDraft(input: GenerateInput) {
 
 export async function reviewDraft(input: ReviewInput) {
   const definition = documentDefinitions[input.kind];
-  const prompt = [
-    "Voce e um especialista em revisao administrativa de documentos de Prefeituras brasileiras.",
-    "Revise o texto como minuta. Nao afirme ilegalidade; aponte riscos, ausencias, inconsistencias e melhorias.",
-    "Avalie se o documento esta suficientemente desenvolvido para uso administrativo preliminar.",
-    "Retorne um relatorio objetivo com status OK, ATENCAO ou PENDENTE, seguido de sugestoes praticas.",
-    "",
-    `Tipo documental esperado: ${definition.name}`,
-    `Secoes minimas: ${definition.sections.join("; ")}`,
-    "",
-    "Configuracao da Prefeitura/Orgao:",
-    JSON.stringify(input.institution || {}, null, 2),
-    "",
-    "Texto para revisar:",
-    input.text
-  ].join("\n");
-
+  const prompt = buildReviewPrompt(input);
   const generated = await callOpenAI(prompt);
 
   if (generated.text) {
     return {
-      text: generated.text,
+      text: [generated.text, "", "---", "", formatChecklistMarkdown(input.kind, input.text)].join("\n"),
       source: "openai",
       debug: generated.debug
     };

@@ -8,7 +8,7 @@ export type MarketingPage = {
 
 export const executivePages: MarketingPage[] = [
   {
-    slug: "gerador-etp-ia",
+    slug: "gerador-etp",
     title: "Gerador de Estudo Tecnico Preliminar (ETP) Lei 14.133",
     category: "Executivo",
     description: "Estruture necessidades, alternativas, riscos e conclusao de viabilidade para compras municipais.",
@@ -50,18 +50,25 @@ export const executivePages: MarketingPage[] = [
     cta: "Gerar contrato"
   },
   {
-    slug: "gerador-parecer-juridico-licitacao",
+    slug: "gerador-parecer-juridico",
     title: "Gerador de Minuta de Parecer Juridico de Compras",
     category: "Executivo",
     description: "Elabore uma minuta preliminar para revisao da assessoria juridica responsavel.",
     cta: "Preparar parecer"
   },
   {
-    slug: "gerador-processo-dispensa-licitacao",
+    slug: "gerador-processo-dispensa",
     title: "Gerador de Processo de Dispensa e Inexigibilidade",
     category: "Executivo",
     description: "Organize justificativa, fornecedor, preco, riscos e encaminhamentos da contratacao direta.",
     cta: "Gerar processo"
+  },
+  {
+    slug: "gerador-decreto-executivo",
+    title: "Gerador de Decretos Municipais e Portarias",
+    category: "Executivo",
+    description: "Apoie a construcao de atos normativos municipais com estrutura revisavel.",
+    cta: "Gerar ato"
   }
 ];
 
@@ -100,13 +107,6 @@ export const legislativePages: MarketingPage[] = [
     category: "Legislativo",
     description: "Redija pedidos, indicacoes e encaminhamentos em linguagem parlamentar objetiva.",
     cta: "Gerar requerimento"
-  },
-  {
-    slug: "gerador-decreto-executivo",
-    title: "Gerador de Decretos Municipais e Portarias",
-    category: "Legislativo",
-    description: "Apoie a construcao de atos normativos municipais com estrutura revisavel.",
-    cta: "Gerar ato"
   }
 ];
 
