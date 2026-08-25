@@ -362,3 +362,7 @@ export const documentDefinitions: Record<DocumentKind, DocumentDefinition> = {
 
 export const documentKinds = Object.keys(documentDefinitions) as DocumentKind[];
 export const documentCatalog = documentKinds.map((kind) => documentDefinitions[kind]);
+
+export function isDocumentKind(value: unknown): value is DocumentKind {
+  return typeof value === "string" && documentKinds.includes(value as DocumentKind);
+}

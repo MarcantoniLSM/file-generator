@@ -6,6 +6,7 @@ import {
   Check,
   Clipboard,
   Download,
+  FileDown,
   FileSearch,
   FileText,
   FolderKanban,
@@ -13,12 +14,11 @@ import {
   Home,
   Landmark,
   Loader2,
-  PlugZap,
-  Settings2,
   Wand2
 } from "lucide-react";
 import DocumentEditor from "@/components/DocumentEditor";
-import { DocumentCategory, DocumentKind, documentCatalog, documentDefinitions } from "@/lib/document-types";
+import { exportDocx } from "@/lib/docx-export";
+import { DocumentCategory, DocumentKind, FormField, documentCatalog, documentDefinitions } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
 type DebugInfo = {
@@ -29,14 +29,18 @@ type DebugInfo = {
   errorMessage?: string;
   responseId?: string;
 };
-type AIStatus = {
-  ok: boolean;
-  model: string;
-  keyConfigured: boolean;
-  reason: string;
-  status?: number;
-  errorCode?: string;
-  errorMessage?: string;
+type ReadinessResult = {
+  status: "suficiente" | "insuficiente";
+  risco: "baixo" | "medio" | "alto";
+  resumo: string;
+  perguntas: Array<{
+    campo: string;
+    pergunta: string;
+    motivo: string;
+  }>;
+  alertas: string[];
+  source: "local" | "openai" | "mixed" | "unavailable";
+  debug?: DebugInfo;
 };
 type NavItem = {
   label: string;
@@ -45,14 +49,23 @@ type NavItem = {
   maturity: "stable" | "beta";
 };
 
-const initialKind: DocumentKind = "etp";
-const institutionFields = [
-  ["prefeitura", "Prefeitura", "Prefeitura Municipal de Exemplo"],
-  ["secretaria", "Secretaria/Orgao", "Secretaria Municipal de Administracao"],
-  ["municipioUf", "Municipio/UF", "Exemplo/CE"],
-  ["cnpj", "CNPJ", "00.000.000/0001-00"],
-  ["responsavel", "Responsavel", "Nome do responsavel pela demanda"],
-  ["cargo", "Cargo", "Secretario Municipal / Diretor / Coordenador"]
+const defaultKind: DocumentKind = "etp";
+const institutionalFields: FormField[] = [
+  {
+    key: "municipio_uf",
+    label: "Municipio/UF",
+    placeholder: "Ex.: Sobral/CE"
+  },
+  {
+    key: "orgao_entidade",
+    label: "Orgao ou entidade",
+    placeholder: "Ex.: Prefeitura Municipal / Camara Municipal / Fundo Municipal"
+  },
+  {
+    key: "responsavel_cargo",
+    label: "Responsavel e cargo",
+    placeholder: "Ex.: Maria Silva, Secretaria Municipal de Administracao"
+  }
 ];
 
 const groupIcons: Record<DocumentCategory, typeof FolderKanban> = {
@@ -76,20 +89,22 @@ const documentGroups = (["Compras e licitacoes", "Atos administrativos", "Legisl
   })
 );
 
-export default function GeneratorApp() {
+export default function GeneratorApp({ initialKind = defaultKind }: { initialKind?: DocumentKind }) {
   const [kind, setKind] = useState<DocumentKind>(initialKind);
   const [mode, setMode] = useState<Mode>("generate");
   const [values, setValues] = useState<Record<string, string>>({});
-  const [institution, setInstitution] = useState<Record<string, string>>({});
+  const [headerTemplate, setHeaderTemplate] = useState("");
   const [reviewText, setReviewText] = useState("");
   const [output, setOutput] = useState("");
-  const [source, setSource] = useState<"openai" | "local" | null>(null);
+  const [source, setSource] = useState<"openai" | null>(null);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
-  const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
-  const [checkingAI, setCheckingAI] = useState(false);
+  const [readiness, setReadiness] = useState<ReadinessResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const definition = documentDefinitions[kind];
+  const institutionPayload = { headerTemplate };
+  const requiredFields = definition.fields.filter((field) => field.required);
+  const optionalFields = definition.fields.filter((field) => !field.required);
 
   const missingRequired = useMemo(
     () => definition.fields.filter((field) => field.required && !values[field.key]?.trim()),
@@ -101,36 +116,58 @@ export default function GeneratorApp() {
     setOutput("");
     setSource(null);
     setDebug(null);
+    setReadiness(null);
   }
 
   function updateValue(key: string, value: string) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
-  function updateInstitution(key: string, value: string) {
-    setInstitution((current) => ({ ...current, [key]: value }));
+  async function generateDraftRequest() {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, values, institution: institutionPayload })
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Nao foi possivel gerar a minuta.");
+    }
+
+    setOutput(data.text);
+    setSource("openai");
+    setDebug(data.debug || null);
   }
 
   async function generate() {
     setLoading(true);
     setOutput("");
     setDebug(null);
+    setReadiness(null);
 
     try {
-      const response = await fetch("/api/generate", {
+      const readinessResponse = await fetch("/api/readiness", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, values, institution })
+        body: JSON.stringify({ kind, values, institution: institutionPayload })
       });
-      const data = await response.json();
+      const readinessData = await readinessResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "Nao foi possivel gerar a minuta.");
+      if (!readinessResponse.ok) {
+        setReadiness(readinessData);
+        setDebug(readinessData.debug || null);
+        throw new Error(readinessData.error || "A IA esta indisponivel no momento. Tente novamente mais tarde.");
       }
 
-      setOutput(data.text);
-      setSource(data.source);
-      setDebug(data.debug || null);
+      setReadiness(readinessData);
+      setDebug(readinessData.debug || null);
+
+      if (readinessData.status === "insuficiente" || readinessData.risco === "alto") {
+        return;
+      }
+
+      await generateDraftRequest();
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
     } finally {
@@ -147,7 +184,7 @@ export default function GeneratorApp() {
       const response = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, text: reviewText, institution })
+        body: JSON.stringify({ kind, text: reviewText, institution: institutionPayload })
       });
       const data = await response.json();
 
@@ -156,7 +193,7 @@ export default function GeneratorApp() {
       }
 
       setOutput(data.text);
-      setSource(data.source);
+      setSource("openai");
       setDebug(data.debug || null);
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
@@ -165,22 +202,32 @@ export default function GeneratorApp() {
     }
   }
 
-  async function checkAI() {
-    setCheckingAI(true);
+  async function reviewCurrentOutput() {
+    if (!output.trim()) return;
+    setMode("review");
+    setReviewText(output);
+    setLoading(true);
+    setDebug(null);
 
     try {
-      const response = await fetch("/api/ai-status", { cache: "no-store" });
-      const data = await response.json();
-      setAiStatus(data);
-    } catch (error) {
-      setAiStatus({
-        ok: false,
-        model: "desconhecido",
-        keyConfigured: false,
-        reason: error instanceof Error ? error.message : "Nao foi possivel testar a IA."
+      const response = await fetch("/api/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, text: output, institution: institutionPayload })
       });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Nao foi possivel revisar o documento.");
+      }
+
+      setOutput(data.text);
+      setSource("openai");
+      setDebug(data.debug || null);
+    } catch (error) {
+      setOutput(error instanceof Error ? error.message : "Erro inesperado.");
     } finally {
-      setCheckingAI(false);
+      setLoading(false);
     }
   }
 
@@ -201,6 +248,47 @@ export default function GeneratorApp() {
     anchor.download = `${definition.shortName.toLowerCase()}-minuta.txt`;
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function downloadDocx() {
+    if (!output) return;
+
+    await exportDocx({
+      title: definition.name,
+      filename: `${definition.shortName.toLowerCase()}-minuta.docx`,
+      body: output,
+      header: headerTemplate
+    });
+  }
+
+  function renderField(field: (typeof definition.fields)[number]) {
+    return (
+      <label key={field.key} className="block">
+        <span className="flex items-center justify-between gap-3 text-sm font-semibold">
+          <span>
+            {field.label}
+            {field.required ? <span className="text-accent"> *</span> : null}
+          </span>
+          {values[field.key]?.trim() ? <Check size={14} className="text-success" /> : null}
+        </span>
+        {field.type === "textarea" ? (
+          <textarea
+            value={values[field.key] || ""}
+            onChange={(event) => updateValue(field.key, event.target.value)}
+            placeholder={field.placeholder}
+            rows={4}
+            className="mt-2 w-full border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
+          />
+        ) : (
+          <input
+            value={values[field.key] || ""}
+            onChange={(event) => updateValue(field.key, event.target.value)}
+            placeholder={field.placeholder}
+            className="mt-2 w-full border border-line px-3 py-2 text-sm outline-none focus:border-civic"
+          />
+        )}
+      </label>
+    );
   }
 
   return (
@@ -295,49 +383,67 @@ export default function GeneratorApp() {
                 <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{definition.description}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                {source ? (
+                  <span className="border border-line bg-paper px-3 py-2 text-sm text-muted">
+                    IA conectada
+                  </span>
+                ) : null}
                 <button
                   type="button"
-                  onClick={checkAI}
-                  disabled={checkingAI}
-                  className="flex h-10 items-center gap-2 border border-line bg-white px-3 text-sm font-semibold disabled:cursor-wait disabled:text-muted"
+                  onClick={reviewCurrentOutput}
+                  disabled={!output || loading}
+                  className="flex h-10 items-center gap-2 border border-line bg-white px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
                 >
-                  {checkingAI ? <Loader2 className="animate-spin" size={16} /> : <PlugZap size={16} />}
-                  Testar IA
+                  {loading ? <Loader2 className="animate-spin" size={16} /> : <FileSearch size={16} />}
+                  Revisar
                 </button>
-                <div className="border border-line bg-paper px-3 py-2 text-sm text-muted">
-                  Minuta preliminar. Revisao humana obrigatoria.
-                </div>
+                <button
+                  type="button"
+                  onClick={copyOutput}
+                  disabled={!output}
+                  className="flex h-10 items-center gap-2 border border-line bg-white px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
+                >
+                  {copied ? <Check size={16} /> : <Clipboard size={16} />}
+                  {copied ? "Copiado" : "Copiar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadOutput}
+                  disabled={!output}
+                  className="flex h-10 items-center gap-2 border border-line bg-white px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
+                >
+                  <Download size={16} />
+                  TXT
+                </button>
+                <button
+                  type="button"
+                  onClick={downloadDocx}
+                  disabled={!output}
+                  className="flex h-10 items-center gap-2 border border-line bg-civic px-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:border-line disabled:bg-white disabled:text-slate-300"
+                >
+                  <FileDown size={16} />
+                  DOCX
+                </button>
               </div>
             </div>
           </header>
 
+          {debug ? (
+            <div className="border-b border-line bg-white px-4 py-3 sm:px-6">
+              <div className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+                <p className="font-semibold">Diagnostico da IA</p>
+                {debug.model ? <p>Modelo: {debug.model}</p> : null}
+                {debug.responseId ? <p>Resposta: {debug.responseId}</p> : null}
+                {debug.reason ? <p>Motivo: {debug.reason}</p> : null}
+                {debug.status ? <p>Status HTTP: {debug.status}</p> : null}
+                {debug.errorCode ? <p>Codigo: {debug.errorCode}</p> : null}
+                {debug.errorMessage ? <p>Erro: {debug.errorMessage}</p> : null}
+              </div>
+            </div>
+          ) : null}
+
           <div className="grid gap-5 p-4 sm:p-6 xl:grid-cols-[430px_1fr]">
             <div className="space-y-5">
-              <section className="border border-line bg-white">
-                <div className="border-b border-line px-4 py-3">
-                  <h2 className="flex items-center gap-2 text-base font-bold">
-                    <Settings2 size={17} />
-                    Prefeitura e cabecalho
-                  </h2>
-                  <p className="mt-1 text-sm leading-6 text-muted">
-                    Dados institucionais usados no cabecalho e no contexto da minuta.
-                  </p>
-                </div>
-                <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-1">
-                  {institutionFields.map(([key, label, placeholder]) => (
-                    <label key={key} className="block">
-                      <span className="text-sm font-semibold">{label}</span>
-                      <input
-                        value={institution[key] || ""}
-                        onChange={(event) => updateInstitution(key, event.target.value)}
-                        placeholder={placeholder}
-                        className="mt-2 w-full border border-line px-3 py-2 text-sm outline-none focus:border-civic"
-                      />
-                    </label>
-                  ))}
-                </div>
-              </section>
-
               <section className="border border-line bg-white">
                 <div className="grid grid-cols-2 gap-2 border-b border-line p-2">
                   <button
@@ -370,41 +476,76 @@ export default function GeneratorApp() {
 
                 {mode === "generate" ? (
                   <div className="space-y-4 p-4">
-                    {definition.fields.map((field) => (
-                      <label key={field.key} className="block">
-                        <span className="text-sm font-semibold">
-                          {field.label}
-                          {field.required ? <span className="text-accent"> *</span> : null}
-                        </span>
-                        {field.type === "textarea" ? (
-                          <textarea
-                            value={values[field.key] || ""}
-                            onChange={(event) => updateValue(field.key, event.target.value)}
-                            placeholder={field.placeholder}
-                            rows={4}
-                            className="mt-2 w-full border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
-                          />
-                        ) : (
-                          <input
-                            value={values[field.key] || ""}
-                            onChange={(event) => updateValue(field.key, event.target.value)}
-                            placeholder={field.placeholder}
-                            className="mt-2 w-full border border-line px-3 py-2 text-sm outline-none focus:border-civic"
-                          />
-                        )}
-                      </label>
-                    ))}
+                    <div>
+                      <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
+                        <h3 className="text-sm font-bold">Identificacao institucional</h3>
+                        <span className="text-xs text-muted">opcional</span>
+                      </div>
+                      <div className="space-y-4">{institutionalFields.map(renderField)}</div>
+                    </div>
+
+                    <div>
+                      <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
+                        <h3 className="text-sm font-bold">Dados essenciais</h3>
+                        <span className="text-xs text-muted">{requiredFields.length} obrigatorios</span>
+                      </div>
+                      <div className="space-y-4">{requiredFields.map(renderField)}</div>
+                    </div>
+
+                    {optionalFields.length ? (
+                      <details className="border-t border-line pt-4" open>
+                        <summary className="cursor-pointer text-sm font-bold">Dados complementares</summary>
+                        <div className="mt-4 space-y-4">{optionalFields.map(renderField)}</div>
+                      </details>
+                    ) : null}
+
                     <button
                       type="button"
                       onClick={generate}
-                      disabled={loading || missingRequired.length > 0}
+                      disabled={loading}
                       className="flex h-11 w-full items-center justify-center gap-2 bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
                       {loading ? <Loader2 className="animate-spin" size={18} /> : <Wand2 size={18} />}
-                      Gerar minuta
+                      Validar e gerar
                     </button>
                     {missingRequired.length > 0 ? (
-                      <p className="text-sm text-accent">Preencha os campos obrigatorios para gerar.</p>
+                      <p className="text-sm text-accent">
+                        Ha campos obrigatorios vazios. A validacao vai listar as informacoes necessarias antes da geracao.
+                      </p>
+                    ) : null}
+                    {readiness ? (
+                      <div
+                        className={`border p-3 text-sm ${
+                          readiness.status === "suficiente"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                            : "border-amber-200 bg-amber-50 text-amber-950"
+                        }`}
+                      >
+                        <p className="font-semibold">
+                          Validacao: {readiness.status} | Risco: {readiness.risco}
+                        </p>
+                        <p className="mt-1 leading-6">{readiness.resumo}</p>
+                        {readiness.alertas.length ? (
+                          <ul className="mt-2 list-disc space-y-1 pl-5">
+                            {readiness.alertas.map((alert) => (
+                              <li key={alert}>{alert}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                        {readiness.perguntas.length ? (
+                          <div className="mt-3 border-t border-current/20 pt-3">
+                            <p className="font-semibold">Antes de gerar, esclareca:</p>
+                            <ol className="mt-2 list-decimal space-y-2 pl-5">
+                              {readiness.perguntas.map((question) => (
+                                <li key={`${question.campo}-${question.pergunta}`}>
+                                  <span className="font-medium">{question.pergunta}</span>
+                                  <span className="mt-1 block opacity-80">{question.motivo}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        ) : null}
+                      </div>
                     ) : null}
                   </div>
                 ) : (
@@ -434,53 +575,22 @@ export default function GeneratorApp() {
             </div>
 
             <section className="min-h-[720px] border border-line bg-white">
-              <div className="flex flex-col gap-3 border-b border-line px-4 py-3 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Documento em edicao</h2>
-                  <p className="text-sm text-muted">
-                    {source === "openai"
-                      ? "Gerado com provedor de IA configurado."
-                      : source === "local"
-                        ? "Gerado pelo template local. Veja o diagnostico abaixo."
-                        : "Selecione um documento na sidebar e preencha os dados para gerar."}
-                  </p>
-                  {aiStatus ? (
-                    <p className={`mt-2 text-sm ${aiStatus.ok ? "text-success" : "text-accent"}`}>
-                      IA: {aiStatus.ok ? "conectada" : "indisponivel"} | Modelo: {aiStatus.model} | Chave:{" "}
-                      {aiStatus.keyConfigured ? "sim" : "nao"}
+              <div className="border-b border-line bg-paper px-4 py-4">
+                <div className="mx-auto max-w-[794px] border border-line bg-white">
+                  <div className="border-b border-line px-4 py-3">
+                    <h3 className="text-sm font-bold">Cabecalho do documento</h3>
+                    <p className="mt-1 text-sm leading-6 text-muted">
+                      Cole ou edite aqui o cabecalho da Prefeitura/Camara. Ele sera usado pela IA e exportado no DOCX.
                     </p>
-                  ) : null}
-                  {debug ? (
-                    <div className="mt-2 border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-                      <p className="font-semibold">Diagnostico da IA</p>
-                      {debug.model ? <p>Modelo: {debug.model}</p> : null}
-                      {debug.responseId ? <p>Resposta: {debug.responseId}</p> : null}
-                      {debug.reason ? <p>Motivo: {debug.reason}</p> : null}
-                      {debug.status ? <p>Status HTTP: {debug.status}</p> : null}
-                      {debug.errorCode ? <p>Codigo: {debug.errorCode}</p> : null}
-                      {debug.errorMessage ? <p>Erro: {debug.errorMessage}</p> : null}
-                    </div>
-                  ) : null}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={copyOutput}
-                    disabled={!output}
-                    className="flex h-10 items-center gap-2 border border-line px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
-                  >
-                    {copied ? <Check size={16} /> : <Clipboard size={16} />}
-                    {copied ? "Copiado" : "Copiar"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={downloadOutput}
-                    disabled={!output}
-                    className="flex h-10 items-center gap-2 border border-line px-3 text-sm font-semibold disabled:cursor-not-allowed disabled:text-slate-300"
-                  >
-                    <Download size={16} />
-                    TXT
-                  </button>
+                  </div>
+                  <DocumentEditor
+                    value={headerTemplate}
+                    onChange={setHeaderTemplate}
+                    placeholder="Ex.: Prefeitura Municipal, brasao textual, secretaria, endereco, CNPJ..."
+                    minHeightClass="min-h-[120px]"
+                    paperClassName="min-h-[150px] bg-white px-4 py-4"
+                    toolbarCompact
+                  />
                 </div>
               </div>
 

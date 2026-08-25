@@ -14,5 +14,9 @@ export async function POST(request: Request) {
   const institution = typeof body.institution === "object" && body.institution ? body.institution : {};
   const result = await generateDraft({ kind, values, institution });
 
+  if (result.source === "unavailable") {
+    return NextResponse.json(result, { status: 503 });
+  }
+
   return NextResponse.json(result);
 }

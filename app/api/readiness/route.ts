@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { assessReadiness } from "@/lib/ai";
 import { documentKinds, type DocumentKind } from "@/lib/document-types";
-import { reviewDraft } from "@/lib/ai";
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -10,14 +10,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Tipo documental invalido." }, { status: 400 });
   }
 
-  const text = typeof body.text === "string" ? body.text : "";
+  const values = typeof body.values === "object" && body.values ? body.values : {};
   const institution = typeof body.institution === "object" && body.institution ? body.institution : {};
-
-  if (!text.trim()) {
-    return NextResponse.json({ error: "Informe um texto para revisar." }, { status: 400 });
-  }
-
-  const result = await reviewDraft({ kind, text, institution });
+  const result = await assessReadiness({ kind, values, institution });
 
   if (result.source === "unavailable") {
     return NextResponse.json(result, { status: 503 });

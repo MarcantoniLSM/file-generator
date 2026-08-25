@@ -1,7 +1,12 @@
-import { DocumentKind, documentDefinitions } from "./document-types";
+import { DocumentKind } from "./document-types";
 import { buildGeneratePrompt, buildReviewPrompt } from "./document-prompts";
 import { formatChecklistMarkdown } from "./document-checklists";
-import { generateLocalDraft, reviewLocalText } from "./local-generator";
+import {
+  assessLocalReadiness,
+  buildReadinessPrompt,
+  mergeReadiness,
+  parseAIReadiness
+} from "./document-readiness";
 
 type GenerateInput = {
   kind: DocumentKind;
@@ -15,6 +20,8 @@ type ReviewInput = {
   institution?: Record<string, string>;
 };
 
+type ReadinessInput = GenerateInput;
+
 type AIResult =
   | {
       text: string;
@@ -26,7 +33,7 @@ type AIResult =
     }
   | {
       text: null;
-      source: "local";
+      source: "unavailable";
       debug: {
         reason: string;
         model?: string;
@@ -82,7 +89,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
   if (!apiKey) {
     return {
       text: null,
-      source: "local",
+      source: "unavailable",
       debug: {
         reason: "OPENAI_API_KEY ausente no ambiente do servidor.",
         model
@@ -109,7 +116,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
     if (!response.ok) {
       return {
         text: null,
-        source: "local",
+        source: "unavailable",
         debug: {
           reason: "A OpenAI retornou erro HTTP.",
           model,
@@ -125,7 +132,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
     if (typeof text !== "string" || !text.trim()) {
       return {
         text: null,
-        source: "local",
+        source: "unavailable",
         debug: {
           reason: "A resposta da OpenAI nao trouxe output_text utilizavel.",
           model,
@@ -145,7 +152,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
   } catch (error) {
     return {
       text: null,
-      source: "local",
+      source: "unavailable",
       debug: {
         reason: "Falha ao conectar com a OpenAI.",
         model,
@@ -159,15 +166,46 @@ export async function generateDraft(input: GenerateInput) {
   const prompt = buildGeneratePrompt(input);
   const generated = await callOpenAI(prompt);
 
+  if (!generated.text) {
+    return {
+      text: null,
+      source: "unavailable",
+      error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      debug: generated.debug
+    };
+  }
+
   return {
-    text: generated.text || generateLocalDraft(input),
-    source: generated.source,
+    text: generated.text,
+    source: "openai",
+    debug: generated.debug
+  };
+}
+
+export async function assessReadiness(input: ReadinessInput) {
+  const local = assessLocalReadiness(input);
+  const generated = await callOpenAI(buildReadinessPrompt(input));
+
+  if (!generated.text) {
+    return {
+      status: "insuficiente" as const,
+      risco: "alto" as const,
+      resumo: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      perguntas: [],
+      alertas: ["Nao foi possivel validar as informacoes porque a IA nao respondeu."],
+      source: "unavailable" as const,
+      error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      debug: generated.debug
+    };
+  }
+
+  return {
+    ...mergeReadiness(local, parseAIReadiness(generated.text)),
     debug: generated.debug
   };
 }
 
 export async function reviewDraft(input: ReviewInput) {
-  const definition = documentDefinitions[input.kind];
   const prompt = buildReviewPrompt(input);
   const generated = await callOpenAI(prompt);
 
@@ -179,49 +217,10 @@ export async function reviewDraft(input: ReviewInput) {
     };
   }
 
-  const review = reviewLocalText(input.kind, input.text);
-  const text = [
-    `# Revisao - ${definition.shortName}`,
-    "",
-    ...review.findings.flatMap((finding) => [
-      `## [${finding.status}] ${finding.title}`,
-      finding.detail,
-      ""
-    ]),
-    "## Sugestoes",
-    ...review.suggestions.map((suggestion) => `- ${suggestion}`),
-    "",
-    "_Revisao automatica preliminar. Validacao humana obrigatoria._"
-  ].join("\n");
-
-  return { text, source: "local", debug: generated.debug };
-}
-
-export async function checkAIStatus() {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const model = getOpenAIModel();
-
-  if (!apiKey) {
-    return {
-      ok: false,
-      provider: "openai",
-      model,
-      keyConfigured: false,
-      reason: "OPENAI_API_KEY nao esta disponivel no ambiente do servidor."
-    };
-  }
-
-  const result = await callOpenAI("Responda apenas: OK");
-
   return {
-    ok: result.source === "openai",
-    provider: "openai",
-    model,
-    keyConfigured: true,
-    responseId: result.source === "openai" ? result.debug.responseId : undefined,
-    reason: result.source === "openai" ? "Chamada concluida com sucesso." : result.debug.reason,
-    status: result.source === "local" ? result.debug.status : undefined,
-    errorCode: result.source === "local" ? result.debug.errorCode : undefined,
-    errorMessage: result.source === "local" ? result.debug.errorMessage : undefined
+    text: null,
+    source: "unavailable",
+    error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+    debug: generated.debug
   };
 }

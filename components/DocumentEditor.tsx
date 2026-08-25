@@ -26,6 +26,9 @@ type DocumentEditorProps = {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  minHeightClass?: string;
+  paperClassName?: string;
+  toolbarCompact?: boolean;
 };
 
 function escapeHtml(value: string) {
@@ -144,7 +147,14 @@ function ToolbarButton({
   );
 }
 
-export default function DocumentEditor({ value, onChange, placeholder }: DocumentEditorProps) {
+export default function DocumentEditor({
+  value,
+  onChange,
+  placeholder,
+  minHeightClass = "min-h-[760px]",
+  paperClassName = "mx-auto min-h-[980px] max-w-[794px] border border-line bg-white px-10 py-12 shadow-sm sm:px-16 sm:py-16",
+  toolbarCompact = false
+}: DocumentEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -160,7 +170,7 @@ export default function DocumentEditor({ value, onChange, placeholder }: Documen
     editorProps: {
       attributes: {
         class:
-          "min-h-[760px] focus:outline-none font-serif text-[15px] leading-7 text-ink [&_h1]:text-center [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:uppercase [&_h1]:tracking-wide [&_h1]:mb-8 [&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-semibold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-6 [&_ul]:list-disc [&_ol]:mb-4 [&_ol]:ml-6 [&_ol]:list-decimal [&_li]:mb-1"
+          `${minHeightClass} focus:outline-none font-serif text-[15px] leading-7 text-ink [&_h1]:text-center [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:uppercase [&_h1]:tracking-wide [&_h1]:mb-8 [&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-semibold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-6 [&_ul]:list-disc [&_ol]:mb-4 [&_ol]:ml-6 [&_ol]:list-decimal [&_li]:mb-1`
       }
     },
     onUpdate({ editor: currentEditor }) {
@@ -208,13 +218,15 @@ export default function DocumentEditor({ value, onChange, placeholder }: Documen
         >
           <Heading1 size={16} />
         </ToolbarButton>
-        <ToolbarButton
-          title="Titulo 2"
-          active={editor.isActive("heading", { level: 2 })}
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        >
-          <Heading2 size={16} />
-        </ToolbarButton>
+        {!toolbarCompact ? (
+          <ToolbarButton
+            title="Titulo 2"
+            active={editor.isActive("heading", { level: 2 })}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+          >
+            <Heading2 size={16} />
+          </ToolbarButton>
+        ) : null}
         <div className="mx-1 h-9 w-px bg-line" />
         <ToolbarButton
           title="Negrito"
@@ -230,21 +242,25 @@ export default function DocumentEditor({ value, onChange, placeholder }: Documen
         >
           <Italic size={16} />
         </ToolbarButton>
-        <ToolbarButton
-          title="Lista"
-          active={editor.isActive("bulletList")}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List size={16} />
-        </ToolbarButton>
-        <ToolbarButton
-          title="Lista numerada"
-          active={editor.isActive("orderedList")}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered size={16} />
-        </ToolbarButton>
-        <div className="mx-1 h-9 w-px bg-line" />
+        {!toolbarCompact ? (
+          <>
+            <ToolbarButton
+              title="Lista"
+              active={editor.isActive("bulletList")}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
+            >
+              <List size={16} />
+            </ToolbarButton>
+            <ToolbarButton
+              title="Lista numerada"
+              active={editor.isActive("orderedList")}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            >
+              <ListOrdered size={16} />
+            </ToolbarButton>
+            <div className="mx-1 h-9 w-px bg-line" />
+          </>
+        ) : null}
         <ToolbarButton
           title="Alinhar a esquerda"
           active={editor.isActive({ textAlign: "left" })}
@@ -276,7 +292,7 @@ export default function DocumentEditor({ value, onChange, placeholder }: Documen
       </div>
 
       <div className="overflow-auto p-4 sm:p-8">
-        <div className="mx-auto min-h-[980px] max-w-[794px] border border-line bg-white px-10 py-12 shadow-sm sm:px-16 sm:py-16">
+        <div className={paperClassName}>
           <EditorContent editor={editor} />
         </div>
       </div>

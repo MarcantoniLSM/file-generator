@@ -109,6 +109,8 @@ Rotas prioritarias:
 
 Resultado esperado: SEO, navegacao e area interna passam a falar a mesma lingua.
 
+Status: base implementada. As landing pages dos 14 documentos usam dados do catalogo documental, mostram estrutura, campos obrigatorios, orientacoes especificas, FAQ, relacionados e CTA para abrir `/gerador` com o documento correto selecionado.
+
 ## Etapa 5 - Refinamento por prioridade comercial
 
 Depois que os 14 estiverem disponiveis, aprofundar primeiro os mais fortes para Prefeituras:
