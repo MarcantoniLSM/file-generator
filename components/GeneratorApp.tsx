@@ -21,6 +21,7 @@ import { exportDocx } from "@/lib/docx-export";
 import { DocumentCategory, DocumentKind, FormField, documentCatalog, documentDefinitions } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
+type ProcessModalState = "closed" | "validating" | "generating" | "insufficient" | "error";
 type DebugInfo = {
   reason?: string;
   model?: string;
@@ -99,6 +100,8 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
   const [source, setSource] = useState<"openai" | null>(null);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
   const [readiness, setReadiness] = useState<ReadinessResult | null>(null);
+  const [processModal, setProcessModal] = useState<ProcessModalState>("closed");
+  const [formCollapsed, setFormCollapsed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const definition = documentDefinitions[kind];
@@ -117,6 +120,8 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     setSource(null);
     setDebug(null);
     setReadiness(null);
+    setProcessModal("closed");
+    setFormCollapsed(false);
   }
 
   function updateValue(key: string, value: string) {
@@ -138,6 +143,24 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     setOutput(data.text);
     setSource("openai");
     setDebug(data.debug || null);
+    setFormCollapsed(true);
+  }
+
+  async function forceGenerate() {
+    setLoading(true);
+    setOutput("");
+    setDebug(null);
+    setProcessModal("generating");
+
+    try {
+      await generateDraftRequest();
+      setProcessModal("closed");
+    } catch (error) {
+      setOutput(error instanceof Error ? error.message : "Erro inesperado.");
+      setProcessModal("error");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function generate() {
@@ -145,6 +168,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     setOutput("");
     setDebug(null);
     setReadiness(null);
+    setProcessModal("validating");
 
     try {
       const readinessResponse = await fetch("/api/readiness", {
@@ -157,6 +181,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       if (!readinessResponse.ok) {
         setReadiness(readinessData);
         setDebug(readinessData.debug || null);
+        setProcessModal("error");
         throw new Error(readinessData.error || "A IA esta indisponivel no momento. Tente novamente mais tarde.");
       }
 
@@ -164,12 +189,16 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       setDebug(readinessData.debug || null);
 
       if (readinessData.status === "insuficiente" || readinessData.risco === "alto") {
+        setProcessModal("insufficient");
         return;
       }
 
+      setProcessModal("generating");
       await generateDraftRequest();
+      setProcessModal("closed");
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
+      setProcessModal("error");
     } finally {
       setLoading(false);
     }
@@ -195,6 +224,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       setOutput(data.text);
       setSource("openai");
       setDebug(data.debug || null);
+      setFormCollapsed(true);
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
     } finally {
@@ -474,7 +504,47 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                   </button>
                 </div>
 
-                {mode === "generate" ? (
+                {formCollapsed && mode === "generate" ? (
+                  <div className="space-y-3 p-4">
+                    <div>
+                      <p className="text-sm font-bold">Informacoes recolhidas</p>
+                      <p className="mt-1 text-sm leading-6 text-muted">
+                        O documento esta aberto ao lado. Reabra o formulario para ajustar os dados e gerar uma nova
+                        versao.
+                      </p>
+                    </div>
+                    {readiness ? (
+                      <div
+                        className={`border px-3 py-2 text-sm ${
+                          readiness.status === "suficiente"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                            : "border-amber-200 bg-amber-50 text-amber-950"
+                        }`}
+                      >
+                        <span className="font-semibold">Validacao: {readiness.status}</span>
+                        <span className="mx-2">|</span>
+                        <span>Risco: {readiness.risco}</span>
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => setFormCollapsed(false)}
+                      className="flex h-10 w-full items-center justify-center gap-2 border border-line bg-white px-4 text-sm font-bold text-ink hover:bg-paper"
+                    >
+                      <FileText size={16} />
+                      Editar informacoes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={generate}
+                      disabled={loading}
+                      className="flex h-10 w-full items-center justify-center gap-2 bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={17} /> : <Wand2 size={17} />}
+                      Validar novamente
+                    </button>
+                  </div>
+                ) : mode === "generate" ? (
                   <div className="space-y-4 p-4">
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
@@ -512,40 +582,6 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                       <p className="text-sm text-accent">
                         Ha campos obrigatorios vazios. A validacao vai listar as informacoes necessarias antes da geracao.
                       </p>
-                    ) : null}
-                    {readiness ? (
-                      <div
-                        className={`border p-3 text-sm ${
-                          readiness.status === "suficiente"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-950"
-                            : "border-amber-200 bg-amber-50 text-amber-950"
-                        }`}
-                      >
-                        <p className="font-semibold">
-                          Validacao: {readiness.status} | Risco: {readiness.risco}
-                        </p>
-                        <p className="mt-1 leading-6">{readiness.resumo}</p>
-                        {readiness.alertas.length ? (
-                          <ul className="mt-2 list-disc space-y-1 pl-5">
-                            {readiness.alertas.map((alert) => (
-                              <li key={alert}>{alert}</li>
-                            ))}
-                          </ul>
-                        ) : null}
-                        {readiness.perguntas.length ? (
-                          <div className="mt-3 border-t border-current/20 pt-3">
-                            <p className="font-semibold">Antes de gerar, esclareca:</p>
-                            <ol className="mt-2 list-decimal space-y-2 pl-5">
-                              {readiness.perguntas.map((question) => (
-                                <li key={`${question.campo}-${question.pergunta}`}>
-                                  <span className="font-medium">{question.pergunta}</span>
-                                  <span className="mt-1 block opacity-80">{question.motivo}</span>
-                                </li>
-                              ))}
-                            </ol>
-                          </div>
-                        ) : null}
-                      </div>
                     ) : null}
                   </div>
                 ) : (
@@ -594,11 +630,145 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                 </div>
               </div>
 
-              <DocumentEditor value={output} onChange={setOutput} placeholder="A minuta gerada aparecera aqui." />
+              {output ? (
+                <DocumentEditor value={output} onChange={setOutput} placeholder="A minuta gerada aparecera aqui." />
+              ) : (
+                <div className="flex min-h-[520px] items-center justify-center px-6 py-12">
+                  <div className="max-w-md text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center border border-line bg-paper text-civic">
+                      {loading ? <Loader2 className="animate-spin" size={22} /> : <FileText size={22} />}
+                    </div>
+                    <h2 className="mt-4 font-serif text-2xl font-semibold">Documento pronto para nascer</h2>
+                    <p className="mt-2 text-sm leading-6 text-muted">
+                      Preencha os dados do formulario e valide com a IA. Quando a minuta for gerada, ela aparece aqui
+                      em formato editavel.
+                    </p>
+                  </div>
+                </div>
+              )}
             </section>
           </div>
         </section>
       </div>
+
+      {processModal !== "closed" ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 px-4">
+          <div className="w-full max-w-xl border border-line bg-white shadow-2xl">
+            <div className="border-b border-line px-5 py-4">
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">IA documental</p>
+              <h2 className="mt-1 font-serif text-2xl font-semibold">
+                {processModal === "validating"
+                  ? "Validando informacoes"
+                  : processModal === "generating"
+                    ? "Gerando minuta"
+                    : processModal === "insufficient"
+                      ? "Dados insuficientes"
+                      : "Nao foi possivel concluir"}
+              </h2>
+            </div>
+
+            <div className="space-y-4 px-5 py-5 text-sm leading-6">
+              {processModal === "validating" || processModal === "generating" ? (
+                <div className="flex items-start gap-3">
+                  <Loader2 className="mt-1 animate-spin text-civic" size={20} />
+                  <div>
+                    <p className="font-semibold">
+                      {processModal === "validating"
+                        ? "A IA esta verificando se existem dados suficientes."
+                        : "A validacao passou. A IA esta redigindo o documento."}
+                    </p>
+                    <p className="mt-1 text-muted">
+                      Esta etapa evita que a minuta seja criada com lacunas importantes sem aviso.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+
+              {processModal === "insufficient" && readiness ? (
+                <>
+                  <div className="border border-amber-200 bg-amber-50 p-3 text-amber-950">
+                    <p className="font-semibold">
+                      Validacao: {readiness.status} | Risco: {readiness.risco}
+                    </p>
+                    <p className="mt-1">{readiness.resumo}</p>
+                  </div>
+
+                  {readiness.alertas.length ? (
+                    <div>
+                      <p className="font-semibold">Pontos de atencao</p>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-muted">
+                        {readiness.alertas.map((alert) => (
+                          <li key={alert}>{alert}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {readiness.perguntas.length ? (
+                    <div>
+                      <p className="font-semibold">Antes de gerar, esclareca</p>
+                      <ol className="mt-2 list-decimal space-y-2 pl-5 text-muted">
+                        {readiness.perguntas.map((question) => (
+                          <li key={`${question.campo}-${question.pergunta}`}>
+                            <span className="font-medium text-ink">{question.pergunta}</span>
+                            <span className="mt-1 block">{question.motivo}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ) : null}
+
+                  <p className="border-t border-line pt-4 text-muted">
+                    Se optar por gerar mesmo assim, a minuta podera conter pendencias e devera ser revisada com
+                    cuidado antes de qualquer uso oficial.
+                  </p>
+                </>
+              ) : null}
+
+              {processModal === "error" ? (
+                <div className="border border-amber-200 bg-amber-50 p-3 text-amber-950">
+                  <p className="font-semibold">A IA nao concluiu a operacao.</p>
+                  <p className="mt-1">{output || "Tente novamente mais tarde."}</p>
+                </div>
+              ) : null}
+            </div>
+
+            {processModal === "insufficient" ? (
+              <div className="flex flex-col gap-2 border-t border-line p-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProcessModal("closed");
+                    setFormCollapsed(false);
+                  }}
+                  className="h-10 border border-line bg-white px-4 text-sm font-bold text-ink hover:bg-paper"
+                >
+                  Voltar e complementar
+                </button>
+                <button
+                  type="button"
+                  onClick={forceGenerate}
+                  disabled={loading}
+                  className="flex h-10 items-center justify-center gap-2 bg-civic px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={17} /> : <Wand2 size={17} />}
+                  Gerar mesmo assim
+                </button>
+              </div>
+            ) : processModal === "error" ? (
+              <div className="flex justify-end border-t border-line p-4">
+                <button
+                  type="button"
+                  onClick={() => setProcessModal("closed")}
+                  className="h-10 bg-civic px-4 text-sm font-bold text-white"
+                >
+                  Entendi
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }
