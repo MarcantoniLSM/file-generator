@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { assessReadiness } from "@/lib/ai";
+import { getCurrentUserProfile } from "@/lib/auth";
 import { documentKinds, type DocumentKind } from "@/lib/document-types";
 
 export async function POST(request: Request) {
+  const { user, profile, configured } = await getCurrentUserProfile();
+
+  if (!configured || !user || profile?.access_status === "blocked") {
+    return NextResponse.json({ error: "Acesso nao autorizado." }, { status: 401 });
+  }
+
   const body = await request.json();
   const kind = body.kind as DocumentKind;
 

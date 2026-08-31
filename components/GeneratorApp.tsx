@@ -14,6 +14,8 @@ import {
   Home,
   Landmark,
   Loader2,
+  LogOut,
+  Shield,
   Wand2
 } from "lucide-react";
 import DocumentEditor from "@/components/DocumentEditor";
@@ -352,6 +354,22 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                 <Home size={16} />
                 Landing page
               </Link>
+              <div className="mb-4 grid grid-cols-2 gap-2">
+                <Link
+                  href="/admin"
+                  className="flex items-center justify-center gap-2 border border-line bg-white px-3 py-2 text-sm font-semibold text-muted hover:bg-paper hover:text-ink"
+                >
+                  <Shield size={15} />
+                  Admin
+                </Link>
+                <Link
+                  href="/logout"
+                  className="flex items-center justify-center gap-2 border border-line bg-white px-3 py-2 text-sm font-semibold text-muted hover:bg-paper hover:text-ink"
+                >
+                  <LogOut size={15} />
+                  Sair
+                </Link>
+              </div>
 
               <div className="space-y-5">
                 {documentGroups.map((group) => {

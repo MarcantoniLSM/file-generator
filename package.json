@@ -7,9 +7,12 @@
     "dev:clean": "rm -f .next/dev/lock && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed:users": "node scripts/seed-initial-users.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
     "@tiptap/extension-placeholder": "^3.30.2",
     "@tiptap/extension-text-align": "^3.30.2",
     "@tiptap/react": "^3.30.2",
