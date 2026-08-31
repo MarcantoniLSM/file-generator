@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { documentKinds, type DocumentKind } from "@/lib/document-types";
 import { generateDraft } from "@/lib/ai";
 import { getCurrentUserProfile } from "@/lib/auth";
+import { saveGenerationHistory } from "@/lib/generation-history";
 
 export async function POST(request: Request) {
   const { user, profile, configured } = await getCurrentUserProfile();
@@ -24,6 +25,16 @@ export async function POST(request: Request) {
   if (result.source === "unavailable") {
     return NextResponse.json(result, { status: 503 });
   }
+
+  await saveGenerationHistory({
+    userId: user.id,
+    kind,
+    source: result.source,
+    risk: body.readiness?.risco,
+    output: result.text || "",
+    institution,
+    values
+  });
 
   return NextResponse.json(result);
 }

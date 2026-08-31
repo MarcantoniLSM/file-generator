@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, Shield, UserCheck, UserCog, UserX, Users } from "lucide-react";
+import { ArrowRight, BarChart3, FileText, Shield, UserCheck, UserCog, UserX, Users } from "lucide-react";
 import { requireAdmin } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminConfig } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { documentDefinitions, type DocumentKind } from "@/lib/document-types";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,20 @@ type Profile = {
   full_name: string | null;
   role: "admin" | "user";
   access_status: "active" | "blocked";
+  created_at: string;
+};
+
+type Generation = {
+  id: string;
+  user_id: string | null;
+  document_kind: DocumentKind;
+  document_name: string;
+  source: string;
+  risk: string | null;
+  status: string;
+  municipality: string | null;
+  organization: string | null;
+  output_length: number | null;
   created_at: string;
 };
 
@@ -43,6 +58,32 @@ function StatCard({
   );
 }
 
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    generated: "Gerado",
+    reviewed: "Revisado",
+    forced_generation: "Forcado"
+  };
+
+  return labels[status] || status;
+}
+
+function CountBar({ label, value, total }: { label: string; value: number; total: number }) {
+  const width = total > 0 ? Math.max(5, Math.round((value / total) * 100)) : 0;
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+        <span className="font-semibold">{label}</span>
+        <span className="text-muted">{value}</span>
+      </div>
+      <div className="h-2 bg-paper">
+        <div className="h-2 bg-civic" style={{ width: `${width}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
@@ -51,14 +92,50 @@ export default async function AdminDashboardPage() {
     .from("file_generator_profiles")
     .select("id,email,full_name,role,access_status,created_at")
     .order("created_at", { ascending: false });
+  const { data: generationData, error: generationsError } = await supabase
+    .from("file_generator_document_generations")
+    .select("id,user_id,document_kind,document_name,source,risk,status,municipality,organization,output_length,created_at")
+    .order("created_at", { ascending: false })
+    .limit(500);
 
   const profiles = (data || []) as Profile[];
+  const generations = (generationData || []) as Generation[];
   const totalUsers = profiles.length;
   const activeUsers = profiles.filter((profile) => profile.access_status === "active").length;
   const blockedUsers = profiles.filter((profile) => profile.access_status === "blocked").length;
   const admins = profiles.filter((profile) => profile.role === "admin").length;
   const commonUsers = profiles.filter((profile) => profile.role === "user").length;
   const recentProfiles = profiles.slice(0, 8);
+  const today = new Date();
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
+
+  const generationsThisWeek = generations.filter((generation) => new Date(generation.created_at) >= sevenDaysAgo).length;
+  const reviewedGenerations = generations.filter((generation) => generation.status === "reviewed").length;
+  const forcedGenerations = generations.filter((generation) => generation.status === "forced_generation").length;
+  const averageOutputLength = generations.length
+    ? Math.round(generations.reduce((sum, generation) => sum + (generation.output_length || 0), 0) / generations.length)
+    : 0;
+  const generationUsers = new Set(generations.map((generation) => generation.user_id).filter(Boolean)).size;
+  const maxGenerationCount = Math.max(
+    1,
+    ...Object.keys(documentDefinitions).map(
+      (kind) => generations.filter((generation) => generation.document_kind === kind).length
+    )
+  );
+  const statusCounts = ["generated", "reviewed", "forced_generation"].map((status) => ({
+    status,
+    count: generations.filter((generation) => generation.status === status).length
+  }));
+  const organizationCounts = Object.entries(
+    generations.reduce<Record<string, number>>((acc, generation) => {
+      const organization = generation.organization || "Orgao nao informado";
+      acc[organization] = (acc[organization] || 0) + 1;
+      return acc;
+    }, {})
+  )
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
 
   return (
     <main className="min-h-screen bg-paper text-ink">
@@ -91,20 +168,83 @@ export default async function AdminDashboardPage() {
           <StatCard label="Comuns" value={commonUsers} helper="Uso do gerador" icon={UserCog} />
         </div>
 
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <StatCard label="Geracoes" value={generations.length} helper="Historico total" icon={FileText} />
+          <StatCard label="7 dias" value={generationsThisWeek} helper="Atividade recente" icon={BarChart3} />
+          <StatCard label="Revisados" value={reviewedGenerations} helper="Passaram por revisao" icon={UserCheck} />
+          <StatCard label="Forcados" value={forcedGenerations} helper="Com risco assumido" icon={Shield} />
+          <StatCard label="Media chars" value={averageOutputLength} helper="Tamanho medio" icon={FileText} />
+        </div>
+
+        {generationsError ? (
+          <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            Historico de geracoes ainda nao disponivel. Rode a migration de geracoes no Supabase e depois o seed do
+            dashboard.
+          </div>
+        ) : null}
+
         <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr]">
           <div className="border border-line bg-white">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <div>
+                <h2 className="text-sm font-bold">Distribuicao por documento</h2>
+                <p className="mt-1 text-sm text-muted">Volume de uso por tipo documental.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 p-4">
+              {Object.values(documentDefinitions).map((definition) => {
+                const count = generations.filter((generation) => generation.document_kind === definition.kind).length;
+                return (
+                  <CountBar
+                    key={definition.kind}
+                    label={`${definition.shortName} - ${definition.name}`}
+                    value={count}
+                    total={maxGenerationCount}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          <aside className="border border-line bg-white p-4">
+            <h2 className="text-sm font-bold">Status das geracoes</h2>
+            <div className="mt-4 space-y-4">
+              {statusCounts.map((item) => (
+                <CountBar key={item.status} label={statusLabel(item.status)} value={item.count} total={generations.length} />
+              ))}
+            </div>
+            <p className="mt-5 border-t border-line pt-4 text-sm text-muted">
+              {generationUsers} usuarios ativos ja aparecem no historico de geracao.
+            </p>
+          </aside>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="border border-line bg-white">
+            <div className="border-b border-line px-4 py-3">
+              <h2 className="text-sm font-bold">Orgaos mais ativos</h2>
+              <p className="mt-1 text-sm text-muted">Secretarias e unidades com maior volume no periodo carregado.</p>
+            </div>
+            <div className="space-y-4 p-4">
+              {organizationCounts.map(([organization, count]) => (
+                <CountBar key={organization} label={organization} value={count} total={generations.length} />
+              ))}
+            </div>
+          </div>
+
+          <div className="border border-line bg-white">
+            <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+              <div>
                 <h2 className="text-sm font-bold">Usuarios recentes</h2>
-                <p className="mt-1 text-sm text-muted">Amostra dos perfis cadastrados no Supabase.</p>
+                <p className="mt-1 text-sm text-muted">Controle de acesso da plataforma.</p>
               </div>
               <Link href="/admin/usuarios" className="flex items-center gap-2 text-sm font-semibold text-civic">
                 Ver todos <ArrowRight size={15} />
               </Link>
             </div>
-
             <div className="divide-y divide-line">
-              {recentProfiles.map((profile) => (
+              {recentProfiles.slice(0, 5).map((profile) => (
                 <div key={profile.id} className="grid gap-3 px-4 py-3 sm:grid-cols-[1fr_auto_auto] sm:items-center">
                   <div>
                     <p className="font-semibold">{profile.full_name || "Sem nome"}</p>
@@ -120,20 +260,42 @@ export default async function AdminDashboardPage() {
               ))}
             </div>
           </div>
+        </div>
 
-          <aside className="border border-line bg-white p-4">
-            <h2 className="text-sm font-bold">Operacao</h2>
-            <div className="mt-4 space-y-3 text-sm text-muted">
-              <p>Use este painel para conferir a base de usuarios e validar se o controle de acesso esta funcionando.</p>
-              <p>O usuario admin consegue liberar, bloquear e promover contas pela tela de gerenciamento.</p>
-            </div>
-            <Link
-              href="/admin/usuarios"
-              className="mt-5 flex items-center justify-center gap-2 bg-ink px-4 py-2 text-sm font-semibold text-white"
-            >
-              Abrir usuarios <ArrowRight size={15} />
-            </Link>
-          </aside>
+        <div className="border border-line bg-white">
+          <div className="border-b border-line px-4 py-3">
+            <h2 className="text-sm font-bold">Atividade recente</h2>
+            <p className="mt-1 text-sm text-muted">Ultimas minutas registradas no historico.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+              <thead className="bg-paper text-muted">
+                <tr>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Documento</th>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Orgao</th>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Status</th>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Fonte</th>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {generations.slice(0, 10).map((generation) => (
+                  <tr key={generation.id} className="border-b border-line last:border-b-0">
+                    <td className="px-4 py-3">
+                      <p className="font-semibold">{generation.document_name}</p>
+                      <p className="text-xs text-muted">{generation.risk ? `Risco ${generation.risk}` : "Sem alerta"}</p>
+                    </td>
+                    <td className="px-4 py-3 text-muted">{generation.organization || "Nao informado"}</td>
+                    <td className="px-4 py-3">{statusLabel(generation.status)}</td>
+                    <td className="px-4 py-3 uppercase text-muted">{generation.source}</td>
+                    <td className="px-4 py-3 text-muted">
+                      {new Date(generation.created_at).toLocaleDateString("pt-BR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </main>
