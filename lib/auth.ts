@@ -44,14 +44,20 @@ export async function requireUser() {
   const session = await getCurrentUserProfile();
 
   if (!session.configured) {
+    console.warn("[auth:require-user] Supabase nao configurado.");
     redirect("/login?erro=configuracao");
   }
 
   if (!session.user) {
+    console.warn("[auth:require-user] Usuario ausente na sessao.");
     redirect("/login");
   }
 
   if (session.profile?.access_status === "blocked") {
+    console.warn("[auth:require-user] Usuario bloqueado.", {
+      userId: session.user?.id,
+      email: session.user?.email
+    });
     redirect("/login?erro=bloqueado");
   }
 
@@ -62,6 +68,11 @@ export async function requireAdmin() {
   const session = await requireUser();
 
   if (session.profile?.role !== "admin") {
+    console.warn("[auth:require-admin] Usuario sem papel admin.", {
+      userId: session.user?.id,
+      email: session.user?.email,
+      role: session.profile?.role
+    });
     redirect("/gerador");
   }
 

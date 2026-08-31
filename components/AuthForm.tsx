@@ -15,6 +15,7 @@ const initialState = { message: "" };
 export default function AuthForm({ mode, error }: AuthFormProps) {
   const action = mode === "login" ? signIn : signUp;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const isLogin = mode === "login";
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-paper px-4 py-10 text-ink">
@@ -31,7 +32,11 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
           </p>
         </div>
 
-        <form action={formAction} className="space-y-4 px-6 py-6">
+        <form
+          action={isLogin ? "/auth/sign-in" : formAction}
+          method={isLogin ? "post" : undefined}
+          className="space-y-4 px-6 py-6"
+        >
           {mode === "signup" ? (
             <label className="block">
               <span className="text-sm font-semibold">Nome completo</span>
@@ -77,7 +82,12 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
               Seu acesso esta bloqueado. Procure o administrador.
             </p>
           ) : null}
-          {state?.message ? (
+          {error === "credenciais" ? (
+            <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+              Nao foi possivel entrar. Verifique email e senha.
+            </p>
+          ) : null}
+          {!isLogin && state?.message ? (
             <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{state.message}</p>
           ) : null}
 
