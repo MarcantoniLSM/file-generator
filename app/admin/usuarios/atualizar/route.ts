@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       role,
       accessStatus
     });
-    return redirectTo(request, "/admin#usuarios");
+    return redirectTo(request, "/admin/usuarios");
   }
 
   if (id === session.user.id && (role !== "admin" || accessStatus !== "active")) {
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       email: session.user.email
     });
-    return redirectTo(request, "/admin#usuarios");
+    return redirectTo(request, "/admin/usuarios");
   }
 
   const supabase = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : await createSupabaseServerClient();
@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
       targetUserId: id,
       message: error.message
     });
-    return redirectTo(request, "/admin#usuarios");
+    return redirectTo(request, "/admin/usuarios");
   }
 
   revalidatePath("/admin");
   revalidatePath("/admin/usuarios");
 
-  return redirectTo(request, "/admin#usuarios");
+  return redirectTo(request, "/admin/usuarios");
 }

@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "seed:users": "node scripts/seed-initial-users.mjs",
-    "seed:dashboard": "node scripts/seed-dashboard-data.mjs"
+    "seed:dashboard": "node scripts/seed-dashboard-data.mjs",
+    "db:reset-demo": "node scripts/reset-cloud-demo-data.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

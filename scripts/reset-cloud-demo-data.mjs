@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const users = [
+const keepUsers = [
   {
     email: "admin@withnocode.com",
     password: "Admin@123",
@@ -35,8 +35,7 @@ function loadLocalEnv() {
 }
 
 async function request(path, options = {}) {
-  const url = `${SUPABASE_URL}${path}`;
-  const response = await fetch(url, {
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
     ...options,
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -57,15 +56,18 @@ async function request(path, options = {}) {
   return data;
 }
 
-async function findUserByEmail(email) {
-  const result = await request(`/auth/v1/admin/users?page=1&per_page=100`);
-  const usersList = Array.isArray(result?.users) ? result.users : [];
+async function listAuthUsers(page = 1, users = []) {
+  const result = await request(`/auth/v1/admin/users?page=${page}&per_page=100`);
+  const pageUsers = Array.isArray(result?.users) ? result.users : [];
+  const allUsers = [...users, ...pageUsers];
+  const hasNextPage = pageUsers.length === 100;
 
-  return usersList.find((user) => user.email?.toLowerCase() === email.toLowerCase()) || null;
+  return hasNextPage ? listAuthUsers(page + 1, allUsers) : allUsers;
 }
 
 async function createOrUpdateAuthUser(seedUser) {
-  const existing = await findUserByEmail(seedUser.email);
+  const authUsers = await listAuthUsers();
+  const existing = authUsers.find((user) => user.email?.toLowerCase() === seedUser.email.toLowerCase());
 
   if (existing) {
     await request(`/auth/v1/admin/users/${existing.id}`, {
@@ -108,7 +110,7 @@ async function upsertProfile(id, seedUser) {
       email: seedUser.email,
       full_name: seedUser.fullName,
       role: seedUser.role,
-      access_status: seedUser.accessStatus || "active"
+      access_status: "active"
     })
   });
 }
@@ -119,14 +121,45 @@ const SUPABASE_URL = process.env.SUPABASE_URL?.replace(/\/$/, "");
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error("Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY antes de rodar o seed.");
+  console.error("Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY antes de rodar a limpeza.");
   process.exit(1);
 }
 
-for (const user of users) {
+const keepEmails = new Set(keepUsers.map((user) => user.email.toLowerCase()));
+const keepIds = new Set();
+
+for (const user of keepUsers) {
   const id = await createOrUpdateAuthUser(user);
+  keepIds.add(id);
   await upsertProfile(id, user);
-  console.log(`${user.email} criado/atualizado como ${user.role}.`);
+  console.log(`${user.email} pronto como ${user.role}.`);
 }
 
-console.log("Usuários iniciais prontos.");
+await request("/rest/v1/file_generator_document_generations?id=not.is.null", {
+  method: "DELETE"
+});
+console.log("Histórico de gerações removido.");
+
+const profiles = await request("/rest/v1/file_generator_profiles?select=id,email");
+const removableProfiles = Array.isArray(profiles)
+  ? profiles.filter((profile) => !keepEmails.has(profile.email?.toLowerCase()))
+  : [];
+
+for (const profile of removableProfiles) {
+  await request(`/rest/v1/file_generator_profiles?id=eq.${profile.id}`, {
+    method: "DELETE"
+  });
+}
+console.log(`${removableProfiles.length} perfis falsos removidos.`);
+
+const authUsers = await listAuthUsers();
+const removableAuthUsers = authUsers.filter((user) => user.id && !keepIds.has(user.id));
+
+for (const user of removableAuthUsers) {
+  await request(`/auth/v1/admin/users/${user.id}`, {
+    method: "DELETE"
+  });
+}
+console.log(`${removableAuthUsers.length} usuários falsos removidos do Auth.`);
+
+console.log("Banco limpo e usuários definitivos prontos.");

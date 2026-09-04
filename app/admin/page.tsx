@@ -5,7 +5,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminConfig } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { documentDefinitions, type DocumentKind } from "@/lib/document-types";
-import { AdminUsersTable } from "@/components/AdminUsersTable";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +85,7 @@ function CountBar({ label, value, total }: { label: string; value: number; total
 }
 
 export default async function AdminDashboardPage() {
-  const { user } = await requireAdmin();
+  await requireAdmin();
 
   const supabase = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : await createSupabaseServerClient();
   const { data } = await supabase
@@ -150,7 +149,7 @@ export default async function AdminDashboardPage() {
             <Link href="/gerador" className="border border-line bg-white px-4 py-2 text-sm font-semibold hover:bg-paper">
               Área interna
             </Link>
-            <Link href="/admin#usuarios" className="bg-civic px-4 py-2 text-sm font-semibold text-white">
+            <Link href="/admin/usuarios" className="bg-civic px-4 py-2 text-sm font-semibold text-white">
               Gerenciar usuários
             </Link>
             <form action="/logout" method="post">
@@ -245,7 +244,7 @@ export default async function AdminDashboardPage() {
                 <h2 className="text-sm font-bold">Usuários recentes</h2>
                 <p className="mt-1 text-sm text-muted">Controle de acesso da plataforma.</p>
               </div>
-              <Link href="/admin#usuarios" className="flex items-center gap-2 text-sm font-semibold text-civic">
+              <Link href="/admin/usuarios" className="flex items-center gap-2 text-sm font-semibold text-civic">
                 Ver todos <ArrowRight size={15} />
               </Link>
             </div>
@@ -267,14 +266,6 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
         </div>
-
-        <section id="usuarios" className="scroll-mt-6 space-y-3">
-          <div>
-            <h2 className="font-serif text-2xl font-semibold">Gestão de usuários</h2>
-            <p className="mt-1 text-sm text-muted">Controle administrativo de perfis e liberação de acesso.</p>
-          </div>
-          <AdminUsersTable profiles={profiles} currentUserId={user?.id} />
-        </section>
 
         <div className="border border-line bg-white">
           <div className="border-b border-line px-4 py-3">
