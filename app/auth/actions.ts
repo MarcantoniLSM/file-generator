@@ -104,5 +104,6 @@ export async function updateUserAccess(formData: FormData) {
     })
     .eq("id", id);
 
+  revalidatePath("/admin");
   revalidatePath("/admin/usuarios");
 }
