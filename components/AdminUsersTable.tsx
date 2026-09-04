@@ -1,5 +1,3 @@
-import { updateUserAccess } from "@/app/auth/actions";
-
 type Profile = {
   id: string;
   email: string;
@@ -53,7 +51,7 @@ export function AdminUsersTable({
                   </td>
                   <td className="px-4 py-3 text-muted">{new Date(profile.created_at).toLocaleDateString("pt-BR")}</td>
                   <td className="px-4 py-3">
-                    <form action={updateUserAccess} className="flex items-center gap-2">
+                    <form action="/admin/usuarios/atualizar" method="post" className="flex items-center gap-2">
                       <input type="hidden" name="id" value={profile.id} />
                       <select
                         name="role"
