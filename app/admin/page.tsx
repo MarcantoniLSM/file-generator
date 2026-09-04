@@ -171,7 +171,7 @@ export default async function AdminDashboardPage({
           <StatCard label="Usuários" value={totalUsers} helper="Contas cadastradas" icon={Users} />
           <StatCard label="Ativos" value={activeUsers} helper="Podem acessar" icon={UserCheck} />
           <StatCard label="Bloqueados" value={blockedUsers} helper="Sem acesso" icon={UserX} />
-          <StatCard label="Admins" value={admins} helper="Gestao liberada" icon={Shield} />
+          <StatCard label="Admins" value={admins} helper="Gestão liberada" icon={Shield} />
           <StatCard label="Comuns" value={commonUsers} helper="Uso do gerador" icon={UserCog} />
         </div>
 
@@ -179,7 +179,7 @@ export default async function AdminDashboardPage({
           <StatCard label="Gerações" value={generations.length} helper="Histórico total" icon={FileText} />
           <StatCard label="7 dias" value={generationsThisWeek} helper="Atividade recente" icon={BarChart3} />
           <StatCard label="Revisados" value={reviewedGenerations} helper="Passaram por revisão" icon={UserCheck} />
-          <StatCard label="Forcados" value={forcedGenerations} helper="Com risco assumido" icon={Shield} />
+          <StatCard label="Forçados" value={forcedGenerations} helper="Com risco assumido" icon={Shield} />
           <StatCard label="Média chars" value={averageOutputLength} helper="Tamanho médio" icon={FileText} />
         </div>
 
