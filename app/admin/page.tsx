@@ -153,9 +153,14 @@ export default async function AdminDashboardPage() {
             <Link href="/admin#usuarios" className="bg-civic px-4 py-2 text-sm font-semibold text-white">
               Gerenciar usuários
             </Link>
-            <Link href="/logout" className="border border-line bg-white px-4 py-2 text-sm font-semibold hover:bg-paper">
-              Sair
-            </Link>
+            <form action="/logout" method="post">
+              <button
+                type="submit"
+                className="border border-line bg-white px-4 py-2 text-sm font-semibold hover:bg-paper"
+              >
+                Sair
+              </button>
+            </form>
           </div>
         </div>
       </header>

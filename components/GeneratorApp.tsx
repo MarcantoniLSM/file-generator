@@ -433,13 +433,15 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                   <Shield size={15} />
                   Admin
                 </Link>
-                <Link
-                  href="/logout"
-                  className="flex items-center justify-center gap-2 border border-line bg-white px-3 py-2 text-sm font-semibold text-muted hover:bg-paper hover:text-ink"
-                >
-                  <LogOut size={15} />
-                  Sair
-                </Link>
+                <form action="/logout" method="post">
+                  <button
+                    type="submit"
+                    className="flex w-full items-center justify-center gap-2 border border-line bg-white px-3 py-2 text-sm font-semibold text-muted hover:bg-paper hover:text-ink"
+                  >
+                    <LogOut size={15} />
+                    Sair
+                  </button>
+                </form>
               </div>
 
               <div className="space-y-5">
