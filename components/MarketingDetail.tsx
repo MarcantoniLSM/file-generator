@@ -11,7 +11,7 @@ function getGeneratorHref(page: MarketingPage) {
 function getDocumentIntro(page: MarketingPage) {
   if (!page.documentKind) return page.description;
   const definition = documentDefinitions[page.documentKind];
-  return `${page.description} A geracao usa campos, estrutura, checklist e prompt especificos para ${definition.name.toLowerCase()}, com pendencias destacadas quando faltar informacao.`;
+  return `${page.description} A geração usa campos, estrutura, checklist e prompt específicos para ${definition.name.toLowerCase()}, com pendências destácadas quando faltar informação.`;
 }
 
 function getFaq(page: MarketingPage) {
@@ -21,15 +21,15 @@ function getFaq(page: MarketingPage) {
   return [
     [
       `O ${documentName} sai pronto para uso oficial?`,
-      `Nao. O sistema gera uma minuta estruturada para acelerar o trabalho, mas a revisao final deve ser feita pela equipe responsavel da ${institution}.`
+      `Não. O sistema gera uma minuta estruturada para acelerar o trabalho, mas a revisão final deve ser feita pela equipe responsável da ${institution}.`
     ],
     [
-      "A IA inventa dados quando faltam informacoes?",
-      "A orientacao do sistema e nao inventar dados sensiveis. Quando faltar processo, valor, fundamento, fonte, autoridade ou documento, a minuta deve marcar como pendencia."
+      "A IA inventa dados quando faltam informações?",
+      "A orientação do sistema e não inventar dados sensíveis. Quando faltar processo, valor, fundamento, fonte, autoridade ou documento, a minuta deve marcar como pendência."
     ],
     [
-      "A pagina abre o documento correto no gerador?",
-      "Sim. O botao principal abre a area interna com o tipo documental correspondente ja selecionado."
+      "A página abre o documento correto no gerador?",
+      "Sim. O botão principal abre a área interna com o tipo documental correspondente já selecionado."
     ]
   ];
 }
@@ -59,7 +59,7 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
               <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
                 Gerador de
               </span>
-              <span className="font-serif text-base font-semibold text-ink">Documentos Publicos</span>
+              <span className="font-serif text-base font-semibold text-ink">Documentos Públicos</span>
             </span>
           </Link>
           <nav className="hidden items-center gap-8 lg:flex">
@@ -70,7 +70,7 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
               Documentos
             </Link>
             <Link className="text-[15px] font-medium hover:text-civic" href="/gerador">
-              Area interna
+              Área interna
             </Link>
           </nav>
           <Link href={generatorHref} className="hidden rounded-lg bg-civic px-5 py-3 text-sm font-semibold text-white lg:block">
@@ -109,9 +109,9 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
             <div className="mt-5 space-y-4">
               {[
                 ["Documento selecionado", definition?.shortName || "Minuta"],
-                ["Campos obrigatorios", requiredFields.length ? requiredFields.map((field) => field.label).join(", ") : "Dados basicos"],
-                ["Revisao automatica", "Checklist proprio do documento"],
-                ["Resultado", "Minuta editavel com pendencias"]
+                ["Campos obrigatórios", requiredFields.length ? requiredFields.map((field) => field.label).join(", ") : "Dados basicos"],
+                ["Revisão automática", "Checklist próprio do documento"],
+                ["Resultado", "Minuta editável com pendências"]
               ].map(([title, text]) => (
                 <div key={title} className="border-t border-line pt-4 first:border-t-0 first:pt-0">
                   <h2 className="text-sm font-semibold">{title}</h2>
@@ -129,7 +129,7 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-civic">Estrutura</p>
             <h2 className="mt-3 font-serif text-3xl font-semibold">Elementos que a minuta deve cobrir</h2>
             <p className="mt-4 text-[15px] leading-7 text-muted">
-              Cada pagina usa a estrutura esperada do proprio documento para orientar a geracao, revisar lacunas e evitar
+              Cada página usa a estrutura esperada do próprio documento para orientar a geração, revisar lacunas e evitar
               respostas genericas.
             </p>
           </div>
@@ -147,9 +147,9 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
       <section className="border-b border-line bg-paper">
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-14 md:px-10 sm:grid-cols-3">
           {[
-            ["01", "Informe o contexto", "Preencha os dados essenciais do orgao, objeto, necessidade e campos especificos."],
-            ["02", "Gere a minuta", "A IA usa o prompt especializado daquele documento, sem tratar tudo como formulario unico."],
-            ["03", "Revise e edite", "O editor permite ajustes e a revisao aponta pendencias antes do uso oficial."]
+            ["01", "Informe o contexto", "Preencha os dados essenciais do órgão, objeto, necessidade e campos específicos."],
+            ["02", "Gere a minuta", "A IA usa o prompt especializado daquele documento, sem tratar tudo como formulário único."],
+            ["03", "Revise e edite", "O editor permite ajustes e a revisão aponta pendências antes do uso oficial."]
           ].map(([number, title, text]) => (
             <div key={number} className="border-t-2 border-civic bg-white p-5">
               <span className="font-mono text-sm font-semibold text-civic">{number}</span>
@@ -164,7 +164,7 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:px-10 lg:grid-cols-[1fr_0.9fr]">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.14em] text-civic">Acuracia</p>
-            <h2 className="mt-3 font-serif text-3xl font-semibold">Orientacoes especificas para este documento</h2>
+            <h2 className="mt-3 font-serif text-3xl font-semibold">Orientações específicas para este documento</h2>
             <div className="mt-6 space-y-4">
               {focusItems.map((item) => (
                 <div key={item} className="flex gap-3 border-t border-line pt-4 first:border-t-0 first:pt-0">
@@ -178,13 +178,13 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
             <FileText className="text-civic" size={24} />
             <h3 className="mt-5 text-lg font-semibold">Minuta com cautela institucional</h3>
             <p className="mt-3 text-sm leading-7 text-muted">
-              O sistema evita conclusoes definitivas e sinaliza dados ausentes como pendencia, especialmente em pontos
-              juridicos, orcamentarios, tecnicos e legislativos.
+              O sistema evita conclusoes definitivas e sinaliza dados ausentes como pendência, especialmente em pontos
+              jurídicos, orçamentários, técnicos e legislativos.
             </p>
             <div className="mt-5 flex items-start gap-3 border-t border-line pt-5">
               <ShieldCheck className="mt-1 shrink-0 text-civic" size={20} />
               <p className="text-sm leading-6 text-muted">
-                Ferramenta de apoio. Nao substitui revisao da assessoria juridica, area tecnica, controle interno ou
+                Ferramenta de apoio. Não substitui revisão da assessoria jurídica, área técnica, controle interno ou
                 autoridade competente.
               </p>
             </div>

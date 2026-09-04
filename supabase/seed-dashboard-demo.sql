@@ -50,18 +50,18 @@ document_types as (
   select *
   from (
     values
-      (1, 'etp', 'Estudo Tecnico Preliminar'),
-      (2, 'tr', 'Termo de Referencia'),
-      (3, 'edital_licitacao', 'Edital de Licitacao'),
+      (1, 'etp', 'Estudo Técnico Preliminar'),
+      (2, 'tr', 'Termo de Referência'),
+      (3, 'edital_licitacao', 'Edital de Licitação'),
       (4, 'mapa_riscos', 'Mapa de Riscos'),
       (5, 'processo_dispensa', 'Processo de Dispensa e Inexigibilidade'),
-      (6, 'pesquisa_precos', 'Pesquisa de Precos'),
-      (7, 'parecer_juridico', 'Parecer Juridico de Compras'),
+      (6, 'pesquisa_precos', 'Pesquisa de Preços'),
+      (7, 'parecer_juridico', 'Parecer Jurídico de Compras'),
       (8, 'decreto_portaria', 'Decreto Executivo e Portaria'),
       (9, 'minuta_contrato', 'Minuta de Contrato Administrativo'),
       (10, 'projeto_lei', 'Projeto de Lei'),
-      (11, 'requerimento_legislativo', 'Requerimento e Indicacao'),
-      (12, 'parecer_comissao', 'Parecer de Comissao'),
+      (11, 'requerimento_legislativo', 'Requerimento e Indicação'),
+      (12, 'parecer_comissao', 'Parecer de Comissão'),
       (13, 'emenda_parlamentar', 'Emenda Parlamentar'),
       (14, 'justificativa_projeto_lei', 'Justificativa de Projeto de Lei')
   ) as docs(ord, document_kind, document_name)
@@ -73,7 +73,7 @@ organizations as (
       (1, 'Sobral/CE', 'Secretaria Municipal de Administracao'),
       (2, 'Sobral/CE', 'Secretaria Municipal de Educacao'),
       (3, 'Sobral/CE', 'Secretaria Municipal de Saude'),
-      (4, 'Sobral/CE', 'Procuradoria Geral do Municipio'),
+      (4, 'Sobral/CE', 'Procuradoria Geral do Município'),
       (5, 'Sobral/CE', 'Camara Municipal'),
       (6, 'Sobral/CE', 'Secretaria Municipal de Obras')
   ) as orgs(ord, municipality, organization)

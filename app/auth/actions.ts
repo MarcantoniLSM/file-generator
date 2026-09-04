@@ -15,7 +15,7 @@ function requireSupabaseConfig(): AuthState | null {
   if (hasSupabaseConfig()) return null;
 
   return {
-    message: "Supabase nao configurado. Defina SUPABASE_URL e SUPABASE_ANON_KEY."
+    message: "Supabase não configurado. Defina SUPABASE_URL e SUPABASE_ANON_KEY."
   };
 }
 
@@ -39,7 +39,7 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { message: "Nao foi possivel entrar. Verifique email e senha." };
+    return { message: "Não foi possível entrar. Verifique email e senha." };
   }
 
   redirect("/gerador");
@@ -69,7 +69,7 @@ export async function signUp(_state: AuthState, formData: FormData): Promise<Aut
   });
 
   if (error) {
-    return { message: "Nao foi possivel criar a conta. Verifique os dados informados." };
+    return { message: "Não foi possível criar a conta. Verifique os dados informados." };
   }
 
   redirect("/gerador");

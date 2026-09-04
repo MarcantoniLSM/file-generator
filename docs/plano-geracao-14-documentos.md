@@ -1,28 +1,28 @@
-# Plano pragmatico para geracao dos 14 documentos
+# Plano pragmático para geração dos 14 documentos
 
 ## Objetivo
 
-Evoluir o produto de um formulario unico para uma plataforma de geracao documental, com 14 tipos de documentos disponiveis desde ja. Os documentos mais maduros entram como versao principal; os demais ficam marcados como beta enquanto ganham refinamento por uso, revisao e exemplos reais.
+Evoluir o produto de um formulário único para uma plataforma de geração documental, com 14 tipos de documentos disponíveis desde já. Os documentos mais maduros entram como versão principal; os demais ficam marcados como beta enquanto ganham refinamento por uso, revisão e exemplos reais.
 
-## Estrategia
+## Estratégia
 
-1. Criar um catalogo unico dos documentos.
-2. Dar a cada documento seu proprio conjunto de campos, secoes, checklist e prompt.
-3. Exibir todos na area interna, separados por categoria.
-4. Marcar como beta os documentos que ainda precisam de revisao fina.
-5. Usar a mesma base para landing pages, sidebar, API e geracao por IA.
+1. Criar um catalogo único dos documentos.
+2. Dar a cada documento seu proprio conjunto de campos, seções, checklist e prompt.
+3. Exibir todos na área interna, separados por catégoria.
+4. Marcar como beta os documentos que ainda precisam de revisão fina.
+5. Usar a mesma base para landing pages, sidebar, API e geração por IA.
 
 ## Documentos da primeira cobertura
 
-### Executivo: compras e licitacoes
+### Executivo: compras e licitações
 
-- ETP - Estudo Tecnico Preliminar.
-- Termo de Referencia.
-- Edital de Licitacao.
+- ETP - Estudo Técnico Preliminar.
+- Termo de Referência.
+- Edital de Licitação.
 - Mapa de Riscos.
 - Processo de Dispensa e Inexigibilidade.
-- Pesquisa de Precos.
-- Parecer Juridico de Compras.
+- Pesquisa de Preços.
+- Parecer Jurídico de Compras.
 - Minuta de Contrato.
 
 ### Executivo: atos administrativos
@@ -32,15 +32,15 @@ Evoluir o produto de um formulario unico para uma plataforma de geracao document
 ### Legislativo
 
 - Projeto de Lei.
-- Requerimento e Indicacao Legislativa.
-- Parecer de Comissao.
+- Requerimento e Indicação Legislativa.
+- Parecer de Comissão.
 - Emenda Parlamentar.
 - Justificativa de Projeto de Lei.
 
 ## Nivel de maturidade
 
-- Estavel: documentos mais proximos de uso demonstravel, com estrutura mais clara.
-- Beta: documentos disponiveis para demonstracao e teste, mas ainda sujeitos a refinamento de prompt, campos e checklist.
+- Estavel: documentos mais próximos de uso demonstravel, com estrutura mais clara.
+- Beta: documentos disponíveis para demonstração e teste, mas ainda sujeitos a refinamento de prompt, campos e checklist.
 
 ## Etapa 1 - Base documental
 
@@ -48,47 +48,47 @@ Criar uma fonte unica em codigo para os 14 documentos, contendo:
 
 - slug publico;
 - nome;
-- categoria;
+- catégoria;
 - status de maturidade;
 - descricao;
-- campos do formulario;
-- secoes esperadas;
-- orientacao especifica para a IA;
-- pontos de atencao do prompt.
+- campos do formulário;
+- seções esperadas;
+- orientacao específica para a IA;
+- pontos de aténcao do prompt.
 
-Resultado esperado: a area interna passa a listar todos os documentos, e a API passa a aceitar todos os tipos.
+Resultado esperado: a área interna passa a listar todos os documentos, e a API passa a aceitar todos os tipos.
 
 ## Etapa 2 - Prompts individuais
 
-Separar a logica de prompt por documento. Cada tipo documental deve orientar a IA de forma propria, por exemplo:
+Separar a logica de prompt por documento. Cada tipo documental deve orientar a IA de forma própria, por exemplo:
 
 - ETP: necessidade, alternativas, viabilidade, parcelamento e riscos.
-- TR: especificacoes, execucao, recebimento, fiscalizacao e obrigacoes.
-- Edital: regras do certame, habilitacao, julgamento, recursos e anexos.
-- Parecer juridico: relatorio, ressalvas, pendencias e conclusao cautelosa.
-- Projeto de Lei: ementa, artigos, vigencia e justificativa.
+- TR: específicações, execução, recebimento, fiscalização e obrigações.
+- Edital: regras do certame, habilitação, julgamento, recursos e anexos.
+- Parecer jurídico: relatorio, ressalvas, pendências e conclusão cautelosa.
+- Projeto de Lei: ementa, artigos, vigência e justificativa.
 
 Resultado esperado: as minutas deixam de ter cara generica e passam a respeitar melhor a natureza de cada documento.
 
-Status: base implementada. Os 14 documentos agora possuem perfil proprio de prompt, com persona, objetivo, regras obrigatorias, proibicoes, notas de estrutura, padrao de qualidade e criterios de revisao.
+Status: base implementada. Os 14 documentos agora possuem perfil proprio de prompt, com persona, objetivo, regras obrigatorias, proibicoes, notas de estrutura, padrao de qualidade e critérios de revisão.
 
 ## Etapa 3 - Checklist por documento
 
-Cada documento deve ter uma revisao propria, com alertas sobre:
+Cada documento deve ter uma revisão própria, com alertas sobre:
 
-- secoes ausentes;
-- dados obrigatorios nao informados;
-- riscos de texto generico;
-- pontos juridicos que exigem revisao humana;
-- pendencias tecnicas, orcamentarias e administrativas.
+- seções ausentes;
+- dados obrigatorios não informados;
+- riscos de texto genérico;
+- pontos jurídicos que exigem revisão humana;
+- pendências técnicas, orçamentárias e administrativas.
 
-Resultado esperado: a ferramenta nao apenas gera texto, mas ajuda o servidor a saber o que ainda precisa revisar.
+Resultado esperado: a ferramenta não apenas gera texto, mas ajuda o servidor a saber o que ainda precisa revisar.
 
-Status: base implementada. Os 14 documentos agora possuem checklist automatico por regras, usado no fallback local e anexado ao relatorio de revisao quando a IA responde.
+Status: base implementada. Os 14 documentos agora possuem checklist automatico por regras, usado no fallback local e anexado ao relatorio de revisão quando a IA responde.
 
-## Etapa 4 - Landing pages especificas
+## Etapa 4 - Landing pages específicas
 
-Padronizar as rotas do prototipo e conectar cada landing ao documento correto no gerador.
+Padronizar as rotas do protótipo e conectar cada landing ao documento correto no gerador.
 
 Rotas prioritarias:
 
@@ -97,8 +97,8 @@ Rotas prioritarias:
 - `/gerador-edital-licitacao`
 - `/gerador-mapa-de-riscos`
 - `/gerador-processo-dispensa`
-- `/gerador-pesquisa-de-precos`
-- `/gerador-parecer-juridico`
+- `/gerador-pesquisa-de-preços`
+- `/gerador-parecer-jurídico`
 - `/gerador-decreto-executivo`
 - `/gerador-minuta-de-contrato`
 - `/gerador-projeto-de-lei`
@@ -107,32 +107,32 @@ Rotas prioritarias:
 - `/gerador-emenda-parlamentar`
 - `/gerador-justificativa-projeto-de-lei`
 
-Resultado esperado: SEO, navegacao e area interna passam a falar a mesma lingua.
+Resultado esperado: SEO, navegacao e área interna passam a falar a mesma lingua.
 
-Status: base implementada. As landing pages dos 14 documentos usam dados do catalogo documental, mostram estrutura, campos obrigatorios, orientacoes especificas, FAQ, relacionados e CTA para abrir `/gerador` com o documento correto selecionado.
+Status: base implementada. As landing pages dos 14 documentos usam dados do catalogo documental, mostram estrutura, campos obrigatorios, orientacoes específicas, FAQ, relacionados e CTA para abrir `/gerador` com o documento correto selecionado.
 
 ## Etapa 5 - Refinamento por prioridade comercial
 
-Depois que os 14 estiverem disponiveis, aprofundar primeiro os mais fortes para Prefeituras:
+Depois que os 14 estiverem disponíveis, aprofundar primeiro os mais fortes para Prefeituras:
 
 1. ETP.
-2. Termo de Referencia.
+2. Termo de Referência.
 3. Dispensa e Inexigibilidade.
-4. Pesquisa de Precos.
+4. Pesquisa de Preços.
 5. Mapa de Riscos.
 6. Edital.
 7. Contrato.
-8. Parecer Juridico.
+8. Parecer Jurídico.
 
 Depois disso, aprofundar Legislativo e atos administrativos.
 
-## Criterio de pronto para demonstracao
+## Critério de pronto para demonstração
 
-O produto estara pronto para demonstracao quando:
+O produto estára pronto para demonstração quando:
 
-- os 14 documentos aparecerem na area interna;
+- os 14 documentos aparecerem na área interna;
 - cada documento tiver campos proprios;
-- a IA receber orientacoes especificas;
+- a IA receber orientacoes específicas;
 - documentos beta estiverem claramente marcados;
-- a minuta gerada vier estruturada em secoes;
-- as pendencias forem sinalizadas sem esconder limitacoes.
+- a minuta gerada vier estruturada em seções;
+- as pendências forem sinalizadas sem esconder limitacoes.

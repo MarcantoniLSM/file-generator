@@ -42,54 +42,54 @@ const criticalFieldsByKind: Record<DocumentKind, string[]> = {
 };
 
 const fieldQuestions: Record<string, string> = {
-  objeto: "Qual e o objeto exato do documento ou da contratacao?",
-  problema: "Qual necessidade publica, problema administrativo ou contexto concreto justifica este documento?",
-  requisitos: "Quais requisitos minimos a solucao precisa atender?",
+  objeto: "Qual é o objeto exato do documento ou da contratação?",
+  problema: "Qual necessidade pública, problema administrativo ou contexto concreto justifica este documento?",
+  requisitos: "Quais requisitos mínimos a solução precisa atender?",
   alternativas: "Quais alternativas foram consideradas ou devem ser comparadas?",
-  solucao: "Qual solucao parece mais adequada e por qual motivo?",
+  solucao: "Qual solução parece mais adequada e por qual motivo?",
   quantidade: "Qual a quantidade estimada e como ela foi calculada?",
-  especificacoes: "Quais especificacoes tecnicas ou funcionais devem constar no documento?",
-  execucao: "Como sera a entrega ou execucao do objeto?",
-  gestao: "Como sera feita a gestao, fiscalizacao, recebimento ou atesto?",
-  modalidade: "Qual modalidade de licitacao sera usada?",
-  julgamento: "Qual criterio de julgamento sera adotado?",
-  etapas: "Quais etapas do processo ou da contratacao merecem analise de risco?",
-  riscos: "Quais riscos ja sao conhecidos pela equipe?",
-  fundamento: "Qual hipotese ou fundamento esta sendo considerado para a contratacao direta?",
-  fornecedor: "Ha fornecedor pretendido? Qual a razao preliminar da escolha?",
-  preco: "Como o preco foi justificado ou pesquisado?",
-  fontes: "Quais fontes de pesquisa de precos foram consultadas?",
-  metodologia: "Qual metodologia sera usada para compor o preco estimado?",
+  especificacoes: "Quais especificações técnicas ou funcionais devem constar no documento?",
+  execucao: "Como será a entrega ou execução do objeto?",
+  gestao: "Como será feita a gestão, fiscalização, recebimento ou atesto?",
+  modalidade: "Qual modalidade de licitação será usada?",
+  julgamento: "Qual critério de julgamento será adotado?",
+  etapas: "Quais etapas do processo ou da contratação merecem análise de risco?",
+  riscos: "Quais riscos já são conhecidos pela equipe?",
+  fundamento: "Qual hipótese ou fundamento está sendo considerado para a contratação direta?",
+  fornecedor: "Há fornecedor pretendido? Qual a razão preliminar da escolha?",
+  preco: "Como o preço foi justificado ou pesquisado?",
+  fontes: "Quais fontes de pesquisa de preços foram consultadas?",
+  metodologia: "Qual metodologia será usada para compor o preço estimado?",
   resultado: "Quais valores encontrados ou qual resultado preliminar da pesquisa?",
-  processo: "Qual e o numero ou identificacao do processo administrativo?",
+  processo: "Qual é o número ou identificação do processo administrativo?",
   documentos: "Quais documentos foram analisados ou instruem o processo?",
-  duvidas: "Quais pontos juridicos, riscos ou documentos ausentes devem ser avaliados?",
-  orgao: "Qual orgao ou autoridade emitira o ato?",
-  tipo_ato: "O ato sera decreto ou portaria?",
+  duvidas: "Quais pontos jurídicos, riscos ou documentos ausentes devem ser avaliados?",
+  orgao: "Qual órgão ou autoridade emitirá o ato?",
+  tipo_ato: "O ato será decreto ou portaria?",
   assunto: "Qual assunto o ato deve regular ou formalizar?",
-  fundamentos: "Quais fundamentos legais, competencia ou processo embasam o ato?",
+  fundamentos: "Quais fundamentos legais, competência ou processo embasam o ato?",
   conteudo: "Quais comandos o ato deve estabelecer?",
-  contratada: "Quem e a contratada ou essa informacao ainda esta pendente?",
-  regime: "Qual sera o regime ou forma de execucao contratual?",
-  pagamento: "Quais condicoes de pagamento, medicao e atesto devem constar?",
+  contratada: "Quem é a contratada ou essa informação ainda está pendente?",
+  regime: "Qual será o regime ou forma de execução contratual?",
+  pagamento: "Quais condições de pagamento, medição e atesto devem constar?",
   valor: "Qual valor estimado, limite ou valor contratual?",
-  prazo: "Qual prazo de entrega, execucao ou vigencia?",
-  autor: "Quem e o autor ou proponente?",
-  tema: "Qual e o tema central da proposicao?",
-  objetivo: "Qual objetivo concreto a proposicao pretende alcancar?",
-  impacto: "Ha impacto financeiro, administrativo ou social previsto?",
-  tipo: "A peca sera requerimento, indicacao ou pedido de informacao?",
-  destinatario: "A quem o pedido ou indicacao sera encaminhado?",
-  pedido: "Qual providencia, informacao ou encaminhamento esta sendo solicitado?",
+  prazo: "Qual prazo de entrega, execução ou vigência?",
+  autor: "Quem é o autor ou proponente?",
+  tema: "Qual é o tema central da proposição?",
+  objetivo: "Qual objetivo concreto a proposição pretende alcançar?",
+  impacto: "Há impacto financeiro, administrativo ou social previsto?",
+  tipo: "A peça será requerimento, indicação ou pedido de informação?",
+  destinatario: "A quem o pedido ou indicação será encaminhado?",
+  pedido: "Qual providência, informação ou encaminhamento está sendo solicitado?",
   justificativa: "Qual justificativa sustenta o pedido?",
-  comissao: "Qual comissao emitira o parecer?",
-  proposicao: "Qual proposicao original sera analisada ou alterada?",
-  ementa: "Qual e a ementa ou resumo da materia?",
-  posicao: "O voto tende a ser favoravel, contrario ou com ressalvas?",
-  tipo_emenda: "Qual tipo de emenda sera apresentada?",
-  dispositivo: "Qual dispositivo sera alterado, acrescido ou suprimido?",
-  redacao: "Qual redacao proposta deve constar na emenda?",
-  beneficiarios: "Quem sera beneficiado pela proposta?",
+  comissao: "Qual comissão emitirá o parecer?",
+  proposicao: "Qual proposição original será analisada ou alterada?",
+  ementa: "Qual é a ementa ou resumo da matéria?",
+  posicao: "O voto tende a ser favorável, contrário ou com ressalvas?",
+  tipo_emenda: "Qual tipo de emenda será apresentada?",
+  dispositivo: "Qual dispositivo será alterado, acrescido ou suprimido?",
+  redacao: "Qual redação proposta deve constar na emenda?",
+  beneficiarios: "Quem será beneficiado pela proposta?",
   argumentos: "Quais argumentos principais devem sustentar a justificativa?"
 };
 
@@ -101,7 +101,7 @@ function questionFor(field: string): ReadinessQuestion {
   return {
     campo: field,
     pergunta: fieldQuestions[field] || `Informe o dado referente a ${field}.`,
-    motivo: "Informacao importante para reduzir lacunas e evitar que a IA complete o documento com suposicoes."
+    motivo: "Informação importante para reduzir lacunas e evitar que a IA complete o documento com suposições."
   };
 }
 
@@ -117,9 +117,9 @@ export function assessLocalReadiness({ kind, values, institution }: ReadinessInp
       institution?.headerTemplate?.trim()
   );
   const alertas = [
-    ...requiredMissing.map((field) => `Campo obrigatorio nao informado: ${field.label}.`),
-    ...criticalMissing.map((field) => `Dado critico ausente: ${field}.`),
-    ...(hasInstitution ? [] : ["Nao ha identificacao institucional estruturada nem cabecalho informado."])
+    ...requiredMissing.map((field) => `Campo obrigatório não informado: ${field.label}.`),
+    ...criticalMissing.map((field) => `Dado crítico ausente: ${field}.`),
+    ...(hasInstitution ? [] : ["Não há identificação institucional estruturada nem cabeçalho informado."])
   ];
   const highRisk = requiredMissing.length > 0 || criticalMissing.length >= 3;
   const mediumRisk = criticalMissing.length > 0 || !hasInstitution;
@@ -130,10 +130,10 @@ export function assessLocalReadiness({ kind, values, institution }: ReadinessInp
     risco,
     resumo:
       highRisk
-        ? "As informacoes ainda nao sao suficientes para gerar uma minuta confiavel."
+        ? "As informações ainda não são suficientes para gerar uma minuta confiável."
         : mediumRisk
-          ? "E possivel gerar, mas existem lacunas que podem resultar em pendencias no texto."
-          : "As informacoes parecem suficientes para uma minuta preliminar.",
+          ? "É possível gerar, mas existem lacunas que podem resultar em pendências no texto."
+          : "As informações parecem suficientes para uma minuta preliminar.",
     perguntas: uniqueMissing.map(questionFor),
     alertas,
     source: "local"
@@ -144,26 +144,26 @@ export function buildReadinessPrompt(input: ReadinessInput) {
   const definition = documentDefinitions[input.kind];
 
   return [
-    "Voce e um revisor de entrada de dados para geracao de documentos publicos brasileiros.",
-    "Nao gere a minuta. Avalie apenas se ha informacoes suficientes para gerar com baixo risco de alucinacao.",
-    "Responda somente em JSON valido, sem markdown.",
+    "Você é um revisor de entrada de dados para geração de documentos públicos brasileiros.",
+    "Não gere a minuta. Avalie apenas se há informações suficientes para gerar com baixo risco de alucinação.",
+    "Responda somente em JSON válido, sem markdown.",
     "",
-    "Formato obrigatorio:",
+    "Formato obrigatório:",
     '{"status":"suficiente|insuficiente","risco":"baixo|medio|alto","resumo":"texto curto","perguntas":[{"campo":"nome","pergunta":"texto","motivo":"texto"}],"alertas":["texto"]}',
     "",
     `Tipo documental: ${definition.name}`,
-    `Secoes esperadas: ${definition.sections.join("; ")}`,
-    `Campos do formulario: ${definition.fields.map((field) => `${field.key}${field.required ? " (obrigatorio)" : ""}`).join("; ")}`,
-    `Dados criticos locais: ${criticalFieldsByKind[input.kind].join("; ")}`,
+    `Seções esperadas: ${definition.sections.join("; ")}`,
+    `Campos do formulário: ${definition.fields.map((field) => `${field.key}${field.required ? " (obrigatório)" : ""}`).join("; ")}`,
+    `Dados críticos locais: ${criticalFieldsByKind[input.kind].join("; ")}`,
     "",
     "Regras:",
     "- Se faltarem dados essenciais para o tipo documental, status deve ser insuficiente.",
-    "- Se for possivel gerar apenas com varias pendencias, risco deve ser medio ou alto.",
-    "- Faca perguntas objetivas que o usuario consiga responder no formulario.",
-    "- Nao peça documentos impossiveis; peça informacoes praticas.",
-    "- Nao invente fatos, valores, leis locais, fontes ou fundamentos.",
+    "- Se for possível gerar apenas com várias pendências, risco deve ser médio ou alto.",
+    "- Faça perguntas objetivas que o usuário consiga responder no formulário.",
+    "- Não peça documentos impossíveis; peça informações práticas.",
+    "- Não invente fatos, valores, leis locais, fontes ou fundamentos.",
     "",
-    "Configuracao/cabecalho:",
+    "Configuração/cabeçalho:",
     JSON.stringify(input.institution || {}, null, 2),
     "",
     "Dados informados:",
@@ -194,9 +194,9 @@ function normalizeQuestions(value: unknown): ReadinessQuestion[] {
       if (typeof question.pergunta !== "string" || !question.pergunta.trim()) return null;
 
       return {
-        campo: typeof question.campo === "string" ? question.campo : "informacao",
+        campo: typeof question.campo === "string" ? question.campo : "informação",
         pergunta: question.pergunta,
-        motivo: typeof question.motivo === "string" ? question.motivo : "Informacao necessaria para reduzir lacunas."
+        motivo: typeof question.motivo === "string" ? question.motivo : "Informação necessária para reduzir lacunas."
       };
     })
     .filter((item): item is ReadinessQuestion => Boolean(item));
@@ -211,7 +211,7 @@ export function parseAIReadiness(text: string): Omit<ReadinessResult, "source"> 
     return {
       status: normalizeStatus(parsed.status),
       risco: normalizeRisk(parsed.risco),
-      resumo: typeof parsed.resumo === "string" ? parsed.resumo : "Validacao concluida.",
+      resumo: typeof parsed.resumo === "string" ? parsed.resumo : "Validação concluída.",
       perguntas: normalizeQuestions(parsed.perguntas),
       alertas: asStringArray(parsed.alertas)
     };

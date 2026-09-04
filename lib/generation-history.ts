@@ -23,7 +23,7 @@ export async function saveGenerationHistory(input: GenerationHistoryInput) {
   const supabase = createSupabaseAdminClient();
   const definition = documentDefinitions[input.kind];
   const municipality = asText(input.institution?.municipio_uf);
-  const organization = asText(input.institution?.orgao_entidade) || asText(input.values?.orgao);
+  const organization = asText(input.institution?.orgao_entidade) || asText(input.values?.órgão);
   const promptTokens = JSON.stringify({
     institution: input.institution,
     values: input.values
@@ -43,7 +43,7 @@ export async function saveGenerationHistory(input: GenerationHistoryInput) {
   });
 
   if (error) {
-    console.warn("[generation-history] Nao foi possivel salvar historico.", {
+    console.warn("[generation-history] Não foi possível salvar histórico.", {
       userId: input.userId,
       kind: input.kind,
       message: error.message

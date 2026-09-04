@@ -62,7 +62,7 @@ function statusLabel(status: string) {
   const labels: Record<string, string> = {
     generated: "Gerado",
     reviewed: "Revisado",
-    forced_generation: "Forcado"
+    forced_generation: "Forçado"
   };
 
   return labels[status] || status;
@@ -129,7 +129,7 @@ export default async function AdminDashboardPage() {
   }));
   const organizationCounts = Object.entries(
     generations.reduce<Record<string, number>>((acc, generation) => {
-      const organization = generation.organization || "Orgao nao informado";
+      const organization = generation.organization || "Órgão não informado";
       acc[organization] = (acc[organization] || 0) + 1;
       return acc;
     }, {})
@@ -142,15 +142,15 @@ export default async function AdminDashboardPage() {
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-5 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Administracao</p>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Administração</p>
             <h1 className="mt-1 font-serif text-3xl font-semibold">Painel admin</h1>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/gerador" className="border border-line bg-white px-4 py-2 text-sm font-semibold hover:bg-paper">
-              Area interna
+              Área interna
             </Link>
             <Link href="/admin/usuarios" className="bg-civic px-4 py-2 text-sm font-semibold text-white">
-              Gerenciar usuarios
+              Gerenciar usuários
             </Link>
             <Link href="/logout" className="border border-line bg-white px-4 py-2 text-sm font-semibold hover:bg-paper">
               Sair
@@ -161,7 +161,7 @@ export default async function AdminDashboardPage() {
 
       <section className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <StatCard label="Usuarios" value={totalUsers} helper="Contas cadastradas" icon={Users} />
+          <StatCard label="Usuários" value={totalUsers} helper="Contas cadastradas" icon={Users} />
           <StatCard label="Ativos" value={activeUsers} helper="Podem acessar" icon={UserCheck} />
           <StatCard label="Bloqueados" value={blockedUsers} helper="Sem acesso" icon={UserX} />
           <StatCard label="Admins" value={admins} helper="Gestao liberada" icon={Shield} />
@@ -169,16 +169,16 @@ export default async function AdminDashboardPage() {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <StatCard label="Geracoes" value={generations.length} helper="Historico total" icon={FileText} />
+          <StatCard label="Gerações" value={generations.length} helper="Histórico total" icon={FileText} />
           <StatCard label="7 dias" value={generationsThisWeek} helper="Atividade recente" icon={BarChart3} />
-          <StatCard label="Revisados" value={reviewedGenerations} helper="Passaram por revisao" icon={UserCheck} />
+          <StatCard label="Revisados" value={reviewedGenerations} helper="Passaram por revisão" icon={UserCheck} />
           <StatCard label="Forcados" value={forcedGenerations} helper="Com risco assumido" icon={Shield} />
-          <StatCard label="Media chars" value={averageOutputLength} helper="Tamanho medio" icon={FileText} />
+          <StatCard label="Média chars" value={averageOutputLength} helper="Tamanho médio" icon={FileText} />
         </div>
 
         {generationsError ? (
           <div className="border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-            Historico de geracoes ainda nao disponivel. Rode a migration de geracoes no Supabase e depois o seed do
+            Histórico de gerações ainda não disponível. Rode a migration de gerações no Supabase e depois o seed do
             dashboard.
           </div>
         ) : null}
@@ -187,7 +187,7 @@ export default async function AdminDashboardPage() {
           <div className="border border-line bg-white">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <div>
-                <h2 className="text-sm font-bold">Distribuicao por documento</h2>
+                <h2 className="text-sm font-bold">Distribuição por documento</h2>
                 <p className="mt-1 text-sm text-muted">Volume de uso por tipo documental.</p>
               </div>
             </div>
@@ -208,14 +208,14 @@ export default async function AdminDashboardPage() {
           </div>
 
           <aside className="border border-line bg-white p-4">
-            <h2 className="text-sm font-bold">Status das geracoes</h2>
+            <h2 className="text-sm font-bold">Status das gerações</h2>
             <div className="mt-4 space-y-4">
               {statusCounts.map((item) => (
                 <CountBar key={item.status} label={statusLabel(item.status)} value={item.count} total={generations.length} />
               ))}
             </div>
             <p className="mt-5 border-t border-line pt-4 text-sm text-muted">
-              {generationUsers} usuarios ativos ja aparecem no historico de geracao.
+              {generationUsers} usuários ativos já aparecem no histórico de geração.
             </p>
           </aside>
         </div>
@@ -223,8 +223,8 @@ export default async function AdminDashboardPage() {
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="border border-line bg-white">
             <div className="border-b border-line px-4 py-3">
-              <h2 className="text-sm font-bold">Orgaos mais ativos</h2>
-              <p className="mt-1 text-sm text-muted">Secretarias e unidades com maior volume no periodo carregado.</p>
+              <h2 className="text-sm font-bold">Órgãos mais ativos</h2>
+              <p className="mt-1 text-sm text-muted">Secretarias e unidades com maior volume no período carregado.</p>
             </div>
             <div className="space-y-4 p-4">
               {organizationCounts.map(([organization, count]) => (
@@ -236,7 +236,7 @@ export default async function AdminDashboardPage() {
           <div className="border border-line bg-white">
             <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
               <div>
-                <h2 className="text-sm font-bold">Usuarios recentes</h2>
+                <h2 className="text-sm font-bold">Usuários recentes</h2>
                 <p className="mt-1 text-sm text-muted">Controle de acesso da plataforma.</p>
               </div>
               <Link href="/admin/usuarios" className="flex items-center gap-2 text-sm font-semibold text-civic">
@@ -251,7 +251,7 @@ export default async function AdminDashboardPage() {
                     <p className="text-sm text-muted">{profile.email}</p>
                   </div>
                   <span className="w-fit border border-line px-2 py-1 text-xs font-semibold">
-                    {profile.role === "admin" ? "Admin" : "Usuario"}
+                    {profile.role === "admin" ? "Admin" : "Usuário"}
                   </span>
                   <span className="w-fit border border-line px-2 py-1 text-xs font-semibold">
                     {profile.access_status === "active" ? "Ativo" : "Bloqueado"}
@@ -265,14 +265,14 @@ export default async function AdminDashboardPage() {
         <div className="border border-line bg-white">
           <div className="border-b border-line px-4 py-3">
             <h2 className="text-sm font-bold">Atividade recente</h2>
-            <p className="mt-1 text-sm text-muted">Ultimas minutas registradas no historico.</p>
+            <p className="mt-1 text-sm text-muted">Últimas minutas registradas no histórico.</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead className="bg-paper text-muted">
                 <tr>
                   <th className="border-b border-line px-4 py-3 font-semibold">Documento</th>
-                  <th className="border-b border-line px-4 py-3 font-semibold">Orgao</th>
+                  <th className="border-b border-line px-4 py-3 font-semibold">Órgão</th>
                   <th className="border-b border-line px-4 py-3 font-semibold">Status</th>
                   <th className="border-b border-line px-4 py-3 font-semibold">Fonte</th>
                   <th className="border-b border-line px-4 py-3 font-semibold">Data</th>
@@ -285,7 +285,7 @@ export default async function AdminDashboardPage() {
                       <p className="font-semibold">{generation.document_name}</p>
                       <p className="text-xs text-muted">{generation.risk ? `Risco ${generation.risk}` : "Sem alerta"}</p>
                     </td>
-                    <td className="px-4 py-3 text-muted">{generation.organization || "Nao informado"}</td>
+                    <td className="px-4 py-3 text-muted">{generation.organization || "Não informado"}</td>
                     <td className="px-4 py-3">{statusLabel(generation.status)}</td>
                     <td className="px-4 py-3 uppercase text-muted">{generation.source}</td>
                     <td className="px-4 py-3 text-muted">

@@ -4,20 +4,20 @@ import { executivePages, legislativePages, modelPages, toolPages } from "@/lib/s
 
 const generatedExamples = [
   "Documento de Formalizacao da Demanda",
-  "Estudo Tecnico Preliminar",
-  "Termo de Referencia",
+  "Estudo Técnico Preliminar",
+  "Termo de Referência",
   "Mapa de Riscos",
   "Minuta de Edital",
   "Minuta de Contrato",
   "Projeto de Lei",
-  "Parecer de Comissao",
+  "Parecer de Comissão",
   "Oficio Administrativo"
 ];
 
 const steps = [
   {
-    title: "Configure o orgao",
-    text: "Informe Prefeitura, secretaria, municipio, CNPJ e responsaveis para adaptar cabecalho e linguagem institucional."
+    title: "Configure o órgão",
+    text: "Informe Prefeitura, secretaria, município, CNPJ e responsáveis para adaptar cabeçalho e linguagem institucional."
   },
   {
     title: "Escolha o documento",
@@ -25,11 +25,11 @@ const steps = [
   },
   {
     title: "Gere a minuta",
-    text: "A IA organiza o conteudo em secoes, aponta pendencias e evita inventar dados nao fornecidos."
+    text: "A IA organiza o conteúdo em seções, aponta pendências e evita inventar dados não fornecidos."
   },
   {
     title: "Revise e aprove",
-    text: "O servidor confere, ajusta e encaminha a minuta para as areas tecnica, juridica ou administrativa competentes."
+    text: "O servidor confere, ajusta e encaminha a minuta para as áreas técnica, jurídica ou administrativa competentes."
   }
 ];
 
@@ -53,7 +53,7 @@ function PageGroup({
             <h2 className="mt-2 font-serif text-3xl font-semibold leading-tight text-ink">{title}</h2>
           </div>
           <p className="max-w-2xl text-base leading-7 text-muted">
-            Paginas preparadas para captar demandas especificas, explicar o documento e levar o usuario ao gerador
+            Páginas preparadas para captar demandas específicas, explicar o documento e levar o usuário ao gerador
             com contexto adequado.
           </p>
         </div>
@@ -70,7 +70,7 @@ function PageGroup({
                 <p className="mt-3 text-sm leading-6 text-muted">{page.description}</p>
               </div>
               <span className="mt-5 flex items-center gap-2 text-sm font-semibold text-civic">
-                Abrir pagina <ArrowRight size={15} className="transition group-hover:translate-x-1" />
+                Abrir página <ArrowRight size={15} className="transition group-hover:translate-x-1" />
               </span>
             </Link>
           ))}
@@ -97,7 +97,7 @@ export default function Home() {
               <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">
                 Gerador de
               </span>
-              <span className="font-serif text-base font-semibold text-ink">Documentos Publicos</span>
+              <span className="font-serif text-base font-semibold text-ink">Documentos Públicos</span>
             </span>
           </Link>
           <nav className="hidden items-center gap-8 text-[15px] font-medium text-ink md:flex">
@@ -114,13 +114,13 @@ export default function Home() {
       <section className="border-b border-line bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-10 md:grid-cols-[1.1fr_0.9fr] md:items-center md:px-10 md:py-14 lg:py-16">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">Gerador de Documentos Publicos</p>
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted">Gerador de Documentos Públicos</p>
             <h1 className="mt-5 max-w-3xl font-serif text-[2rem] font-semibold leading-[1.15] text-ink sm:text-4xl lg:text-[2.75rem]">
               Minutas prontas para a revisão do jurídico.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
               Editais, termos de referência, DFDs, ETPs e proposições legislativas montados a partir de roteiros
-              objetivos, com cabeçalho do órgão e pontos de revisão destacados.
+              objetivos, com cabeçalho do órgão e pontos de revisão destácados.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link href="/gerador" className="rounded-lg bg-civic px-7 py-3 text-base font-medium text-white">
@@ -155,7 +155,7 @@ export default function Home() {
             <div className="mt-5 space-y-2">
               <div className="h-2 w-24 bg-lilacLight" />
               <p className="font-serif text-[13px] italic leading-relaxed text-muted">
-                Dispõe sobre a abertura de processo administrativo para contratação do objeto especificado no termo de
+                Dispõe sobre a abertura de processo administrativo para contratação do objeto específicado no termo de
                 referência.
               </p>
             </div>
@@ -237,31 +237,31 @@ export default function Home() {
         </div>
       </section>
 
-      <PageGroup title="Licitacoes e compras publicas" eyebrow="Executivo municipal" pages={executivePages} />
+      <PageGroup title="Licitações e compras públicas" eyebrow="Executivo municipal" pages={executivePages} />
       <PageGroup title="Projetos de lei e atos normativos" eyebrow="Legislativo municipal" pages={legislativePages} />
       <PageGroup title="Modelos prontos e captura" eyebrow="Biblioteca" pages={modelPages} basePath="/modelos" />
-      <PageGroup title="Ferramentas gratuitas" eyebrow="Trafego e validacao" pages={toolPages} basePath="/ferramentas" />
+      <PageGroup title="Ferramentas gratuitas" eyebrow="Trafego e validação" pages={toolPages} basePath="/ferramentas" />
 
       <section className="border-y border-line bg-civic py-16 text-white">
         <div className="mx-auto grid max-w-6xl gap-8 px-6 md:px-10 lg:grid-cols-[1fr_420px]">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-lilac">Limite institucional</p>
             <h2 className="mt-3 max-w-3xl font-serif text-4xl font-semibold leading-tight">
-              O sistema apoia a redacao. Quem revisa, valida e assina continua sendo o agente publico.
+              O sistema apoia a redação. Quem revisa, valida e assina continua sendo o agente público.
             </h2>
           </div>
           <div className="grid gap-3 text-sm leading-6 text-white/75">
             <p className="flex gap-3">
               <ShieldCheck className="mt-1 text-lilac" size={18} />
-              Nao promete legalidade automatica.
+              Não promete legalidade automática.
             </p>
             <p className="flex gap-3">
               <Landmark className="mt-1 text-lilac" size={18} />
-              Deve evoluir para normas e templates de cada orgao.
+              Deve evoluir para normas e templates de cada órgão.
             </p>
             <p className="flex gap-3">
               <Scale className="mt-1 text-lilac" size={18} />
-              Pareceres e atos juridicos ficam como minutas para revisao competente.
+              Pareceres e atos jurídicos ficam como minutas para revisão competente.
             </p>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function Home() {
 
       <footer className="border-t border-line px-4 py-8 text-center text-sm text-muted sm:px-6">
         <FileText className="mx-auto mb-3 text-civic" size={22} />
-        Gerador de Documentos Publicos
+        Gerador de Documentos Públicos
       </footer>
     </main>
   );

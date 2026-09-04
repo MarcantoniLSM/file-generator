@@ -17,274 +17,286 @@ type PromptInput = {
   text?: string;
 };
 
+export type ComplianceFinding = {
+  item: string;
+  severity: "baixa" | "media" | "alta";
+  issue: string;
+  recommendation: string;
+};
+
+type CompliancePromptInput = PromptInput & {
+  text: string;
+  findings?: ComplianceFinding[];
+};
+
 const sharedMustDo = [
   "Use linguagem formal, impessoal, objetiva e adequada ao setor publico municipal.",
-  "Adapte termos informais para redacao administrativa, preservando os fatos informados pelo usuario.",
-  "Use os dados institucionais para cabecalho e contexto quando eles forem suficientes.",
-  "Quando faltar informacao relevante, marque exatamente no ponto adequado com [PENDENTE: detalhe da informacao].",
-  "Deixe claro, ao final, que a minuta exige revisao da area competente antes de uso oficial."
+  "Adapte termos informais para redação administrativa, preservando os fatos informados pelo usuário.",
+  "Use os dados institucionais para cabeçalho e contexto quando eles forem suficientes.",
+  "Quando faltar informação relevante, marque exatamente no ponto adequado com [PENDENTE: detalhe da informação].",
+  "Deixe claro, ao final, que a minuta exige revisão da área competente antes de uso oficial."
 ];
 
 const sharedMustAvoid = [
-  "Nao invente numero de processo, dotacao, decreto municipal, lei local, data, parecer, fonte de preco, fornecedor, autoridade ou valor nao informado.",
-  "Nao declare legalidade definitiva, aprovacao juridica, regularidade fiscal, viabilidade absoluta ou enquadramento conclusivo.",
-  "Nao produza texto curto de chat; entregue uma minuta documental desenvolvida.",
-  "Nao misture a finalidade de documentos diferentes. Respeite o tipo documental solicitado."
+  "Não invente numero de processo, dotação, decreto municipal, lei local, data, parecer, fonte de preço, fornecedor, autoridade ou valor não informado.",
+  "Não declare legalidade definitiva, aprovação jurídica, regularidade fiscal, viabilidade absoluta ou enquadramento conclusivo.",
+  "Não produza texto curto de chat; entregue uma minuta documental desenvolvida.",
+  "Não misture a finalidade de documentos diferentes. Respeite o tipo documental solicitado."
 ];
 
 const purchaseCare = [
-  "Conecte necessidade, interesse publico, quantidade, valor, prazo, riscos e encaminhamentos ao objeto informado.",
-  "Quando houver dados insuficientes para compras publicas, marque pendencias de area demandante, compras, orcamento, controle interno ou juridico.",
-  "Evite especificacoes direcionadas a marca ou fornecedor, salvo se o usuario informar justificativa tecnica expressa."
+  "Conecte necessidade, interesse público, quantidade, valor, prazo, riscos e encaminhamentos ao objeto informado.",
+  "Quando houver dados insuficientes para compras públicas, marque pendências de área demandante, compras, orçamento, controle interno ou jurídico.",
+  "Evite específicações direcionadas a marca ou fornecedor, salvo se o usuário informar justificativa técnica expressa."
 ];
 
 const legislativeCare = [
-  "Use tecnica legislativa simples: ementa objetiva, articulado claro, justificativa separada quando aplicavel e clausula de vigencia.",
-  "Marque pendencias sobre competencia, iniciativa, impacto orcamentario e adequacao constitucional quando os dados forem insuficientes.",
-  "Nao prometa constitucionalidade, legalidade ou aprovacao parlamentar."
+  "Use técnica legislativa simples: ementa objetiva, articulado claro, justificativa separada quando aplicavel e cláusula de vigência.",
+  "Marque pendências sobre competência, iniciativa, impacto orçamentário e adequação constitucional quando os dados forem insuficientes.",
+  "Não prometa constitucionalidade, legalidade ou aprovação parlamentar."
 ];
 
 const profiles: Record<DocumentKind, PromptProfile> = {
   etp: {
-    persona: "especialista em planejamento de contratacoes publicas municipais e fase preparatoria da Lei 14.133/21",
+    persona: "especialista em planejámento de contratações públicas municipais e fase preparatória da Lei 14.133/21",
     objective:
-      "produzir um Estudo Tecnico Preliminar robusto, com raciocinio tecnico-administrativo, demonstrando necessidade, alternativas, solucao recomendada e viabilidade condicionada.",
+      "produzir um Estudo Técnico Preliminar robusto, com raciocínio técnico-administrativo, demonstrando necessidade, alternativas, solução recomendada e viabilidade condicionada.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
-      "Desenvolva a descricao da necessidade com causa, consequencia e impacto no servico publico municipal.",
-      "Inclua levantamento de mercado mesmo que preliminar, diferenciando alternativas possiveis e registrando limites da analise.",
-      "Justifique a solucao recomendada com base nos dados fornecidos e indique quando a escolha depender de complementacao tecnica.",
-      "Trate parcelamento ou nao parcelamento do objeto, sem fechar conclusao quando faltarem dados.",
-      "Inclua riscos relevantes e providencias previas para a contratacao."
+      "Desenvolva a descricao da necessidade com causa, consequência e impacto no servico publico municipal.",
+      "Inclua levantamento de mercado mesmo que preliminar, diferenciando alternativas possiveis e registrando limites da análise.",
+      "Justifique a solução recomendada com base nos dados fornecidos e indique quando a escolha depender de complementacao técnica.",
+      "Trate parcelamento ou não parcelamento do objeto, sem fechar conclusão quando faltarem dados.",
+      "Inclua riscos relevantes e providências previas para a contratação."
     ],
-    mustAvoid: [...sharedMustAvoid, "Nao transformar o ETP em Termo de Referencia detalhado ou em edital."],
+    mustAvoid: [...sharedMustAvoid, "Não transformar o ETP em Termo de Referência detalhado ou em edital."],
     structureNotes: [
-      "Comece com identificacao da necessidade e area requisitante.",
-      "Organize a analise em secoes numeradas.",
-      "Inclua alternativas: manter situacao atual, aquisicao/contratacao, adesao a ata, locacao ou outra solucao pertinente quando fizer sentido.",
-      "Finalize com conclusao de viabilidade condicionada as pendencias registradas."
+      "Comece com identificacao da necessidade e área requisitante.",
+      "Organize a análise em seções numeradas.",
+      "Inclua alternativas: manter situação atual, aquisição/contratação, adesao a ata, locação ou outra solução pertinente quando fizer sentido.",
+      "Finalize com conclusão de viabilidade condicionada as pendências registradas."
     ],
     qualityBar: [
-      "A minuta deve explicar o porquê da contratacao, nao apenas repetir o objeto.",
-      "Cada secao deve ter conteudo substantivo, ainda que existam pendencias.",
-      "A conclusao deve refletir os riscos e lacunas apontados ao longo do documento."
+      "A minuta deve explicar o porquê da contratação, não apenas repetir o objeto.",
+      "Cada seção deve ter conteúdo substantivo, ainda que existam pendências.",
+      "A conclusão deve refletir os riscos e lacunas apontados ao longo do documento."
     ],
     reviewCriteria: [
-      "Verificar se ha necessidade publica clara.",
-      "Verificar se alternativas e solucao recomendada foram tratadas.",
-      "Verificar se quantidades, valor, parcelamento, riscos e conclusao de viabilidade aparecem com coerencia."
+      "Verificar se ha necessidade pública clara.",
+      "Verificar se alternativas e solução recomendada foram tratadas.",
+      "Verificar se quantidades, valor, parcelamento, riscos e conclusão de viabilidade aparecem com coerencia."
     ]
   },
   tr: {
     persona: "especialista em Termos de Referencia para Prefeituras e setores de compras municipais",
     objective:
-      "produzir Termo de Referencia operacional, com objeto, requisitos, execucao, recebimento, fiscalizacao, pagamento, obrigacoes e sancoes.",
+      "produzir Termo de Referência operacional, com objeto, requisitos, execução, recebimento, fiscalização, pagamento, obrigações e sanções.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
-      "Transforme a necessidade em requisitos tecnicos e funcionais verificaveis.",
-      "Detalhe forma de entrega ou execucao, locais, prazos, etapas, recebimento provisoria/definitivo quando aplicavel.",
-      "Inclua criterios de aceitacao, obrigacoes da contratada, obrigacoes da contratante e gestao/fiscalizacao.",
-      "Inclua condicoes de pagamento em termos preliminares e marque pendencias de medicao, atesto e nota fiscal quando faltarem dados."
+      "Transforme a necessidade em requisitos técnicos e funcionais verificáveis.",
+      "Detalhe forma de entrega ou execução, locais, prazos, etapas, recebimento provisoria/definitivo quando aplicavel.",
+      "Inclua critérios de aceitação, obrigações da contratada, obrigações da contratante e gestão/fiscalização.",
+      "Inclua condições de pagamento em termos preliminares e marque pendências de medição, atésto e nota fiscal quando faltarem dados."
     ],
-    mustAvoid: [...sharedMustAvoid, "Nao escrever regras extensas de edital quando o pedido e TR.", "Nao criar sancoes especificas sem base informada; redija clausulas gerais e revisaveis."],
+    mustAvoid: [...sharedMustAvoid, "Não escrever regras extensas de edital quando o pedido e TR.", "Não criar sanções específicas sem base informada; redijá cláusulas gerais e revisáveis."],
     structureNotes: [
-      "Organize em clausulas ou secoes numeradas.",
-      "Separe especificacao tecnica de forma de execucao.",
-      "Crie uma secao propria para fiscalizacao e recebimento.",
-      "Finalize com disposicoes gerais e pendencias para revisao."
+      "Organize em cláusulas ou seções numeradas.",
+      "Separe específicacao técnica de forma de execução.",
+      "Crie uma seção própria para fiscalização e recebimento.",
+      "Finalize com disposições gerais e pendências para revisão."
     ],
     qualityBar: [
-      "O documento deve permitir que outro servidor entenda o que sera contratado e como sera conferido.",
-      "As obrigacoes devem ser praticas e relacionadas ao objeto.",
+      "O documento deve permitir que outro servidor entenda o que será contratado e como será conferido.",
+      "As obrigações devem ser praticas e relacionadas ao objeto.",
       "Evite justificativas genericas; conecte requisitos aos dados informados."
     ],
     reviewCriteria: [
-      "Verificar se objeto e especificacoes estao suficientemente claros.",
-      "Verificar se execucao, fiscalizacao, recebimento e pagamento foram abordados.",
-      "Apontar lacunas que possam gerar disputa ou execucao ruim."
+      "Verificar se objeto e específicações estáo suficientemente claros.",
+      "Verificar se execução, fiscalização, recebimento e pagamento foram abordados.",
+      "Apontar lacunas que possam gerar disputa ou execução ruim."
     ]
   },
   edital_licitacao: {
-    persona: "especialista em minutas de edital de licitacao para Prefeituras, com revisao juridica obrigatoria",
+    persona: "especialista em minutas de edital de licitacao para Prefeituras, com revisão jurídica obrigatoria",
     objective:
-      "produzir minuta-base de edital com regras do certame, preservando cautela juridica e destacando anexos e campos pendentes.",
+      "produzir minuta-base de edital com regras do certame, preservando cautela jurídica e destácando anexos e campos pendentes.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
       "Identifique modalidade, criterio de julgamento e modo de disputa quando informados.",
-      "Inclua regras preliminares de participacao, proposta, julgamento, habilitacao, esclarecimentos, impugnacao e recursos.",
+      "Inclua regras preliminares de participação, proposta, julgamento, habilitação, esclarecimentos, impugnacao e recursos.",
       "Inclua bloco de anexos previstos: TR, minuta de contrato, modelo de proposta, declaracoes e demais anexos.",
-      "Marque como pendente qualquer dado sensivel: plataforma, datas, horarios, dotacao, criterios tecnicos, documentos de habilitacao e minuta contratual."
+      "Marque como pendente qualquer dado sensivel: plataforma, datas, horarios, dotação, critérios técnicos, documentos de habilitação e minuta contratual."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao afirmar que o edital esta pronto para publicacao.",
-      "Nao fixar prazos, datas, indices, documentos de habilitacao especificos ou exigencias restritivas sem informacao do usuario."
+      "Não afirmar que o edital está pronto para publicação.",
+      "Não fixar prazos, datas, índices, documentos de habilitação específicos ou exigências restritivas sem informação do usuário."
     ],
     structureNotes: [
-      "Comece com preambulo e objeto.",
-      "Use capitulos/secoes com linguagem de edital.",
-      "Inclua anexos ao final, com pendencias claras.",
-      "Use tom cauteloso: minuta-base para revisao da comissao/agente de contratacao e juridico."
+      "Comece com preâmbulo e objeto.",
+      "Use capitulos/seções com linguagem de edital.",
+      "Inclua anexos ao final, com pendências claras.",
+      "Use tom cauteloso: minuta-base para revisão da comissão/agente de contratação e jurídico."
     ],
     qualityBar: [
-      "A minuta deve parecer um edital, nao um resumo de edital.",
+      "A minuta deve parecer um edital, não um resumo de edital.",
       "As regras devem ser coerentes com modalidade e criterio de julgamento informados.",
-      "As pendencias devem ser visiveis, pois edital incompleto e risco alto."
+      "As pendências devem ser visiveis, pois edital incompleto e risco alto."
     ],
     reviewCriteria: [
-      "Verificar se modalidade, julgamento, participacao, proposta, habilitacao e recursos aparecem.",
-      "Verificar se ha exigencias potencialmente restritivas ou nao justificadas.",
-      "Verificar se anexos e dados de publicacao foram tratados como pendentes quando ausentes."
+      "Verificar se modalidade, julgamento, participação, proposta, habilitação e recursos aparecem.",
+      "Verificar se ha exigências potencialmente restritivas ou não justificadas.",
+      "Verificar se anexos e dados de publicação foram tratados como pendentes quando ausentes."
     ]
   },
   mapa_riscos: {
-    persona: "especialista em gestao de riscos de contratacoes publicas municipais",
+    persona: "especialista em gestão de riscos de contratações públicas municipais",
     objective:
-      "produzir mapa e matriz de riscos com identificacao, causas, consequencias, probabilidade, impacto, resposta, responsavel e monitoramento.",
+      "produzir mapa e matriz de riscos com identificacao, causas, consequências, probabilidade, impacto, resposta, responsável e monitoramento.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
-      "Classifique riscos por fase: planejamento, selecao do fornecedor, execucao contratual e encerramento.",
-      "Para cada risco, indique causa, consequencia, probabilidade, impacto, nivel, medida preventiva, medida de contingencia e responsavel sugerido.",
+      "Classifique riscos por fase: planejámento, seleção do fornecedor, execução contratual e encerramento.",
+      "Para cada risco, indique causa, consequência, probabilidade, impacto, nível, medida preventiva, medida de contingência e responsável sugerido.",
       "Use matriz textual em Markdown, facilitando edicao posterior no editor.",
-      "Relacione riscos ao objeto, prazo, quantidade, valor, especificacoes e mercado informado."
+      "Relacione riscos ao objeto, prazo, quantidade, valor, específicações e mercado informado."
     ],
-    mustAvoid: [...sharedMustAvoid, "Nao listar riscos genericos sem conexao com o objeto.", "Nao atribuir responsavel nominal se nao foi informado."],
+    mustAvoid: [...sharedMustAvoid, "Não listar riscos genéricos sem conexao com o objeto.", "Não atribuir responsável nominal se não foi informado."],
     structureNotes: [
       "Inclua metodologia de classificacao simples.",
       "Use uma tabela Markdown para a matriz principal.",
-      "Apos a matriz, inclua plano de monitoramento e pendencias."
+      "Apos a matriz, inclua plano de monitoramento e pendências."
     ],
     qualityBar: [
       "Os riscos devem ser acionaveis e monitoraveis.",
-      "Medidas preventivas e de contingencia devem ser diferentes entre si.",
-      "Responsaveis devem ser setores ou papeis, nao pessoas inventadas."
+      "Medidas preventivas e de contingência devem ser diferentes entre si.",
+      "Responsaveis devem ser setores ou papeis, não pessoas inventadas."
     ],
     reviewCriteria: [
       "Verificar se riscos cobrem as fases principais.",
-      "Verificar se cada risco tem causa, consequencia, probabilidade, impacto e resposta.",
+      "Verificar se cada risco tem causa, consequência, probabilidade, impacto e resposta.",
       "Verificar se as medidas propostas sao concretas."
     ]
   },
   processo_dispensa: {
-    persona: "especialista em instrucao de processos de contratacao direta em Prefeituras",
+    persona: "especialista em instrução de processos de contratação direta em Prefeituras",
     objective:
-      "produzir minuta administrativa para processo de dispensa ou inexigibilidade, com justificativas e pendencias para validacao.",
+      "produzir minuta administrativa para processo de dispensa ou inexigibilidade, com justificativas e pendências para validação.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
-      "Diferencie hipotese informada de enquadramento juridico definitivo.",
-      "Desenvolva necessidade da contratacao, justificativa da contratacao direta, razao da escolha do fornecedor e justificativa do preco.",
-      "Indique documentos pendentes: pesquisa de precos, demonstracao de compatibilidade, habilitacao, regularidade fiscal, autorizacao e parecer juridico.",
-      "Quando houver fornecedor, trate como informacao preliminar e sujeita a comprovacao."
+      "Diferencie hipotese informada de enquadramento jurídico definitivo.",
+      "Desenvolva necessidade da contratação, justificativa da contratação direta, razão da escolha do fornecedor e justificativa do preço.",
+      "Indique documentos pendentes: pesquisa de preços, demonstração de compatibilidade, habilitação, regularidade fiscal, autorização e parecer jurídico.",
+      "Quando houver fornecedor, trate como informação preliminar e sujeita a comprovacao."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao afirmar que a dispensa ou inexigibilidade e cabivel de forma conclusiva.",
-      "Nao declarar exclusividade, emergencia ou pequeno valor se os dados nao comprovarem."
+      "Não afirmar que a dispensa ou inexigibilidade e cabivel de forma conclusiva.",
+      "Não declarar exclusividade, emergencia ou pequeno valor se os dados não comprovarem."
     ],
     structureNotes: [
       "Use estrutura de termo/justificativa administrativa.",
-      "Inclua secao de documentos instrutórios pendentes.",
-      "Finalize com encaminhamento para autoridade competente e juridico quando aplicavel."
+      "Inclua seção de documentos instrutórios pendentes.",
+      "Finalize com encaminhamento para autoridade competente e jurídico quando aplicavel."
     ],
     qualityBar: [
       "A minuta deve demonstrar prudencia administrativa.",
       "Preco, fornecedor e fundamento devem ficar claramente condicionados a comprovacao.",
-      "Pendencias devem ser explicitas."
+      "Pendências devem ser explicitas."
     ],
     reviewCriteria: [
-      "Verificar se necessidade, fundamento informado, fornecedor e preco foram tratados.",
-      "Verificar se ha conclusao juridica indevida.",
+      "Verificar se necessidade, fundamento informado, fornecedor e preço foram tratados.",
+      "Verificar se ha conclusão jurídica indevida.",
       "Verificar se documentos obrigatorios ou usuais foram apontados."
     ]
   },
   pesquisa_precos: {
-    persona: "especialista em pesquisa de precos para compras publicas municipais",
+    persona: "especialista em pesquisa de preços para compras públicas municipais",
     objective:
-      "produzir relatorio de pesquisa de precos com fontes, metodologia, analise critica, tratamento de dados e preco estimado.",
+      "produzir relatório de pesquisa de preços com fontes, metodologia, análise crítica, tratamento de dados e preço estimado.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
       "Organize as fontes informadas e nunca invente cotações, links, fornecedores ou valores.",
-      "Explique metodologia de composicao do preco: media, mediana, menor preco, exclusao de outliers ou justificativa de criterio.",
-      "Inclua tabela Markdown para fontes e valores quando o usuario informar dados.",
-      "Aponte pendencias quando nao houver fontes suficientes, data da pesquisa, memoria de calculo ou justificativa de exclusao."
+      "Explique metodologia de composição do preço: media, mediana, menor preço, exclusao de outliers ou justificativa de criterio.",
+      "Inclua tabela Markdown para fontes e valores quando o usuário informar dados.",
+      "Aponte pendências quando não houver fontes suficientes, data da pesquisa, memória de cálculo ou justificativa de exclusao."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao gerar numeros ficticios para completar tabela.",
-      "Nao afirmar que o preco e de mercado se as fontes nao forem suficientes."
+      "Não gerar numeros ficticios para completar tabela.",
+      "Não afirmar que o preço e de mercado se as fontes não forem suficientes."
     ],
     structureNotes: [
-      "Comece por objeto pesquisado e parametros.",
+      "Comece por objeto pesquisado e parâmetros.",
       "Depois apresente fontes consultadas e metodologia.",
-      "Inclua analise critica dos precos e conclusao condicionada.",
+      "Inclua análise crítica dos preços e conclusão condicionada.",
       "Use tabela somente com dados informados; onde faltar, use [PENDENTE]."
     ],
     qualityBar: [
-      "O relatorio deve deixar auditavel de onde saiu o preco.",
+      "O relatório deve deixar auditável de onde saiu o preço.",
       "A metodologia deve ser explicada em linguagem simples.",
       "Limites da pesquisa devem ficar claros."
     ],
     reviewCriteria: [
       "Verificar se ha fontes suficientes e metodologia clara.",
       "Verificar se foram inventados valores ou fontes.",
-      "Verificar se preco estimado e limitacoes foram justificados."
+      "Verificar se preço estimado e limitacoes foram justificados."
     ]
   },
   parecer_juridico: {
-    persona: "assessor juridico publico redigindo minuta preliminar, sem substituir a autoridade juridica responsavel",
+    persona: "assessor jurídico publico redigindo minuta preliminar, sem substituir a autoridade jurídica responsável",
     objective:
-      "produzir minuta cautelosa de parecer juridico de compras, com relatorio, delimitacao, analise preliminar, pendencias e conclusao condicionada.",
+      "produzir minuta cautelosa de parecer jurídico de compras, com relatório, delimitação, análise preliminar, pendências e conclusão condicionada.",
     mustDo: [
       ...sharedMustDo,
-      "Use tom tecnico, prudente e opinativo, sem prometer aprovacao.",
-      "Delimite expressamente que a analise depende dos documentos informados e de revisao por procurador/assessor competente.",
-      "Aponte pendencias de instrucao processual, motivacao, pesquisa de precos, autorizacao, minuta, habilitacao e dotacao quando aplicavel.",
-      "Separe relatorio dos fundamentos e da conclusao."
+      "Use tom técnico, prudente e opinativo, sem prometer aprovação.",
+      "Delimite expressamente que a análise depende dos documentos informados e de revisão por procurador/assessor competente.",
+      "Aponte pendências de instrução processual, motivacao, pesquisa de preços, autorização, minuta, habilitação e dotação quando aplicavel.",
+      "Separe relatório dos fundamentos e da conclusão."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao assinar como advogado, procurador ou parecerista real.",
-      "Nao citar jurisprudencia especifica, acordao, norma local ou artigo nao informado como se tivesse sido verificado.",
-      "Nao concluir pela aprovacao sem ressalvas."
+      "Não assinar como advogado, procurador ou parecerista real.",
+      "Não citar jurisprudencia específica, acordao, norma local ou artigo não informado como se tivesse sido verificado.",
+      "Não concluir pela aprovação sem ressalvas."
     ],
     structureNotes: [
-      "Use secoes: relatorio, delimitacao da analise, fundamentacao preliminar, analise da instrucao, pendencias, conclusao.",
-      "A conclusao deve ser condicional: favoravel ao prosseguimento apenas se sanadas pendencias, ou pendente de complementacao.",
-      "Inclua ressalva de controle juridico humano."
+      "Use seções: relatório, delimitação da análise, fundamentação preliminar, análise da instrução, pendências, conclusão.",
+      "A conclusão deve ser condicional: favoravel ao prosseguimento apenas se sanadas pendências, ou pendente de complementacao.",
+      "Inclua ressalva de controle jurídico humano."
     ],
     qualityBar: [
-      "O parecer deve ser util para checklist juridico, nao apenas elogiar o processo.",
-      "A conclusao deve refletir o nivel de informacao fornecida.",
-      "Ausencia de documentos deve gerar pendencias claras."
+      "O parecer deve ser útil para checklist jurídico, não apenas elogiar o processo.",
+      "A conclusão deve refletir o nível de informação fornecida.",
+      "Ausencia de documentos deve gerar pendências claras."
     ],
     reviewCriteria: [
-      "Verificar se o texto evita aprovacao juridica definitiva.",
-      "Verificar se relatorio, delimitacao, pendencias e conclusao existem.",
-      "Apontar riscos de fundamentacao insuficiente."
+      "Verificar se o texto evita aprovação jurídica definitiva.",
+      "Verificar se relatório, delimitação, pendências e conclusão existem.",
+      "Apontar riscos de fundamentação insuficiente."
     ]
   },
   decreto_portaria: {
-    persona: "especialista em atos administrativos municipais e tecnica normativa",
+    persona: "especialista em atos administrativos municipais e técnica normativa",
     objective:
-      "produzir minuta de decreto executivo ou portaria com ementa, preambulo, considerandos, dispositivos, vigencia e publicacao.",
+      "produzir minuta de decreto executivo ou portaria com ementa, preâmbulo, considerandos, dispositivos, vigência e publicação.",
     mustDo: [
       ...sharedMustDo,
-      "Identifique se o usuario pediu decreto ou portaria; se estiver indefinido, marque pendencia.",
+      "Identifique se o usuário pediu decreto ou portaria; se estiver indefinido, marque pendencia.",
       "Use ementa curta iniciada por verbo no presente ou formula normativa adequada.",
       "Crie artigos objetivos, com comandos claros e numeracao simples.",
-      "Inclua clausula de vigencia e publicacao.",
-      "Marque como pendentes os fundamentos legais locais, competencia da autoridade e numero do processo."
+      "Inclua cláusula de vigência e publicação.",
+      "Marque como pendentes os fundamentos legais locais, competência da autoridade e numero do processo."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao criar lei organica, decreto municipal ou competencia local ficticia.",
-      "Nao usar considerandos longos e vagos sem relacao com o ato."
+      "Não criar lei organica, decreto municipal ou competência local ficticia.",
+      "Não usar considerandos longos e vagos sem relacao com o ato."
     ],
     structureNotes: [
       "Se for decreto, use formula com Prefeito Municipal quando informado.",
@@ -295,185 +307,185 @@ const profiles: Record<DocumentKind, PromptProfile> = {
     qualityBar: [
       "O ato deve ser enxuto, normativo e executavel.",
       "Cada artigo deve conter uma determinacao clara.",
-      "Fundamentos ausentes devem aparecer como pendencia, nao como invencao."
+      "Fundamentos ausentes devem aparecer como pendencia, não como invencao."
     ],
     reviewCriteria: [
-      "Verificar se tipo de ato, autoridade, assunto e comandos estao claros.",
-      "Verificar se ementa, artigos, vigencia e publicacao existem.",
+      "Verificar se tipo de ato, autoridade, assunto e comandos estáo claros.",
+      "Verificar se ementa, artigos, vigência e publicação existem.",
       "Apontar fundamentos legais locais pendentes."
     ]
   },
   minuta_contrato: {
     persona: "especialista em contratos administrativos municipais",
     objective:
-      "produzir minuta de contrato administrativo com clausulas essenciais, dados pendentes e revisao juridica obrigatoria.",
+      "produzir minuta de contrato administrativo com cláusulas essenciais, dados pendentes e revisão jurídica obrigatoria.",
     mustDo: [
       ...sharedMustDo,
       ...purchaseCare,
-      "Estruture clausulas de partes, objeto, fundamento, valor, dotacao, vigencia, execucao, obrigacoes, fiscalizacao, pagamento, sancoes, alteracao, rescisao e foro.",
-      "Marque pendencias de contratada, processo, dotacao, valor, prazo, garantia, fiscal e gestor quando ausentes.",
-      "Adapte as obrigacoes ao objeto e forma de execucao informados.",
-      "Use linguagem contratual, mas sem fechar dados nao fornecidos."
+      "Estruture cláusulas de partes, objeto, fundamento, valor, dotação, vigência, execução, obrigações, fiscalização, pagamento, sanções, alteração, rescisão e foro.",
+      "Marque pendências de contratada, processo, dotação, valor, prazo, garantia, fiscal e gestor quando ausentes.",
+      "Adapte as obrigações ao objeto e forma de execução informados.",
+      "Use linguagem contratual, mas sem fechar dados não fornecidos."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao inventar CNPJ, representante legal, fiscal do contrato ou dotacao.",
-      "Nao criar clausulas desproporcionais ou desconectadas do objeto."
+      "Não inventar CNPJ, representante legal, fiscal do contrato ou dotação.",
+      "Não criar cláusulas desproporcionais ou desconectadas do objeto."
     ],
     structureNotes: [
-      "Use clausulas numeradas.",
-      "Separe obrigacoes da contratada e contratante.",
-      "Inclua fiscalizacao e pagamento com pendencias quando necessario.",
+      "Use cláusulas numeradas.",
+      "Separe obrigações da contratada e contratante.",
+      "Inclua fiscalização e pagamento com pendências quando necessario.",
       "Finalize com foro, assinaturas e testemunhas pendentes."
     ],
     qualityBar: [
-      "A minuta deve parecer contrato, nao termo de referencia.",
-      "Clausulas devem ser completas o bastante para revisao juridica.",
+      "A minuta deve parecer contrato, não termo de referencia.",
+      "Clausulas devem ser completas o bastante para revisão jurídica.",
       "Dados variaveis devem ficar marcados para preenchimento."
     ],
     reviewCriteria: [
-      "Verificar se clausulas essenciais aparecem.",
+      "Verificar se cláusulas essenciais aparecem.",
       "Verificar se dados sensiveis foram inventados.",
-      "Verificar coerencia entre objeto, prazo, pagamento e fiscalizacao."
+      "Verificar coerencia entre objeto, prazo, pagamento e fiscalização."
     ]
   },
   projeto_lei: {
-    persona: "consultor legislativo municipal com foco em tecnica legislativa preliminar",
+    persona: "consultor legislativo municipal com foco em técnica legislativa preliminar",
     objective:
-      "produzir minuta de projeto de lei com ementa, articulado e justificativa, respeitando cautelas de iniciativa e competencia.",
+      "produzir minuta de projeto de lei com ementa, articulado e justificativa, respeitando cautelas de iniciativa e competência.",
     mustDo: [
       ...sharedMustDo,
       ...legislativeCare,
-      "Crie ementa objetiva que resuma o conteudo normativo.",
+      "Crie ementa objetiva que resuma o conteúdo normativo.",
       "Redija artigos curtos, com comandos normativos claros.",
-      "Inclua clausula de vigencia.",
-      "Inclua justificativa separada, conectada ao problema e ao interesse publico.",
-      "Marque pendencias de impacto orcamentario, iniciativa privativa, competencia municipal e adequacao a leis superiores quando faltar informacao."
+      "Inclua cláusula de vigência.",
+      "Inclua justificativa separada, conectada ao problema e ao interesse público.",
+      "Marque pendências de impacto orçamentário, iniciativa privativa, competência municipal e adequação a leis superiores quando faltar informação."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao criar projeto com vicio evidente sem apontar pendencia.",
-      "Nao produzir justificativa dentro dos artigos.",
-      "Nao citar lei local inexistente."
+      "Não criar projeto com vicio evidente sem apontar pendencia.",
+      "Não produzir justificativa dentro dos artigos.",
+      "Não citar lei local inexistente."
     ],
     structureNotes: [
       "Use titulo 'Projeto de Lei'.",
       "Depois ementa, texto legal articulado e justificativa.",
       "Quando houver criacao de despesa, inclua pendencia de estimativa de impacto.",
-      "Use redacao normativa concisa."
+      "Use redação normativa concisa."
     ],
     qualityBar: [
       "O articulado deve poder ser lido como lei.",
       "A justificativa deve convencer sem exageros.",
-      "Pendencias de competencia e impacto devem ser visiveis."
+      "Pendências de competência e impacto devem ser visiveis."
     ],
     reviewCriteria: [
-      "Verificar se ementa, artigos, vigencia e justificativa existem.",
-      "Verificar possivel problema de iniciativa ou competencia.",
+      "Verificar se ementa, artigos, vigência e justificativa existem.",
+      "Verificar possível problema de iniciativa ou competência.",
       "Verificar clareza normativa dos dispositivos."
     ]
   },
   requerimento_legislativo: {
-    persona: "assessor parlamentar de Camara Municipal",
+    persona: "assessor parlamentar de Câmara Municipal",
     objective:
-      "produzir requerimento ou indicacao legislativa com pedido claro, justificativa objetiva e encaminhamento adequado.",
+      "produzir requerimento ou indicação legislativa com pedido claro, justificativa objetiva e encaminhamento adequado.",
     mustDo: [
       ...sharedMustDo,
       ...legislativeCare,
-      "Identifique se a peca e requerimento, indicacao, pedido de informacao ou solicitacao de providencia.",
+      "Identifique se a peça e requerimento, indicação, pedido de informação ou solicitacao de providencia.",
       "Redija pedido de forma direta, evitando ambiguidades.",
-      "Inclua justificativa breve, com interesse publico e contexto local informado.",
-      "Inclua encaminhamento ao destinatario adequado quando informado."
+      "Inclua justificativa breve, com interesse público e contexto local informado.",
+      "Inclua encaminhamento ao destinatário adequado quando informado."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao transformar requerimento simples em projeto de lei.",
-      "Nao atribuir obrigacao juridica ao Executivo quando a peca for apenas indicacao."
+      "Não transformar requerimento simples em projeto de lei.",
+      "Não atribuir obrigacao jurídica ao Executivo quando a peça for apenas indicação."
     ],
     structureNotes: [
-      "Use identificacao do autor e destinatario.",
+      "Use identificacao do autor e destinatário.",
       "Separe pedido/requerimento da justificativa.",
       "Finalize com termos de encaminhamento e assinatura pendente."
     ],
     qualityBar: [
       "O pedido deve ser entendivel em uma leitura.",
       "A justificativa deve ser proporcional, sem excesso.",
-      "A peca deve preservar tom institucional."
+      "A peça deve preservar tom institucional."
     ],
     reviewCriteria: [
-      "Verificar se pedido, destinatario e justificativa estao claros.",
-      "Verificar se a peca respeita o tipo escolhido.",
+      "Verificar se pedido, destinatário e justificativa estáo claros.",
+      "Verificar se a peça respeita o tipo escolhido.",
       "Apontar se faltam dados de local, autor ou encaminhamento."
     ]
   },
   parecer_comissao: {
-    persona: "consultor legislativo auxiliando comissao de Camara Municipal",
+    persona: "consultor legislativo auxiliando comissão de Câmara Municipal",
     objective:
-      "produzir minuta de parecer de comissao com relatorio, analise, voto do relator e conclusao.",
+      "produzir minuta de parecer de comissão com relatório, análise, voto do relator e conclusão.",
     mustDo: [
       ...sharedMustDo,
       ...legislativeCare,
-      "Identifique comissao, proposicao analisada e materia.",
-      "Separe relatorio factual de analise.",
-      "Adapte a analise ao tipo de comissao informado: constitucionalidade, financas, merito, educacao, saude etc.",
-      "Redija voto do relator de forma condicionada quando a posicao nao for informada.",
-      "Inclua ressalvas de revisao pela assessoria legislativa/juridica."
+      "Identifique comissão, proposição analisada e matéria.",
+      "Separe relatório factual de análise.",
+      "Adapte a análise ao tipo de comissão informado: constitucionalidade, finanças, mérito, educação, saúde etc.",
+      "Redija voto do relator de forma condicionada quando a posição não for informada.",
+      "Inclua ressalvas de revisão pela assessoria legislativa/jurídica."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao inventar resultado de votacao ou reuniao.",
-      "Nao declarar constitucionalidade definitiva.",
-      "Nao criar emendas sem pedido do usuario."
+      "Não inventar resultado de votacao ou reuniao.",
+      "Não declarar constitucionalidade definitiva.",
+      "Não criar emendas sem pedido do usuário."
     ],
     structureNotes: [
-      "Use secoes: relatorio, analise, voto do relator, conclusao.",
-      "Se a tendencia do voto nao foi informada, apresente minuta neutra com pendencia.",
+      "Use seções: relatório, análise, voto do relator, conclusão.",
+      "Se a tendencia do voto não foi informada, apresente minuta neutra com pendencia.",
       "Finalize com assinatura dos membros como pendencia."
     ],
     qualityBar: [
-      "O parecer deve distinguir fatos, analise e voto.",
-      "A conclusao deve estar alinhada a posicao informada ou marcada como pendente.",
-      "Ressalvas tecnicas devem ser claras."
+      "O parecer deve distinguir fatos, análise e voto.",
+      "A conclusão deve estar alinhada a posição informada ou marcada como pendente.",
+      "Ressalvas técnicas devem ser claras."
     ],
     reviewCriteria: [
-      "Verificar se relatorio, analise, voto e conclusao existem.",
+      "Verificar se relatório, análise, voto e conclusão existem.",
       "Verificar se foram inventados votos, reunioes ou assinaturas.",
-      "Apontar pendencias de competencia da comissao ou posicao do relator."
+      "Apontar pendências de competência da comissão ou posição do relator."
     ]
   },
   emenda_parlamentar: {
     persona: "consultor legislativo especializado em emendas parlamentares municipais",
     objective:
-      "produzir minuta de emenda modificativa, aditiva, supressiva ou substitutiva com redacao proposta e justificativa.",
+      "produzir minuta de emenda modificativa, aditiva, supressiva ou substitutiva com redação proposta e justificativa.",
     mustDo: [
       ...sharedMustDo,
       ...legislativeCare,
-      "Identifique tipo de emenda e proposicao original.",
+      "Identifique tipo de emenda e proposição original.",
       "Informe claramente o dispositivo alterado, suprimido, acrescentado ou substituido.",
-      "Redija a nova redacao de forma normativa.",
-      "Inclua justificativa breve explicando finalidade e adequacao da emenda.",
+      "Redija a nova redação de forma normativa.",
+      "Inclua justificativa breve explicando finalidade e adequação da emenda.",
       "Marque pendencia quando faltar texto original ou dispositivo afetado."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao alterar dispositivos nao informados como se fossem conhecidos.",
-      "Nao produzir emenda incompatível sem apontar risco de tecnica legislativa."
+      "Não alterar dispositivos não informados como se fossem conhecidos.",
+      "Não produzir emenda incompatível sem apontar risco de técnica legislativa."
     ],
     structureNotes: [
-      "Use cabecalho 'Emenda [tipo]'.",
+      "Use cabeçalho 'Emenda [tipo]'.",
       "Separe texto da emenda e justificativa.",
       "Quando faltar dispositivo, use [PENDENTE] em vez de presumir artigo.",
       "Finalize com assinatura pendente."
     ],
     qualityBar: [
-      "A redacao proposta deve ser utilizavel como texto legislativo.",
-      "A justificativa deve explicar a mudanca, nao repetir a redacao.",
-      "A peca deve deixar claro o tipo de emenda."
+      "A redação proposta deve ser útilizavel como texto legislativo.",
+      "A justificativa deve explicar a mudança, não repetir a redação.",
+      "A peça deve deixar claro o tipo de emenda."
     ],
     reviewCriteria: [
-      "Verificar se tipo, proposicao, dispositivo e redacao aparecem.",
+      "Verificar se tipo, proposição, dispositivo e redação aparecem.",
       "Verificar se a emenda depende de texto original ausente.",
-      "Apontar incoerencias de tecnica legislativa."
+      "Apontar incoerencias de técnica legislativa."
     ]
   },
   justificativa_projeto_lei: {
@@ -483,31 +495,31 @@ const profiles: Record<DocumentKind, PromptProfile> = {
     mustDo: [
       ...sharedMustDo,
       ...legislativeCare,
-      "Explique contexto, problema publico, finalidade, beneficiarios e razoes para aprovacao.",
+      "Explique contexto, problema publico, finalidade, beneficiários e razoes para aprovação.",
       "Use tom institucional e convincente, sem marketing excessivo.",
-      "Inclua ressalvas sobre impacto orcamentario, competencia e iniciativa quando os dados sugerirem risco ou estiverem ausentes.",
-      "Finalize com pedido respeitoso de apreciacao/aprovacao."
+      "Inclua ressalvas sobre impacto orçamentário, competência e iniciativa quando os dados sugerirem risco ou estiverem ausentes.",
+      "Finalize com pedido respeitoso de apreciação/aprovação."
     ],
     mustAvoid: [
       ...sharedMustAvoid,
-      "Nao escrever artigos de lei se o usuario pediu apenas justificativa.",
-      "Nao afirmar beneficios nao demonstrados ou dados estatisticos nao informados."
+      "Não escrever artigos de lei se o usuário pediu apenas justificativa.",
+      "Não afirmar benefícios não demonstrados ou dados estatísticos não informados."
     ],
     structureNotes: [
       "Use titulo de justificativa.",
-      "Organize em paragrafos densos, nao em topicos soltos.",
+      "Organize em parágrafos densos, não em tópicos soltos.",
       "Conecte a justificativa ao tema e ao publico beneficiado.",
-      "Inclua pendencias ao final quando necessario."
+      "Inclua pendências ao final quando necessario."
     ],
     qualityBar: [
-      "A justificativa deve ser suficiente para acompanhar uma proposicao legislativa.",
-      "O texto deve ter progressao: problema, finalidade, interesse publico e pedido.",
+      "A justificativa deve ser suficiente para acompanhar uma proposição legislativa.",
+      "O texto deve ter progressao: problema, finalidade, interesse público e pedido.",
       "Evite frases vazias e genericas."
     ],
     reviewCriteria: [
-      "Verificar se problema, finalidade, beneficiarios e interesse publico aparecem.",
+      "Verificar se problema, finalidade, beneficiários e interesse público aparecem.",
       "Verificar se ha exageros ou dados inventados.",
-      "Apontar falta de impacto orcamentario ou competencia quando relevante."
+      "Apontar falta de impacto orçamentário ou competência quando relevante."
     ]
   }
 };
@@ -521,7 +533,7 @@ export function buildGeneratePrompt(input: PromptInput) {
   const profile = profiles[input.kind];
 
   return [
-    `Voce e um ${profile.persona}.`,
+    `Você e um ${profile.persona}.`,
     `Objetivo: ${profile.objective}`,
     "",
     "Contexto do tipo documental:",
@@ -536,29 +548,29 @@ export function buildGeneratePrompt(input: PromptInput) {
     "Estrutura esperada:",
     formatList(definition.sections),
     "",
-    "Notas de estrutura especificas:",
+    "Notas de estrutura específicas:",
     formatList(profile.structureNotes),
     "",
     "Padrao de qualidade esperado:",
     formatList(profile.qualityBar),
     "",
-    "Campos esperados pelo formulario:",
+    "Campos esperados pelo formulário:",
     formatList(definition.fields.map((field) => `${field.label}${field.required ? " (obrigatorio)" : ""}: ${field.key}`)),
     "",
-    "Configuracao da Prefeitura/Camara/Orgao:",
+    "Configuração da Prefeitura/Câmara/Órgão:",
     JSON.stringify(input.institution || {}, null, 2),
     "",
-    "Dados informados pelo usuario:",
+    "Dados informados pelo usuário:",
     JSON.stringify(input.values || {}, null, 2),
     "",
     "Formato de saida:",
     "- Use Markdown.",
-    "- Comece com cabecalho institucional quando houver dados suficientes.",
+    "- Comece com cabeçalho institucional quando houver dados suficientes.",
     `- Use como titulo principal: ${definition.name}.`,
-    "- Organize em secoes numeradas ou clausulas, conforme o documento.",
-    "- Desenvolva paragrafos substantivos; nao entregue apenas um esqueleto.",
-    "- Use tabelas Markdown quando isso melhorar matriz, pesquisa de precos, riscos ou comparativos.",
-    "- Termine com observacao curta de minuta preliminar sujeita a revisao humana."
+    "- Organize em seções numeradas ou cláusulas, conforme o documento.",
+    "- Desenvolva parágrafos substantivos; não entregue apenas um esqueleto.",
+    "- Use tabelas Markdown quando isso melhorar matriz, pesquisa de preços, riscos ou comparativos.",
+    "- Termine com observacao curta de minuta preliminar sujeita a revisão humana."
   ].join("\n");
 }
 
@@ -567,29 +579,103 @@ export function buildReviewPrompt(input: PromptInput) {
   const profile = profiles[input.kind];
 
   return [
-    `Voce e um ${profile.persona}.`,
-    "Tarefa: revisar a minuta abaixo de forma objetiva, sem substituir revisao humana.",
+    `Você e um ${profile.persona}.`,
+    "Tarefa: revisar a minuta abaixo de forma objetiva, sem substituir revisão humana.",
     "",
     "Tipo documental esperado:",
     definition.name,
     "",
-    "Criterios de revisao especificos:",
+    "Critérios de revisão específicos:",
     formatList(profile.reviewCriteria),
     "",
-    "Secoes minimas esperadas:",
+    "Seções mínimas esperadas:",
     formatList(definition.sections),
     "",
-    "Regras de revisao:",
+    "Regras de revisão:",
     "- Classifique o documento como OK, ATENCAO ou PENDENTE.",
-    "- Aponte ausencias, inconsistencias, riscos de texto generico e dados sensiveis sem comprovacao.",
-    "- Nao invente solucao juridica; indique complementacoes praticas.",
-    "- Cite os pontos por secao quando possivel.",
+    "- Aponte ausências, inconsistencias, riscos de texto genérico e dados sensiveis sem comprovacao.",
+    "- Não invente solução jurídica; indique complementações praticas.",
+    "- Cite os pontos por seção quando possível.",
     "- Finalize com uma lista curta de proximas acoes.",
     "",
-    "Configuracao da Prefeitura/Camara/Orgao:",
+    "Configuração da Prefeitura/Câmara/Órgão:",
     JSON.stringify(input.institution || {}, null, 2),
     "",
     "Texto para revisar:",
     input.text || ""
+  ].join("\n");
+}
+
+export function buildCompliancePrompt(input: CompliancePromptInput) {
+  const definition = documentDefinitions[input.kind];
+  const profile = profiles[input.kind];
+  const appliesToLaw14133 =
+    definition.category === "Compras e licitações" ||
+    input.kind === "parecer_juridico" ||
+    input.kind === "decreto_portaria";
+
+  return [
+    "Você é um revisor de conformidade preliminar de documentos públicos brasileiros.",
+    "Sua tarefa é verificar a minuta gerada e apontar riscos, lacunas e ajustes necessários.",
+    "Não substitua parecer jurídico, controle interno ou revisão da autoridade competente.",
+    "Não afirme legalidade definitiva.",
+    appliesToLaw14133
+      ? "Use como referência geral a Lei nº 14.133/2021 para documentos de licitações, contratações públicas, fase preparatória, contratação direta, edital, contrato, pesquisa de preços e gestão contratual."
+      : "Para documentos legislativos, foque na coerência formal, técnica legislativa, competência, iniciativa, clareza e pendências, sem aplicar indevidamente a Lei nº 14.133/2021.",
+    "Responda somente em JSON válido, sem markdown.",
+    "",
+    "Formato obrigatório:",
+    '{"status":"conforme|conforme_com_ressalvas|nao_conforme","summary":"texto curto","findings":[{"item":"texto","severity":"baixa|media|alta","issue":"texto","recommendation":"texto"}],"mustRegenerate":true,"confidence":"baixa|media|alta"}',
+    "",
+    "Critérios de análise:",
+    "- Verificar se a estrutura mínima esperada do tipo documental está presente.",
+    "- Verificar se há fatos, valores, fundamentos, prazos, fontes, autoridade ou dados locais não informados.",
+    "- Verificar se pendências relevantes foram marcadas explicitamente.",
+    "- Verificar se há afirmação indevida de legalidade, aprovação, regularidade ou conformidade definitiva.",
+    "- Verificar se a linguagem está compatível com uso institucional por Prefeitura ou Câmara.",
+    "- Quando aplicável, verificar aderência preliminar à Lei nº 14.133/2021, especialmente planejamento, justificativa, estimativa, pesquisa de preços, riscos, critérios, fiscalização, sanções e cláusulas essenciais.",
+    "- Se o problema puder ser corrigido por redação, recomende o ajuste. Se depender de dado ausente, recomende marcar [PENDENTE: ...].",
+    "",
+    `Tipo documental: ${definition.name}`,
+    `Categoria: ${definition.category}`,
+    `Objetivo do prompt original: ${profile.objective}`,
+    `Seções esperadas: ${definition.sections.join("; ")}`,
+    "",
+    "Dados informados pelo usuário:",
+    JSON.stringify(input.values || {}, null, 2),
+    "",
+    "Configuração da Prefeitura/Câmara/Órgão:",
+    JSON.stringify(input.institution || {}, null, 2),
+    "",
+    "Minuta gerada:",
+    input.text
+  ].join("\n");
+}
+
+export function buildComplianceRevisionPrompt(input: CompliancePromptInput) {
+  const definition = documentDefinitions[input.kind];
+
+  return [
+    "Você é um redator técnico de documentos públicos brasileiros.",
+    "Revise a minuta abaixo apenas para corrigir os problemas encontrados na verificação de conformidade preliminar.",
+    "Não invente fatos, valores, fundamentos locais, fontes, datas, número de processo ou autoridade.",
+    "Quando uma informação necessária não estiver nos dados do usuário, marque [PENDENTE: ...].",
+    "Não remova ressalvas relevantes.",
+    "Entregue somente a minuta revisada, sem comentários externos.",
+    "",
+    `Tipo documental: ${definition.name}`,
+    `Seções esperadas: ${definition.sections.join("; ")}`,
+    "",
+    "Dados informados pelo usuário:",
+    JSON.stringify(input.values || {}, null, 2),
+    "",
+    "Configuração da Prefeitura/Câmara/Órgão:",
+    JSON.stringify(input.institution || {}, null, 2),
+    "",
+    "Problemas a corrigir:",
+    JSON.stringify(input.findings || [], null, 2),
+    "",
+    "Minuta original:",
+    input.text
   ].join("\n");
 }

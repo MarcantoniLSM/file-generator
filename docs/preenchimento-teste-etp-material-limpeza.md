@@ -1,10 +1,10 @@
-# Preenchimento de teste - ETP de material de limpeza
+# Preenchimento de teste - ETP de matérial de limpeza
 
-Use este roteiro para testar o gerador de Estudo Tecnico Preliminar com dados suficientes e baixo risco de alucinacao. O conteudo foi resumido a partir de um processo real e separado conforme os campos do formulario.
+Use este roteiro para testár o gerador de Estudo Técnico Preliminar com dados suficientes e baixo risco de alucinação. O conteúdo foi resumido a partir de um processo real e separado conforme os campos do formulário.
 
 ## Tipo de documento
 
-Selecionar: `Estudo Tecnico Preliminar`
+Selecionar: `Estudo Técnico Preliminar`
 
 ## Cabecalho do documento
 
@@ -18,15 +18,15 @@ Praca Sete de Setembro, s/n, Cidade Alta - Natal/RN - CEP: 59025-300
 Fone: (84) 3232-5750 - www.al.rn.gov.br
 ```
 
-## Identificacao institucional
+## Identificação institucional
 
-### Municipio/UF
+### Município/UF
 
 ```text
 Natal/RN
 ```
 
-### Orgao ou entidade
+### Órgão ou entidade
 
 ```text
 Assembleia Legislativa do Estado do Rio Grande do Norte
@@ -35,41 +35,41 @@ Assembleia Legislativa do Estado do Rio Grande do Norte
 ### Responsavel e cargo
 
 ```text
-Divisao de Gestao de Material e Patrimonio
+Divisao de Gestáo de Matérial e Patrimônio
 ```
 
-## Campos do formulario
+## Campos do formulário
 
-### Orgao ou setor demandante
+### Órgão ou setor demandante
 
 ```text
-Divisao de Gestao de Material e Patrimonio da Assembleia Legislativa do Estado do Rio Grande do Norte.
+Divisao de Gestáo de Matérial e Patrimônio da Assembleia Legislativa do Estado do Rio Grande do Norte.
 ```
 
 ### Objeto
 
 ```text
-Registro de precos para aquisicao de material de limpeza, conforme condicoes, quantidades e exigencias a serem definidas no Termo de Referencia.
+Registro de preços para aquisição de matérial de limpeza, conforme condições, quantidades e exigências a serem definidas no Termo de Referência.
 ```
 
-### Necessidade publica ou problema administrativo
+### Necessidade pública ou problema administrativo
 
 ```text
-Os materiais de limpeza fazem parte das compras habituais do orgao, sao de uso continuo e sao distribuidos para todos os setores administrativos. A contratacao tem por finalidade suprir as demandas internas, manter condicoes adequadas de higiene e conservacao dos ambientes e evitar o desabastecimento de itens indispensaveis ao funcionamento regular da Casa Legislativa.
+Os matériais de limpeza fazem parte das compras habituais do órgão, sao de uso continuo e sao distribuidos para todos os setores administrativos. A contratação tem por finalidade suprir as demandas internas, manter condições adequadas de higiene e conservacao dos ambientes e evitar o desabastecimento de itens indispensaveis ao funcionamento regular da Casa Legislativa.
 
-Ha produtos semelhantes contemplados em Atas de Registro de Precos vigentes, com vencimento proximo, o que exige novo planejamento da contratacao para garantir continuidade no fornecimento.
+Há produtos semelhantes contemplados em Atas de Registro de Preços vigentes, com vencimento próximo, o que exige novo planejámento da contratação para garantir continuidade no fornecimento.
 ```
 
-### Publico ou unidades beneficiadas
+### Público ou unidades beneficiadas
 
 ```text
-Todos os setores administrativos da Assembleia Legislativa, incluindo predio sede, anexos, servidores, colaboradores e usuarios que circulam nas dependencias do orgao.
+Todos os setores administrativos da Assembleia Legislativa, incluindo predio sede, anexos, servidores, colaboradores e usuários que circulam nas dependências do órgão.
 ```
 
-### Quantidade ou dimensao estimada
+### Quantidade ou dimensão estimada
 
 ```text
-Contratacao estimada para consumo anual, com fornecimento sob demanda, contemplando 44 itens de material de limpeza e higiene.
+Contratação estimada para consumo anual, com fornecimento sob demanda, contemplando 44 itens de matérial de limpeza e higiene.
 
 Lista completa de itens e quantitativos:
 1. Acido muriatico 1L - unidade - 100.
@@ -78,7 +78,7 @@ Lista completa de itens e quantitativos:
 4. Aparelho odorizador automatico de ambientes - unidade - 20.
 5. Borrifador 500ml - unidade - 250.
 6. Detergente lava louca 500ml - unidade - 2.000.
-7. Esponja dupla face multiuso - unidade - 2.000.
+7. Esponjá dupla face multiuso - unidade - 2.000.
 8. Essencia concentrada para limpeza 120ml a 140ml - unidade - 450.
 9. Fibra verde para limpeza - unidade - 100.
 10. Flanela branca 60cm x 40cm - unidade - 1.200.
@@ -117,15 +117,15 @@ Lista completa de itens e quantitativos:
 43. Mop giratorio com balde de 12L - unidade - 20.
 44. Refil para mop giratorio 100% microfibra - unidade - 20.
 
-Os quantitativos foram estimados a partir do levantamento da necessidade real dos setores, tanto no predio sede quanto em seus anexos, e da analise do consumo registrado pelo sistema eletronico de controle de saidas do almoxarifado.
+Os quantitativos foram estimados a partir do levantamento da necessidade real dos setores, tanto no predio sede quanto em seus anexos, e da análise do consumo registrado pelo sistema eletrônico de controle de saidas do almoxarifado.
 ```
 
-### Prazo ou periodo esperado
+### Prazo ou período esperado
 
 ```text
-A Ata de Registro de Precos devera ter vigencia de 1 ano, admitida prorrogacao por igual periodo, conforme a Lei 14.133/2021.
+A Ata de Registro de Preços deverá ter vigência de 1 ano, admitida prorrogação por igual período, conforme a Lei 14.133/2021.
 
-O fornecimento devera ocorrer de forma parcelada, conforme demanda do orgao. O prazo de entrega de cada pedido sera de ate 5 dias uteis, contados do recebimento da Nota de Empenho, no setor de almoxarifado da Assembleia Legislativa.
+O fornecimento deverá ocorrer de forma parcelada, conforme demanda do órgão. O prazo de entrega de cada pedido será de até 5 dias úteis, contados do recebimento da Nota de Empenho, no setor de almoxarifado da Assembleia Legislativa.
 ```
 
 ### Valor estimado ou limite
@@ -133,14 +133,14 @@ O fornecimento devera ocorrer de forma parcelada, conforme demanda do orgao. O p
 ```text
 Valor total estimado consolidado: R$ 292.140,00.
 
-Memoria de calculo resumida:
+Memoria de cálculo resumida:
 1. Acido muriatico 1L: 100 x R$ 4,00 = R$ 400,00.
 2. Agua sanitaria 5L: 1.000 x R$ 7,89 = R$ 7.890,00.
 3. Alcool etilico liquido 70% 1L: 2.000 x R$ 5,10 = R$ 10.200,00.
 4. Aparelho odorizador automatico: 20 x R$ 46,80 = R$ 936,00.
 5. Borrifador 500ml: 250 x R$ 4,98 = R$ 1.245,00.
 6. Detergente lava louca 500ml: 2.000 x R$ 1,29 = R$ 2.580,00.
-7. Esponja dupla face: 2.000 x R$ 0,55 = R$ 1.100,00.
+7. Esponjá dupla face: 2.000 x R$ 0,55 = R$ 1.100,00.
 8. Essencia concentrada: 450 x R$ 7,99 = R$ 3.595,50.
 9. Fibra verde para limpeza: 100 x R$ 1,62 = R$ 162,00.
 10. Flanela branca: 1.200 x R$ 1,62 = R$ 1.944,00.
@@ -179,49 +179,49 @@ Memoria de calculo resumida:
 43. Mop giratorio com balde 12L: 20 x R$ 140,70 = R$ 2.814,00.
 44. Refil para mop giratorio: 20 x R$ 34,90 = R$ 698,00.
 
-Base de formacao dos valores: Atas de Registro de Precos vigentes e consultas em sitios eletronicos para itens sem ata vigente.
+Base de formação dos valores: Atas de Registro de Preços vigentes e consultas em sítios eletrônicos para itens sem ata vigente.
 ```
 
 ### Requisitos essenciais
 
 ```text
-A aquisicao devera ocorrer sob demanda, por meio de Ata de Registro de Precos, considerando a necessidade de cada produto nos diversos setores administrativos.
+A aquisição deverá ocorrer sob demanda, por meio de Ata de Registro de Preços, considerando a necessidade de cada produto nos diversos setores administrativos.
 
-Os produtos deverao ser entregues em embalagens originais, lacradas e adequadamente identificadas, contendo, quando aplicavel, dados do fabricante, lote, data de fabricacao, validade, responsavel tecnico, registro ou notificacao na ANVISA, selo do INMETRO, FISPQ e ficha tecnica.
+Os produtos deveráo ser entregues em embalagens originais, lacradas e adequadamente identificadas, contendo, quando aplicavel, dados do fabricante, lote, data de fabricacao, validade, responsável tecnico, registro ou notificacao na ANVISA, selo do INMETRO, FISPQ e ficha técnica.
 
-O fornecedor devera possuir capacidade tecnica para atendimento da demanda. Caso algum item seja entregue avariado ou fora das especificacoes exigidas, devera ser substituido no prazo maximo de 5 dias uteis, sem onus para a Administracao.
+O fornecedor deverá possuir capacidade técnica para aténdimento da demanda. Caso algum item sejá entregue avariado ou fora das específicações exigidas, deverá ser substituido no prazo maximo de 5 dias úteis, sem onus para a Administração.
 
-O recebimento devera ocorrer inicialmente de forma provisoria, com posterior verificacao de conformidade, qualidade e aceitacao definitiva.
+O recebimento deverá ocorrer inicialmente de forma provisoria, com posterior verificacao de conformidade, qualidade e aceitação definitiva.
 ```
 
-### Solucoes consideradas
+### Soluções consideradas
 
 ```text
-Solucao 1: aquisicao imediata de todo o quantitativo estimado. Essa alternativa apresenta risco de prejuizo financeiro, pois os quantitativos sao estimados com base em necessidade provavel e podem nao ser integralmente utilizados. Tambem ha risco de acumulo de materiais, vencimento de produtos e insuficiencia de espaco fisico no almoxarifado para armazenar todo o volume.
+Solução 1: aquisição imediata de todo o quantitativo estimado. Essa alternativa apresenta risco de prejuizo financeiro, pois os quantitativos sao estimados com base em necessidade provavel e podem não ser integralmente útilizados. Tambem ha risco de acumulo de matériais, vencimento de produtos e insuficiencia de espaco fisico no almoxarifado para armazenar todo o volume.
 
-Solucao 2: aquisicao sob demanda por meio de Ata de Registro de Precos. Essa alternativa permite requisicoes conforme a necessidade efetiva da Administracao, reduz o risco de estoque excessivo, evita desperdicio, favorece o armazenamento adequado e preserva a continuidade do fornecimento.
+Solução 2: aquisição sob demanda por meio de Ata de Registro de Preços. Essa alternativa permite requisições conforme a necessidade efetiva da Administração, reduz o risco de estoque excessivo, evita desperdício, favorece o armazenamento adequado e preserva a continuidade do fornecimento.
 ```
 
-### Solucao proposta
+### Solução proposta
 
 ```text
-Recomenda-se a aquisicao dos produtos sob demanda, por meio de Ata de Registro de Precos, por ser a solucao mais vantajosa para a Administracao.
+Recomenda-se a aquisição dos produtos sob demanda, por meio de Ata de Registro de Preços, por ser a solução mais vantajosa para a Administração.
 
-A solucao permite compra fracionada conforme a necessidade real dos setores, reduz risco de estoque excessivo, evita aquisicao de materiais que podem nao ser utilizados, facilita o armazenamento e contribui para o controle do consumo pelo almoxarifado.
+A solução permite compra fracionada conforme a necessidade real dos setores, reduz risco de estoque excessivo, evita aquisição de matériais que podem não ser útilizados, facilita o armazenamento e contribui para o controle do consumo pelo almoxarifado.
 
-O objeto podera ser entregue de forma parcelada, considerando que os produtos podem ser fornecidos por diferentes empresas e que o modelo por registro de precos atende melhor a natureza continua e variavel da demanda.
+O objeto poderá ser entregue de forma parcelada, considerando que os produtos podem ser fornecidos por diferentes empresas e que o modelo por registro de preços aténde melhor a natureza continua e variavel da demanda.
 ```
 
-### Informacoes complementares
+### Informações complementares
 
 ```text
-A contratacao esta alinhada ao Plano de Contratacoes Anual, tendo sido informada pelo setor demandante a Coordenadoria de Compras e Patrimonio.
+A contratação está alinhada ao Plano de Contratações Anual, tendo sido informada pelo setor demandante a Coordenadoria de Compras e Patrimônio.
 
-Nao foram identificadas contratacoes correlatas ou interdependentes para esta demanda.
+Não foram identificadas contratações correlatas ou interdependentes para está demanda.
 
-Os fiscais ja se encontram capacitados para o recebimento e o orgao possui instalacoes adequadas para armazenamento dos produtos solicitados sob demanda.
+Os fiscais já se encontram capacitados para o recebimento e o órgão possui instalacoes adequadas para armazenamento dos produtos solicitados sob demanda.
 
-Quanto aos impactos ambientais, os materiais terao uso continuo pelo orgao. Itens reutilizaveis ou reaproveitaveis deverao ter sua vida util prolongada. Ao final do uso, residuos e embalagens deverao receber destinacao adequada, com encaminhamento de reciclaveis a cooperativa de catadores ou entidade equivalente, quando houver instrumento vigente.
+Quanto aos impactos ambientais, os matériais terao uso continuo pelo órgão. Itens reútilizaveis ou reaproveitaveis deveráo ter sua vida útil prolongada. Ao final do uso, residuos e embalagens deveráo receber destinacao adequada, com encaminhamento de reciclaveis a cooperativa de catadores ou entidade equivalente, quando houver instrumento vigente.
 
-A Intencao de Registro de Precos podera ser dispensada, caso justificado pela Administracao, especialmente diante da necessidade de celeridade do procedimento, da estrutura administrativa limitada e da possibilidade de aumento relevante da demanda administrativa caso outros orgaos participem da formacao da ata.
+A Intenção de Registro de Preços poderá ser dispensada, caso justificado pela Administração, especialmente diante da necessidade de celeridade do procedimento, da estrutura administrativa limitada e da possibilidade de aumento relevante da demanda administrativa caso outros órgãos participem da formação da ata.
 ```

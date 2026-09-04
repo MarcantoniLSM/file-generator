@@ -23,12 +23,12 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
         <div className="border-b border-line px-6 py-5">
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Acesso institucional</p>
           <h1 className="mt-2 font-serif text-3xl font-semibold">
-            {mode === "login" ? "Entrar na plataforma" : "Criar usuario"}
+            {mode === "login" ? "Entrar na plataforma" : "Criar usuário"}
           </h1>
           <p className="mt-2 text-sm leading-6 text-muted">
             {mode === "login"
-              ? "Acesse a area interna para gerar, revisar e administrar documentos."
-              : "Cadastre um novo usuario para acessar a area interna."}
+              ? "Acesse a área interna para gerar, revisar e administrar documentos."
+              : "Cadastre um novo usuário para acessar a área interna."}
           </p>
         </div>
 
@@ -74,17 +74,17 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
 
           {error === "configuracao" ? (
             <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-              Supabase ainda nao foi configurado neste ambiente.
+              Supabase ainda não foi configurado neste ambiente.
             </p>
           ) : null}
           {error === "bloqueado" ? (
             <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-              Seu acesso esta bloqueado. Procure o administrador.
+              Seu acesso está bloqueado. Procure o administrador.
             </p>
           ) : null}
           {error === "credenciais" ? (
             <p className="border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-              Nao foi possivel entrar. Verifique email e senha.
+              Não foi possível entrar. Verifique email e senha.
             </p>
           ) : null}
           {!isLogin && state?.message ? (
@@ -105,7 +105,7 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
               Voltar ao site
             </Link>
             <Link href={mode === "login" ? "/cadastro" : "/login"} className="font-semibold text-civic">
-              {mode === "login" ? "Criar conta" : "Ja tenho conta"}
+              {mode === "login" ? "Criar conta" : "Já tenho conta"}
             </Link>
           </div>
         </form>

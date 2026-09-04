@@ -11,7 +11,7 @@ function getString(formData: FormData, key: string) {
 
 export async function POST(request: NextRequest) {
   if (!hasSupabaseConfig()) {
-    console.warn("[auth:sign-in] Supabase config ausente.");
+    console.warn("[auth:sign-in] Configuração do Supabase ausente.");
     return NextResponse.redirect(new URL("/login?erro=configuracao", request.url), { status: 303 });
   }
 

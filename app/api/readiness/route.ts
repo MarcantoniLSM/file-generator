@@ -7,14 +7,14 @@ export async function POST(request: Request) {
   const { user, profile, configured } = await getCurrentUserProfile();
 
   if (!configured || !user || profile?.access_status === "blocked") {
-    return NextResponse.json({ error: "Acesso nao autorizado." }, { status: 401 });
+    return NextResponse.json({ error: "Acesso não autorizado." }, { status: 401 });
   }
 
   const body = await request.json();
   const kind = body.kind as DocumentKind;
 
   if (!documentKinds.includes(kind)) {
-    return NextResponse.json({ error: "Tipo documental invalido." }, { status: 400 });
+    return NextResponse.json({ error: "Tipo documental inválido." }, { status: 400 });
   }
 
   const values = typeof body.values === "object" && body.values ? body.values : {};

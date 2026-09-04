@@ -16,114 +16,114 @@ type ChecklistRule = {
 };
 
 const forbiddenClaims = [
-  "aprovado juridicamente",
+  "aprovado jurídicamente",
   "legalidade comprovada",
   "regularidade comprovada",
   "sem ressalvas",
   "dispensa cabivel",
   "inexigibilidade cabivel",
-  "esta apto para publicacao",
-  "preco de mercado comprovado"
+  "está apto para publicação",
+  "preço de mercado comprovado"
 ];
 
 const rulesByKind: Record<DocumentKind, ChecklistRule[]> = {
   etp: [
-    rule("Necessidade publica", ["necessidade", "problema", "demanda"], "A necessidade publica foi tratada.", "A necessidade publica ainda nao aparece com clareza."),
-    rule("Alternativas avaliadas", ["alternativa", "levantamento de mercado", "solucoes"], "Ha indicacao de alternativas ou levantamento de mercado.", "O ETP precisa tratar alternativas e levantamento de mercado."),
-    rule("Solucao recomendada", ["solucao", "recomenda"], "A solucao pretendida foi abordada.", "Falta explicitar a solucao recomendada ou sua justificativa."),
-    rule("Quantidades e valor", ["quantidade", "valor", "estimativa"], "Quantidade ou valor aparecem no texto.", "Quantidade, memoria de calculo ou valor estimado precisam ser complementados."),
-    rule("Riscos e viabilidade", ["risco", "viabilidade", "conclusao"], "Riscos ou conclusao de viabilidade foram mencionados.", "O ETP precisa fechar com riscos e conclusao de viabilidade condicionada.")
+    rule("Necessidade pública", ["necessidade", "problema", "demanda"], "A necessidade pública foi tratada.", "A necessidade pública ainda não aparece com clareza."),
+    rule("Alternativas avaliadas", ["alternativa", "levantamento de mercado", "soluções"], "Há indicação de alternativas ou levantamento de mercado.", "O ETP precisa tratar alternativas e levantamento de mercado."),
+    rule("Solução recomendada", ["solucao", "recomenda"], "A solução pretendida foi abordada.", "Falta explicitar a solução recomendada ou sua justificativa."),
+    rule("Quantidades e valor", ["quantidade", "valor", "estimativa"], "Quantidade ou valor aparecem no texto.", "Quantidade, memória de cálculo ou valor estimado precisam ser complementados."),
+    rule("Riscos e viabilidade", ["risco", "viabilidade", "conclusão"], "Riscos ou conclusão de viabilidade foram mencionados.", "O ETP precisa fechar com riscos e conclusão de viabilidade condicionada.")
   ],
   tr: [
-    rule("Objeto e justificativa", ["objeto", "justificativa"], "Objeto e justificativa aparecem.", "O TR precisa apresentar objeto e justificativa da contratacao."),
-    rule("Especificacoes tecnicas", ["especificacao", "requisito", "tecnico"], "Ha requisitos ou especificacoes.", "Faltam especificacoes tecnicas ou requisitos verificaveis."),
-    rule("Execucao e entrega", ["execucao", "entrega", "prazo", "local"], "Forma de execucao ou entrega foi tratada.", "O TR precisa detalhar execucao, entrega, local ou prazo."),
-    rule("Recebimento e aceitacao", ["recebimento", "aceitacao", "atesto"], "Criterios de recebimento aparecem.", "Faltam criterios de recebimento, aceite ou atesto."),
-    rule("Fiscalizacao", ["fiscalizacao", "gestor", "fiscal"], "Gestao/fiscalizacao foi abordada.", "Falta tratar gestao e fiscalizacao contratual.")
+    rule("Objeto e justificativa", ["objeto", "justificativa"], "Objeto e justificativa aparecem.", "O TR precisa apresentar objeto e justificativa da contratação."),
+    rule("Especificacoes técnicas", ["específicacao", "requisito", "tecnico"], "Há requisitos ou específicações.", "Faltam específicações técnicas ou requisitos verificáveis."),
+    rule("Execução e entrega", ["execucao", "entrega", "prazo", "local"], "Forma de execução ou entrega foi tratada.", "O TR precisa detalhar execução, entrega, local ou prazo."),
+    rule("Recebimento e aceitação", ["recebimento", "aceitação", "atésto"], "Critérios de recebimento aparecem.", "Faltam critérios de recebimento, aceite ou atésto."),
+    rule("Fiscalizacao", ["fiscalização", "gestor", "fiscal"], "Gestáo/fiscalização foi abordada.", "Falta tratar gestão e fiscalização contratual.")
   ],
   edital_licitacao: [
-    rule("Modalidade e julgamento", ["modalidade", "julgamento", "pregao", "concorrencia"], "Modalidade ou julgamento aparecem.", "Edital sem modalidade ou criterio de julgamento e incompleto."),
-    rule("Participacao e propostas", ["participacao", "proposta", "credenciamento"], "Ha regras de participacao/proposta.", "Faltam regras de participacao, credenciamento ou proposta."),
-    rule("Habilitacao", ["habilitacao", "documentacao", "regularidade"], "Habilitacao foi mencionada.", "Faltam regras de habilitacao/documentacao."),
+    rule("Modalidade e julgamento", ["modalidade", "julgamento", "pregao", "concorrência"], "Modalidade ou julgamento aparecem.", "Edital sem modalidade ou criterio de julgamento e incompleto."),
+    rule("Participação e propostas", ["participação", "proposta", "credenciamento"], "Há regras de participação/proposta.", "Faltam regras de participação, credenciamento ou proposta."),
+    rule("Hábilitacao", ["habilitação", "documentacao", "regularidade"], "Hábilitacao foi mencionada.", "Faltam regras de habilitação/documentacao."),
     rule("Impugnacao e recursos", ["impugnacao", "recurso", "esclarecimento"], "Impugnacao, esclarecimentos ou recursos aparecem.", "Faltam regras de impugnacao, esclarecimentos ou recursos."),
-    rule("Anexos", ["anexo", "termo de referencia", "minuta de contrato"], "Anexos foram previstos.", "O edital deve listar anexos e indicar pendencias.")
+    rule("Anexos", ["anexo", "termo de referencia", "minuta de contrato"], "Anexos foram previstos.", "O edital deve listar anexos e indicar pendências.")
   ],
   mapa_riscos: [
     rule("Matriz de riscos", ["matriz", "risco", "probabilidade", "impacto"], "A matriz de riscos foi tratada.", "Falta matriz com probabilidade e impacto."),
-    rule("Causas e consequencias", ["causa", "consequencia"], "Causas ou consequencias aparecem.", "Cada risco deve ter causa e consequencia."),
-    rule("Medidas preventivas", ["preventiva", "prevencao", "mitigacao"], "Ha medidas preventivas.", "Faltam medidas preventivas ou mitigadoras."),
-    rule("Contingencia", ["contingencia", "corretiva", "resposta"], "Ha resposta ou contingencia.", "Faltam medidas de contingencia/resposta."),
-    rule("Responsaveis", ["responsavel", "fiscal", "gestor", "setor"], "Responsaveis foram indicados.", "Faltam responsaveis por monitoramento.")
+    rule("Causas e consequências", ["causa", "consequência"], "Causas ou consequências aparecem.", "Cada risco deve ter causa e consequência."),
+    rule("Medidas preventivas", ["preventiva", "prevenção", "mitigação"], "Há medidas preventivas.", "Faltam medidas preventivas ou mitigadoras."),
+    rule("Contingência", ["contingência", "corretiva", "resposta"], "Há resposta ou contingência.", "Faltam medidas de contingência/resposta."),
+    rule("Responsaveis", ["responsável", "fiscal", "gestor", "setor"], "Responsaveis foram indicados.", "Faltam responsáveis por monitoramento.")
   ],
   processo_dispensa: [
-    rule("Hipotese informada", ["dispensa", "inexigibilidade", "fundamento", "hipotese"], "A hipotese foi mencionada.", "Falta indicar a hipotese ou fundamento informado."),
-    rule("Necessidade", ["necessidade", "justificativa", "demanda"], "Necessidade/justificativa foi tratada.", "Falta justificar a necessidade da contratacao direta."),
-    rule("Fornecedor", ["fornecedor", "escolha", "contratada"], "Fornecedor ou razao de escolha foi abordado.", "Falta razao da escolha do fornecedor ou pendencia expressa."),
-    rule("Preco", ["preco", "valor", "pesquisa"], "Preco ou pesquisa foram mencionados.", "Falta justificativa de preco ou pesquisa de precos."),
-    rule("Documentos pendentes", ["pendente", "habilitacao", "parecer", "autorizacao"], "Pendencias/documentos foram indicados.", "Faltam documentos instrutorios e pendencias para validacao.")
+    rule("Hipótese informada", ["dispensa", "inexigibilidade", "fundamento", "hipotese"], "A hipotese foi mencionada.", "Falta indicar a hipotese ou fundamento informado."),
+    rule("Necessidade", ["necessidade", "justificativa", "demanda"], "Necessidade/justificativa foi tratada.", "Falta justificar a necessidade da contratação direta."),
+    rule("Fornecedor", ["fornecedor", "escolha", "contratada"], "Fornecedor ou razão de escolha foi abordado.", "Falta razão da escolha do fornecedor ou pendencia expressa."),
+    rule("Preco", ["preco", "valor", "pesquisa"], "Preco ou pesquisa foram mencionados.", "Falta justificativa de preço ou pesquisa de preços."),
+    rule("Documentos pendentes", ["pendente", "habilitação", "parecer", "autorização"], "Pendências/documentos foram indicados.", "Faltam documentos instrutórios e pendências para validação.")
   ],
   pesquisa_precos: [
-    rule("Fontes", ["fonte", "cotacao", "pncp", "painel de precos", "contrato similar"], "Fontes de pesquisa aparecem.", "Faltam fontes de pesquisa ou sua identificacao."),
-    rule("Metodologia", ["metodologia", "media", "mediana", "outlier"], "Metodologia foi tratada.", "Falta explicar metodologia de composicao do preco."),
-    rule("Tabela ou comparativo", ["tabela", "comparativo", "valor"], "Ha tabela/comparativo ou valores.", "Falta tabela ou comparativo com dados informados."),
-    rule("Analise critica", ["analise critica", "justificativa", "limitacao"], "Analise critica foi mencionada.", "Falta analise critica dos precos e limitacoes."),
-    rule("Preco estimado", ["preco estimado", "valor estimado", "estimativa"], "Preco estimado aparece.", "Falta conclusao sobre preco estimado ou pendencia equivalente.")
+    rule("Fontes", ["fonte", "cotacao", "pncp", "painel de preços", "contrato similar"], "Fontes de pesquisa aparecem.", "Faltam fontes de pesquisa ou sua identificacao."),
+    rule("Metodologia", ["metodologia", "media", "mediana", "outlier"], "Metodologia foi tratada.", "Falta explicar metodologia de composicao do preço."),
+    rule("Tabela ou comparativo", ["tabela", "comparativo", "valor"], "Há tabela/comparativo ou valores.", "Falta tabela ou comparativo com dados informados."),
+    rule("Analise critica", ["análise critica", "justificativa", "limitacao"], "Analise critica foi mencionada.", "Falta análise critica dos preços e limitacoes."),
+    rule("Preco estimado", ["preço estimado", "valor estimado", "estimativa"], "Preco estimado aparece.", "Falta conclusão sobre preço estimado ou pendencia equivalente.")
   ],
   parecer_juridico: [
-    rule("Relatorio", ["relatorio", "processo", "documentos"], "Relatorio/documentos aparecem.", "Falta relatorio ou identificacao dos documentos analisados."),
-    rule("Delimitacao", ["delimitacao", "limites da analise", "analise"], "Delimitacao da analise foi mencionada.", "Falta delimitar o alcance da analise juridica."),
-    rule("Fundamentacao cautelosa", ["fundamentacao", "lei", "juridica"], "Fundamentacao aparece.", "Falta fundamentacao preliminar ou referencia juridica geral."),
-    rule("Pendencias", ["pendente", "ressalva", "condicionante"], "Pendencias/ressalvas aparecem.", "Parecer sem pendencias ou ressalvas pode transmitir seguranca indevida."),
-    rule("Conclusao condicionada", ["conclusao", "condicionada", "ressalva"], "Conclusao condicionada aparece.", "Falta conclusao cautelosa e condicionada.")
+    rule("Relatório", ["relatorio", "processo", "documentos"], "Relatório/documentos aparecem.", "Falta relatorio ou identificacao dos documentos analisados."),
+    rule("Delimitação", ["delimitacao", "limites da análise", "análise"], "Delimitação da análise foi mencionada.", "Falta delimitar o alcance da análise jurídica."),
+    rule("Fundamentação cautelosa", ["fundamentacao", "lei", "jurídica"], "Fundamentação aparece.", "Falta fundamentacao preliminar ou referencia jurídica geral."),
+    rule("Pendências", ["pendente", "ressalva", "condicionante"], "Pendências/ressalvas aparecem.", "Parecer sem pendências ou ressalvas pode transmitir segurança indevida."),
+    rule("Conclusao condicionada", ["conclusão", "condicionada", "ressalva"], "Conclusao condicionada aparece.", "Falta conclusão cautelosa e condicionada.")
   ],
   decreto_portaria: [
     rule("Tipo de ato", ["decreto", "portaria"], "Tipo de ato foi identificado.", "Falta identificar se o ato e decreto ou portaria."),
     rule("Ementa", ["ementa", "dispoe", "institui", "nomeia"], "Ementa ou comando inicial aparece.", "Falta ementa objetiva."),
-    rule("Fundamentos", ["considerando", "fundamento", "competencia"], "Fundamentos/considerandos aparecem.", "Faltam fundamentos ou competencia da autoridade."),
+    rule("Fundamentos", ["considerando", "fundamento", "competência"], "Fundamentos/considerandos aparecem.", "Faltam fundamentos ou competência da autoridade."),
     rule("Dispositivos", ["art.", "artigo", "resolve", "decreta"], "Dispositivos normativos aparecem.", "Faltam artigos ou comandos normativos."),
-    rule("Vigencia e publicacao", ["vigencia", "publicacao", "entra em vigor"], "Vigencia/publicacao aparecem.", "Falta clausula de vigencia e publicacao.")
+    rule("Vigencia e publicação", ["vigência", "publicação", "entra em vigor"], "Vigencia/publicação aparecem.", "Falta cláusula de vigência e publicação.")
   ],
   minuta_contrato: [
     rule("Partes e objeto", ["contratante", "contratada", "objeto"], "Partes/objeto aparecem.", "Falta identificar partes ou objeto."),
-    rule("Valor, prazo e vigencia", ["valor", "prazo", "vigencia"], "Valor/prazo/vigencia aparecem.", "Faltam valor, prazo ou vigencia."),
-    rule("Obrigacoes", ["obrigacoes", "contratada", "contratante"], "Obrigacoes foram tratadas.", "Faltam obrigacoes da contratada e contratante."),
-    rule("Fiscalizacao e pagamento", ["fiscalizacao", "pagamento", "atesto"], "Fiscalizacao ou pagamento aparecem.", "Faltam regras de fiscalizacao e pagamento."),
-    rule("Sancoes e rescisao", ["sancoes", "rescisao", "penalidade"], "Sancoes/rescisao aparecem.", "Faltam sancoes, penalidades ou rescisao.")
+    rule("Valor, prazo e vigência", ["valor", "prazo", "vigência"], "Valor/prazo/vigência aparecem.", "Faltam valor, prazo ou vigência."),
+    rule("Obrigacoes", ["obrigações", "contratada", "contratante"], "Obrigacoes foram tratadas.", "Faltam obrigações da contratada e contratante."),
+    rule("Fiscalizacao e pagamento", ["fiscalização", "pagamento", "atésto"], "Fiscalizacao ou pagamento aparecem.", "Faltam regras de fiscalização e pagamento."),
+    rule("Sanções e rescisão", ["sanções", "rescisão", "penalidade"], "Sanções/rescisão aparecem.", "Faltam sanções, penalidades ou rescisão.")
   ],
   projeto_lei: [
     rule("Ementa", ["ementa", "dispoe", "institui"], "Ementa aparece.", "Falta ementa do projeto."),
     rule("Articulado", ["art.", "artigo"], "Articulado aparece.", "Faltam artigos do projeto de lei."),
-    rule("Vigencia", ["vigencia", "entra em vigor"], "Clausula de vigencia aparece.", "Falta clausula de vigencia."),
-    rule("Justificativa", ["justificativa", "interesse publico"], "Justificativa aparece.", "Falta justificativa legislativa."),
-    rule("Impacto/competencia", ["impacto", "competencia", "iniciativa", "pendente"], "Impacto/competencia foram considerados.", "Avaliar competencia, iniciativa e impacto orcamentario.")
+    rule("Vigencia", ["vigência", "entra em vigor"], "Clausula de vigência aparece.", "Falta cláusula de vigência."),
+    rule("Justificativa", ["justificativa", "interesse público"], "Justificativa aparece.", "Falta justificativa legislativa."),
+    rule("Impacto/competência", ["impacto", "competência", "iniciativa", "pendente"], "Impacto/competência foram considerados.", "Avaliar competência, iniciativa e impacto orçamentário.")
   ],
   requerimento_legislativo: [
-    rule("Autor e destinatario", ["autor", "vereador", "destinatario", "senhor"], "Autor/destinatario aparecem.", "Falta autor ou destinatario."),
+    rule("Autor e destinatário", ["autor", "vereador", "destinatario", "senhor"], "Autor/destinatário aparecem.", "Falta autor ou destinatário."),
     rule("Pedido claro", ["requer", "indica", "solicita"], "Pedido legislativo aparece.", "Falta pedido claro."),
-    rule("Justificativa", ["justificativa", "considerando", "interesse publico"], "Justificativa aparece.", "Falta justificativa do pedido."),
+    rule("Justificativa", ["justificativa", "considerando", "interesse público"], "Justificativa aparece.", "Falta justificativa do pedido."),
     rule("Encaminhamento", ["encaminhe", "oficie", "mesa diretora", "prefeito"], "Encaminhamento aparece.", "Falta encaminhamento adequado."),
-    rule("Tipo da peca", ["requerimento", "indicacao"], "Tipo da peca aparece.", "Falta identificar se e requerimento ou indicacao.")
+    rule("Tipo da peça", ["requerimento", "indicação"], "Tipo da peça aparece.", "Falta identificar se e requerimento ou indicação.")
   ],
   parecer_comissao: [
-    rule("Comissao e proposicao", ["comissao", "projeto", "proposicao"], "Comissao/proposicao aparecem.", "Falta comissao ou proposicao analisada."),
-    rule("Relatorio", ["relatorio"], "Relatorio aparece.", "Falta relatorio da materia."),
-    rule("Analise", ["analise", "merito", "constitucionalidade"], "Analise aparece.", "Falta analise da comissao."),
+    rule("Comissão e proposição", ["comissao", "projeto", "proposicao"], "Comissão/proposição aparecem.", "Falta comissão ou proposição analisada."),
+    rule("Relatório", ["relatorio"], "Relatório aparece.", "Falta relatorio da matéria."),
+    rule("Analise", ["análise", "mérito", "constitucionalidade"], "Analise aparece.", "Falta análise da comissao."),
     rule("Voto", ["voto", "relator"], "Voto do relator aparece.", "Falta voto do relator ou pendencia equivalente."),
-    rule("Conclusao", ["conclusao", "favoravel", "contrario"], "Conclusao aparece.", "Falta conclusao do parecer.")
+    rule("Conclusao", ["conclusão", "favoravel", "contrário"], "Conclusao aparece.", "Falta conclusão do parecer.")
   ],
   emenda_parlamentar: [
     rule("Tipo de emenda", ["modificativa", "aditiva", "supressiva", "substitutiva"], "Tipo de emenda aparece.", "Falta tipo da emenda."),
-    rule("Proposicao original", ["projeto", "proposicao"], "Proposicao original aparece.", "Falta proposicao original."),
-    rule("Dispositivo afetado", ["art.", "artigo", "inciso", "paragrafo", "dispositivo"], "Dispositivo afetado aparece.", "Falta dispositivo afetado."),
-    rule("Redacao proposta", ["redacao", "passa a vigorar", "acrescente-se", "suprima-se"], "Redacao proposta aparece.", "Falta redacao proposta."),
+    rule("Proposição original", ["projeto", "proposicao"], "Proposição original aparece.", "Falta proposição original."),
+    rule("Dispositivo afetado", ["art.", "artigo", "inciso", "parágrafo", "dispositivo"], "Dispositivo afetado aparece.", "Falta dispositivo afetado."),
+    rule("Redação proposta", ["redacao", "passa a vigorar", "acrescente-se", "suprima-se"], "Redação proposta aparece.", "Falta redação proposta."),
     rule("Justificativa", ["justificativa"], "Justificativa aparece.", "Falta justificativa da emenda.")
   ],
   justificativa_projeto_lei: [
     rule("Problema publico", ["problema", "necessidade", "contexto"], "Problema/contexto aparece.", "Falta contextualizar o problema publico."),
     rule("Finalidade", ["finalidade", "objetivo", "proposta"], "Finalidade aparece.", "Falta explicar a finalidade da proposta."),
-    rule("Beneficiarios", ["beneficiario", "populacao", "municipio", "cidadao"], "Beneficiarios aparecem.", "Falta indicar beneficiarios ou impacto social."),
-    rule("Interesse publico", ["interesse publico", "relevancia", "beneficio"], "Interesse publico aparece.", "Falta demonstrar interesse publico."),
-    rule("Pedido de apoio", ["aprovacao", "apoio", "apreciacao"], "Pedido de apoio aparece.", "Falta fechamento pedindo apreciacao ou apoio.")
+    rule("Beneficiarios", ["beneficiario", "populacao", "município", "cidadao"], "Beneficiarios aparecem.", "Falta indicar beneficiários ou impacto social."),
+    rule("Interesse publico", ["interesse público", "relevancia", "beneficio"], "Interesse publico aparece.", "Falta demonstrar interesse público."),
+    rule("Pedido de apoio", ["aprovação", "apoio", "apreciacao"], "Pedido de apoio aparece.", "Falta fechamento pedindo apreciacao ou apoio.")
   ]
 };
 
@@ -151,8 +151,8 @@ function sectionFinding(text: string, section: string): ChecklistFinding {
     status: found ? "OK" : "PENDENTE",
     title: `Secao: ${section}`,
     detail: found
-      ? "Foi identificado conteudo relacionado a esta secao."
-      : "Nao foi identificado conteudo claro para esta secao esperada."
+      ? "Foi identificado conteúdo relacionado a está seção."
+      : "Não foi identificado conteúdo claro para está seção esperada."
   };
 }
 
@@ -172,7 +172,7 @@ function forbiddenFindings(text: string): ChecklistFinding[] {
     .map((claim) => ({
       status: "ATENCAO" as const,
       title: "Conclusao sensivel",
-      detail: `O texto contem expressao que pode transmitir conclusao indevida: "${claim}". Revise a cautela da redacao.`
+      detail: `O texto contem expressao que pode transmitir conclusão indevida: "${claim}". Revise a cautela da redação.`
     }));
 }
 
@@ -208,6 +208,6 @@ export function formatChecklistMarkdown(kind: DocumentKind, text: string) {
     "",
     ...checklist.findings.map((finding) => `- [${finding.status}] ${finding.title}: ${finding.detail}`),
     "",
-    "_Checklist automatico por regras. Nao substitui revisao tecnica, juridica ou legislativa._"
+    "_Checklist automatico por regras. Não substitui revisão técnica, jurídica ou legislativa._"
   ].join("\n");
 }

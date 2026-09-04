@@ -23,7 +23,7 @@ import { exportDocx } from "@/lib/docx-export";
 import { DocumentCategory, DocumentKind, FormField, documentCatalog, documentDefinitions } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
-type ProcessModalState = "closed" | "validating" | "generating" | "insufficient" | "error";
+type ProcessModalState = "closed" | "validating" | "generating" | "compliance" | "insufficient" | "error";
 type DebugInfo = {
   reason?: string;
   model?: string;
@@ -45,6 +45,19 @@ type ReadinessResult = {
   source: "local" | "openai" | "mixed" | "unavailable";
   debug?: DebugInfo;
 };
+type ComplianceResult = {
+  status: "conforme" | "conforme_com_ressalvas" | "nao_conforme";
+  summary: string;
+  findings: Array<{
+    item: string;
+    severity: "baixa" | "media" | "alta";
+    issue: string;
+    recommendation: string;
+  }>;
+  mustRegenerate: boolean;
+  confidence: "baixa" | "media" | "alta";
+  adjusted: boolean;
+};
 type NavItem = {
   label: string;
   description: string;
@@ -56,28 +69,28 @@ const defaultKind: DocumentKind = "etp";
 const institutionalFields: FormField[] = [
   {
     key: "municipio_uf",
-    label: "Municipio/UF",
+    label: "Município/UF",
     placeholder: "Ex.: Sobral/CE"
   },
   {
     key: "orgao_entidade",
-    label: "Orgao ou entidade",
+    label: "Órgão ou entidade",
     placeholder: "Ex.: Prefeitura Municipal / Camara Municipal / Fundo Municipal"
   },
   {
     key: "responsavel_cargo",
     label: "Responsavel e cargo",
-    placeholder: "Ex.: Maria Silva, Secretaria Municipal de Administracao"
+    placeholder: "Ex.: Maria Silva, Secretaria Municipal de Administração"
   }
 ];
 
 const groupIcons: Record<DocumentCategory, typeof FolderKanban> = {
-  "Compras e licitacoes": FolderKanban,
+  "Compras e licitações": FolderKanban,
   "Atos administrativos": Landmark,
   Legislativo: Gavel
 };
 
-const documentGroups = (["Compras e licitacoes", "Atos administrativos", "Legislativo"] as DocumentCategory[]).map(
+const documentGroups = (["Compras e licitações", "Atos administrativos", "Legislativo"] as DocumentCategory[]).map(
   (category) => ({
     title: category,
     icon: groupIcons[category],
@@ -102,6 +115,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
   const [source, setSource] = useState<"openai" | null>(null);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
   const [readiness, setReadiness] = useState<ReadinessResult | null>(null);
+  const [compliance, setCompliance] = useState<ComplianceResult | null>(null);
   const [processModal, setProcessModal] = useState<ProcessModalState>("closed");
   const [formCollapsed, setFormCollapsed] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -122,6 +136,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     setSource(null);
     setDebug(null);
     setReadiness(null);
+    setCompliance(null);
     setProcessModal("closed");
     setFormCollapsed(false);
   }
@@ -139,24 +154,28 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Nao foi possivel gerar a minuta.");
+      throw new Error(data.error || "Não foi possível gerar a minuta.");
     }
 
     setOutput(data.text);
     setSource("openai");
     setDebug(data.debug || null);
+    setCompliance(data.compliance || null);
     setFormCollapsed(true);
+
+    return data.compliance as ComplianceResult | null;
   }
 
   async function forceGenerate() {
     setLoading(true);
     setOutput("");
     setDebug(null);
+    setCompliance(null);
     setProcessModal("generating");
 
     try {
-      await generateDraftRequest();
-      setProcessModal("closed");
+      const complianceResult = await generateDraftRequest();
+      setProcessModal(complianceResult ? "compliance" : "closed");
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
       setProcessModal("error");
@@ -170,6 +189,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
     setOutput("");
     setDebug(null);
     setReadiness(null);
+    setCompliance(null);
     setProcessModal("validating");
 
     try {
@@ -184,7 +204,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
         setReadiness(readinessData);
         setDebug(readinessData.debug || null);
         setProcessModal("error");
-        throw new Error(readinessData.error || "A IA esta indisponivel no momento. Tente novamente mais tarde.");
+        throw new Error(readinessData.error || "A IA está indisponível no momento. Tente novamente mais tarde.");
       }
 
       setReadiness(readinessData);
@@ -196,8 +216,8 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       }
 
       setProcessModal("generating");
-      await generateDraftRequest();
-      setProcessModal("closed");
+      const complianceResult = await generateDraftRequest();
+      setProcessModal(complianceResult ? "compliance" : "closed");
     } catch (error) {
       setOutput(error instanceof Error ? error.message : "Erro inesperado.");
       setProcessModal("error");
@@ -220,7 +240,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Nao foi possivel revisar o documento.");
+        throw new Error(data.error || "Não foi possível revisar o documento.");
       }
 
       setOutput(data.text);
@@ -250,7 +270,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Nao foi possivel revisar o documento.");
+        throw new Error(data.error || "Não foi possível revisar o documento.");
       }
 
       setOutput(data.text);
@@ -291,6 +311,57 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
       body: output,
       header: headerTemplate
     });
+  }
+
+  function complianceStatusLabel(status: ComplianceResult["status"]) {
+    const labels: Record<ComplianceResult["status"], string> = {
+      conforme: "Conforme preliminarmente",
+      conforme_com_ressalvas: "Conforme com ressalvas",
+      nao_conforme: "Não conforme"
+    };
+
+    return labels[status];
+  }
+
+  function processStepStatus(step: "readiness" | "generation" | "compliance") {
+    if (processModal === "validating") {
+      return step === "readiness" ? "active" : "pending";
+    }
+
+    if (processModal === "generating") {
+      if (step === "readiness") return "done";
+      return step === "generation" || step === "compliance" ? "active" : "pending";
+    }
+
+    if (processModal === "compliance") {
+      return "done";
+    }
+
+    return "pending";
+  }
+
+  function renderProcessStep(step: "readiness" | "generation" | "compliance", label: string, description: string) {
+    const status = processStepStatus(step);
+
+    return (
+      <div className="flex gap-3">
+        <span
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center border text-xs font-bold ${
+            status === "done"
+              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+              : status === "active"
+                ? "border-civic bg-paper text-civic"
+                : "border-line bg-white text-muted"
+          }`}
+        >
+          {status === "done" ? <Check size={15} /> : status === "active" ? <Loader2 className="animate-spin" size={15} /> : null}
+        </span>
+        <div>
+          <p className="font-semibold">{label}</p>
+          <p className="text-muted">{description}</p>
+        </div>
+      </div>
+    );
   }
 
   function renderField(field: (typeof definition.fields)[number]) {
@@ -340,7 +411,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                 <span>
                   <span className="block font-serif text-lg font-semibold leading-5">Gerador</span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                    Documentos Publicos
+                    Documentos Públicos
                   </span>
                 </span>
               </Link>
@@ -419,7 +490,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
           <header className="border-b border-line bg-white">
             <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Area interna</p>
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">Área interna</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3">
                   <h1 className="font-serif text-3xl font-semibold leading-tight">{definition.name}</h1>
                   {definition.maturity === "beta" ? (
@@ -525,10 +596,10 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                 {formCollapsed && mode === "generate" ? (
                   <div className="space-y-3 p-4">
                     <div>
-                      <p className="text-sm font-bold">Informacoes recolhidas</p>
+                      <p className="text-sm font-bold">Informações recolhidas</p>
                       <p className="mt-1 text-sm leading-6 text-muted">
-                        O documento esta aberto ao lado. Reabra o formulario para ajustar os dados e gerar uma nova
-                        versao.
+                        O documento está aberto ao lado. Reabra o formulário para ajustar os dados e gerar uma nova
+                        versão.
                       </p>
                     </div>
                     {readiness ? (
@@ -550,7 +621,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                       className="flex h-10 w-full items-center justify-center gap-2 border border-line bg-white px-4 text-sm font-bold text-ink hover:bg-paper"
                     >
                       <FileText size={16} />
-                      Editar informacoes
+                      Editar informações
                     </button>
                     <button
                       type="button"
@@ -566,7 +637,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                   <div className="space-y-4 p-4">
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
-                        <h3 className="text-sm font-bold">Identificacao institucional</h3>
+                        <h3 className="text-sm font-bold">Identificação institucional</h3>
                         <span className="text-xs text-muted">opcional</span>
                       </div>
                       <div className="space-y-4">{institutionalFields.map(renderField)}</div>
@@ -575,7 +646,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                     <div>
                       <div className="mb-3 flex items-center justify-between gap-3 border-b border-line pb-2">
                         <h3 className="text-sm font-bold">Dados essenciais</h3>
-                        <span className="text-xs text-muted">{requiredFields.length} obrigatorios</span>
+                        <span className="text-xs text-muted">{requiredFields.length} obrigatórios</span>
                       </div>
                       <div className="space-y-4">{requiredFields.map(renderField)}</div>
                     </div>
@@ -598,18 +669,18 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                     </button>
                     {missingRequired.length > 0 ? (
                       <p className="text-sm text-accent">
-                        Ha campos obrigatorios vazios. A validacao vai listar as informacoes necessarias antes da geracao.
+                        Há campos obrigatórios vazios. A validação vai listar as informações necessárias antes da geração.
                       </p>
                     ) : null}
                   </div>
                 ) : (
                   <div className="p-4">
                     <label className="block">
-                      <span className="text-sm font-semibold">Texto para revisao</span>
+                      <span className="text-sm font-semibold">Texto para revisão</span>
                       <textarea
                         value={reviewText}
                         onChange={(event) => setReviewText(event.target.value)}
-                        placeholder="Cole aqui a minuta existente para receber uma revisao preliminar."
+                        placeholder="Cole aqui a minuta existente para receber uma revisão preliminar."
                         rows={16}
                         className="mt-2 w-full border border-line px-3 py-2 text-sm leading-6 outline-none focus:border-civic"
                       />
@@ -634,7 +705,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                   <div className="border-b border-line px-4 py-3">
                     <h3 className="text-sm font-bold">Cabecalho do documento</h3>
                     <p className="mt-1 text-sm leading-6 text-muted">
-                      Cole ou edite aqui o cabecalho da Prefeitura/Camara. Ele sera usado pela IA e exportado no DOCX.
+                      Cole ou edite aqui o cabeçalho da Prefeitura/Camara. Ele será usado pela IA e exportado no DOCX.
                     </p>
                   </div>
                   <DocumentEditor
@@ -658,8 +729,8 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                     </div>
                     <h2 className="mt-4 font-serif text-2xl font-semibold">Documento pronto para nascer</h2>
                     <p className="mt-2 text-sm leading-6 text-muted">
-                      Preencha os dados do formulario e valide com a IA. Quando a minuta for gerada, ela aparece aqui
-                      em formato editavel.
+                      Preencha os dados do formulário e valide com a IA. Quando a minuta for gerada, ela aparece aqui
+                      em formato editável.
                     </p>
                   </div>
                 </div>
@@ -676,44 +747,91 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
               <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">IA documental</p>
               <h2 className="mt-1 font-serif text-2xl font-semibold">
                 {processModal === "validating"
-                  ? "Validando informacoes"
+                  ? "Validando informações"
                   : processModal === "generating"
-                    ? "Gerando minuta"
-                    : processModal === "insufficient"
-                      ? "Dados insuficientes"
-                      : "Nao foi possivel concluir"}
+                    ? "Gerando e verificando"
+                    : processModal === "compliance"
+                      ? "Verificação concluída"
+                      : processModal === "insufficient"
+                        ? "Dados insuficientes"
+                        : "Não foi possível concluir"}
               </h2>
             </div>
 
             <div className="space-y-4 px-5 py-5 text-sm leading-6">
               {processModal === "validating" || processModal === "generating" ? (
-                <div className="flex items-start gap-3">
-                  <Loader2 className="mt-1 animate-spin text-civic" size={20} />
-                  <div>
+                <div className="space-y-4">
+                  <div className="border border-line bg-paper p-3">
                     <p className="font-semibold">
                       {processModal === "validating"
-                        ? "A IA esta verificando se existem dados suficientes."
-                        : "A validacao passou. A IA esta redigindo o documento."}
+                        ? "A IA está verificando se existem dados suficientes."
+                        : "A IA está redigindo a minuta e fazendo uma verificação preliminar de conformidade."}
                     </p>
                     <p className="mt-1 text-muted">
-                      Esta etapa evita que a minuta seja criada com lacunas importantes sem aviso.
+                      Esta etapa reduz o risco de lacunas relevantes antes de liberar o documento para edição.
                     </p>
                   </div>
+                  {renderProcessStep("readiness", "1. Validação dos dados", "Confere se há informação suficiente para gerar sem depender de suposições.")}
+                  {renderProcessStep("generation", "2. Geração da minuta", "Redige o documento com o prompt específico do tipo selecionado.")}
+                  {renderProcessStep("compliance", "3. Verificação preliminar", "Analisa estrutura, pendências e aderência normativa quando aplicável.")}
                 </div>
+              ) : null}
+
+              {processModal === "compliance" && compliance ? (
+                <>
+                  <div
+                    className={`border p-3 ${
+                      compliance.status === "conforme"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+                        : compliance.status === "nao_conforme"
+                          ? "border-red-200 bg-red-50 text-red-950"
+                          : "border-amber-200 bg-amber-50 text-amber-950"
+                    }`}
+                  >
+                    <p className="font-semibold">{complianceStatusLabel(compliance.status)}</p>
+                    <p className="mt-1">{compliance.summary}</p>
+                    {compliance.adjusted ? (
+                      <p className="mt-2 font-semibold">A minuta recebeu uma rodada automática de ajustes.</p>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-3">
+                    {renderProcessStep("readiness", "1. Validação dos dados", "Concluída antes da geração.")}
+                    {renderProcessStep("generation", "2. Geração da minuta", "Documento criado no editor.")}
+                    {renderProcessStep("compliance", "3. Verificação preliminar", "Relatório de conformidade gerado.")}
+                  </div>
+
+                  {compliance.findings.length ? (
+                    <div>
+                      <p className="font-semibold">Pontos de atenção</p>
+                      <ul className="mt-2 space-y-2">
+                        {compliance.findings.map((finding) => (
+                          <li key={`${finding.item}-${finding.issue}`} className="border border-line p-3">
+                            <p className="font-semibold">
+                              {finding.item} <span className="text-muted">({finding.severity})</span>
+                            </p>
+                            <p className="mt-1 text-muted">{finding.issue}</p>
+                            <p className="mt-1">{finding.recommendation}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </>
               ) : null}
 
               {processModal === "insufficient" && readiness ? (
                 <>
                   <div className="border border-amber-200 bg-amber-50 p-3 text-amber-950">
                     <p className="font-semibold">
-                      Validacao: {readiness.status} | Risco: {readiness.risco}
+                      Validação: {readiness.status} | Risco: {readiness.risco}
                     </p>
                     <p className="mt-1">{readiness.resumo}</p>
                   </div>
 
                   {readiness.alertas.length ? (
                     <div>
-                      <p className="font-semibold">Pontos de atencao</p>
+                      <p className="font-semibold">Pontos de atenção</p>
                       <ul className="mt-2 list-disc space-y-1 pl-5 text-muted">
                         {readiness.alertas.map((alert) => (
                           <li key={alert}>{alert}</li>
@@ -724,7 +842,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
 
                   {readiness.perguntas.length ? (
                     <div>
-                      <p className="font-semibold">Antes de gerar, esclareca</p>
+                      <p className="font-semibold">Antes de gerar, esclareça</p>
                       <ol className="mt-2 list-decimal space-y-2 pl-5 text-muted">
                         {readiness.perguntas.map((question) => (
                           <li key={`${question.campo}-${question.pergunta}`}>
@@ -737,7 +855,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
                   ) : null}
 
                   <p className="border-t border-line pt-4 text-muted">
-                    Se optar por gerar mesmo assim, a minuta podera conter pendencias e devera ser revisada com
+                    Se optar por gerar mesmo assim, a minuta poderá conter pendências e deverá ser revisada com
                     cuidado antes de qualquer uso oficial.
                   </p>
                 </>
@@ -745,13 +863,23 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
 
               {processModal === "error" ? (
                 <div className="border border-amber-200 bg-amber-50 p-3 text-amber-950">
-                  <p className="font-semibold">A IA nao concluiu a operacao.</p>
+                  <p className="font-semibold">A IA não concluiu a operação.</p>
                   <p className="mt-1">{output || "Tente novamente mais tarde."}</p>
                 </div>
               ) : null}
             </div>
 
-            {processModal === "insufficient" ? (
+            {processModal === "compliance" ? (
+              <div className="flex justify-end border-t border-line p-4">
+                <button
+                  type="button"
+                  onClick={() => setProcessModal("closed")}
+                  className="h-10 bg-civic px-4 text-sm font-bold text-white"
+                >
+                  Abrir documento
+                </button>
+              </div>
+            ) : processModal === "insufficient" ? (
               <div className="flex flex-col gap-2 border-t border-line p-4 sm:flex-row sm:justify-end">
                 <button
                   type="button"

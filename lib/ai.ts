@@ -1,5 +1,11 @@
 import { DocumentKind } from "./document-types";
-import { buildGeneratePrompt, buildReviewPrompt } from "./document-prompts";
+import {
+  buildCompliancePrompt,
+  buildComplianceRevisionPrompt,
+  buildGeneratePrompt,
+  buildReviewPrompt,
+  type ComplianceFinding
+} from "./document-prompts";
 import { formatChecklistMarkdown } from "./document-checklists";
 import {
   assessLocalReadiness,
@@ -21,6 +27,19 @@ type ReviewInput = {
 };
 
 type ReadinessInput = GenerateInput;
+
+export type ComplianceResult = {
+  status: "conforme" | "conforme_com_ressalvas" | "nao_conforme";
+  summary: string;
+  findings: ComplianceFinding[];
+  mustRegenerate: boolean;
+  confidence: "baixa" | "media" | "alta";
+  adjusted: boolean;
+  debug?: {
+    model: string;
+    responseId?: string;
+  };
+};
 
 type AIResult =
   | {
@@ -134,7 +153,7 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
         text: null,
         source: "unavailable",
         debug: {
-          reason: "A resposta da OpenAI nao trouxe output_text utilizavel.",
+          reason: "A resposta da OpenAI não trouxe output_text útilizavel.",
           model,
           errorMessage: data ? JSON.stringify(data).slice(0, 600) : "Resposta vazia ou invalida."
         }
@@ -162,6 +181,90 @@ async function callOpenAI(prompt: string): Promise<AIResult> {
   }
 }
 
+function parseJsonBlock(text: string) {
+  const cleaned = text.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
+  return JSON.parse(cleaned) as Record<string, unknown>;
+}
+
+function normalizeComplianceSeverity(value: unknown): ComplianceFinding["severity"] {
+  return value === "baixa" || value === "alta" ? value : "media";
+}
+
+function normalizeComplianceStatus(value: unknown): ComplianceResult["status"] {
+  if (value === "conforme" || value === "conforme_com_ressalvas" || value === "nao_conforme") {
+    return value;
+  }
+
+  return "conforme_com_ressalvas";
+}
+
+function normalizeComplianceConfidence(value: unknown): ComplianceResult["confidence"] {
+  return value === "baixa" || value === "alta" ? value : "media";
+}
+
+function parseCompliance(text: string): Omit<ComplianceResult, "adjusted" | "debug"> {
+  try {
+    const parsed = parseJsonBlock(text);
+    const rawFindings = Array.isArray(parsed.findings) ? parsed.findings : [];
+    const findings = rawFindings
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const finding = item as Record<string, unknown>;
+
+        return {
+          item: typeof finding.item === "string" && finding.item.trim() ? finding.item : "Item de conformidade",
+          severity: normalizeComplianceSeverity(finding.severity),
+          issue: typeof finding.issue === "string" && finding.issue.trim() ? finding.issue : "Ponto de atenção identificado.",
+          recommendation:
+            typeof finding.recommendation === "string" && finding.recommendation.trim()
+              ? finding.recommendation
+              : "Revisar antes do uso oficial."
+        };
+      })
+      .filter((item): item is ComplianceFinding => Boolean(item));
+
+    return {
+      status: normalizeComplianceStatus(parsed.status),
+      summary:
+        typeof parsed.summary === "string" && parsed.summary.trim()
+          ? parsed.summary
+          : "Verificação preliminar concluída.",
+      findings,
+      mustRegenerate: Boolean(parsed.mustRegenerate),
+      confidence: normalizeComplianceConfidence(parsed.confidence)
+    };
+  } catch {
+    return {
+      status: "conforme_com_ressalvas",
+      summary: "A verificação preliminar não retornou JSON válido. A minuta deve ser revisada com atenção.",
+      findings: [
+        {
+          item: "Retorno da verificação",
+          severity: "media",
+          issue: "A IA não devolveu a análise de conformidade no formato esperado.",
+          recommendation: "Submeter a minuta à revisão humana antes de uso oficial."
+        }
+      ],
+      mustRegenerate: false,
+      confidence: "baixa"
+    };
+  }
+}
+
+async function verifyCompliance(input: GenerateInput & { text: string }): Promise<ComplianceResult | null> {
+  const checked = await callOpenAI(buildCompliancePrompt(input));
+
+  if (!checked.text) {
+    return null;
+  }
+
+  return {
+    ...parseCompliance(checked.text),
+    adjusted: false,
+    debug: checked.debug
+  };
+}
+
 export async function generateDraft(input: GenerateInput) {
   const prompt = buildGeneratePrompt(input);
   const generated = await callOpenAI(prompt);
@@ -170,15 +273,45 @@ export async function generateDraft(input: GenerateInput) {
     return {
       text: null,
       source: "unavailable",
-      error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      error: "A IA está indisponível no momento. Tente novamente mais tarde.",
       debug: generated.debug
     };
   }
 
+  let text = generated.text;
+  let compliance = await verifyCompliance({ ...input, text });
+
+  if (compliance?.mustRegenerate && compliance.findings.some((finding) => finding.severity === "alta")) {
+    const revised = await callOpenAI(
+      buildComplianceRevisionPrompt({
+        ...input,
+        text,
+        findings: compliance.findings
+      })
+    );
+
+    if (revised.text) {
+      text = revised.text;
+      const secondCheck = await verifyCompliance({ ...input, text });
+      compliance = secondCheck
+        ? {
+            ...secondCheck,
+            adjusted: true
+          }
+        : {
+            ...compliance,
+            adjusted: true,
+            summary:
+              "A minuta foi ajustada automaticamente, mas a segunda verificação não foi concluída. Revise antes do uso oficial."
+          };
+    }
+  }
+
   return {
-    text: generated.text,
+    text,
     source: "openai",
-    debug: generated.debug
+    debug: generated.debug,
+    compliance
   };
 }
 
@@ -190,11 +323,11 @@ export async function assessReadiness(input: ReadinessInput) {
     return {
       status: "insuficiente" as const,
       risco: "alto" as const,
-      resumo: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      resumo: "A IA está indisponível no momento. Tente novamente mais tarde.",
       perguntas: [],
-      alertas: ["Nao foi possivel validar as informacoes porque a IA nao respondeu."],
+      alertas: ["Não foi possível validar as informações porque a IA não respondeu."],
       source: "unavailable" as const,
-      error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+      error: "A IA está indisponível no momento. Tente novamente mais tarde.",
       debug: generated.debug
     };
   }
@@ -220,7 +353,7 @@ export async function reviewDraft(input: ReviewInput) {
   return {
     text: null,
     source: "unavailable",
-    error: "A IA esta indisponivel no momento. Tente novamente mais tarde.",
+    error: "A IA está indisponível no momento. Tente novamente mais tarde.",
     debug: generated.debug
   };
 }

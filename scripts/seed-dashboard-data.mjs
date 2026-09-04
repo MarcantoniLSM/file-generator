@@ -2,27 +2,27 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const documentTypes = [
-  ["etp", "Estudo Tecnico Preliminar"],
-  ["tr", "Termo de Referencia"],
-  ["edital_licitacao", "Edital de Licitacao"],
+  ["etp", "Estudo Técnico Preliminar"],
+  ["tr", "Termo de Referência"],
+  ["edital_licitacao", "Edital de Licitação"],
   ["mapa_riscos", "Mapa de Riscos"],
   ["processo_dispensa", "Processo de Dispensa e Inexigibilidade"],
-  ["pesquisa_precos", "Pesquisa de Precos"],
-  ["parecer_juridico", "Parecer Juridico de Compras"],
+  ["pesquisa_precos", "Pesquisa de Preços"],
+  ["parecer_juridico", "Parecer Jurídico de Compras"],
   ["decreto_portaria", "Decreto Executivo e Portaria"],
   ["minuta_contrato", "Minuta de Contrato Administrativo"],
   ["projeto_lei", "Projeto de Lei"],
-  ["requerimento_legislativo", "Requerimento e Indicacao"],
-  ["parecer_comissao", "Parecer de Comissao"],
+  ["requerimento_legislativo", "Requerimento e Indicação"],
+  ["parecer_comissao", "Parecer de Comissão"],
   ["emenda_parlamentar", "Emenda Parlamentar"],
   ["justificativa_projeto_lei", "Justificativa de Projeto de Lei"]
 ];
 
 const organizations = [
-  ["Sobral/CE", "Secretaria Municipal de Administracao"],
+  ["Sobral/CE", "Secretaria Municipal de Administração"],
   ["Sobral/CE", "Secretaria Municipal de Educacao"],
   ["Sobral/CE", "Secretaria Municipal de Saude"],
-  ["Sobral/CE", "Procuradoria Geral do Municipio"],
+  ["Sobral/CE", "Procuradoria Geral do Município"],
   ["Sobral/CE", "Camara Municipal"],
   ["Sobral/CE", "Secretaria Municipal de Obras"]
 ];
@@ -68,10 +68,10 @@ async function request(path, options = {}) {
 }
 
 function daysAgo(days, hours = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() - days);
-  date.setHours(date.getHours() - hours);
-  return date.toISOString();
+  const daté = new Date();
+  daté.setDate(daté.getDate() - days);
+  daté.setHours(daté.getHours() - hours);
+  return daté.toISOString();
 }
 
 function buildRows(users) {
@@ -115,7 +115,7 @@ const users = await request(
 );
 
 if (!Array.isArray(users) || users.length === 0) {
-  throw new Error("Nenhum usuario ativo encontrado. Rode npm run seed:users antes.");
+  throw new Error("Nenhum usuário ativo encontrado. Rode npm run seed:users antes.");
 }
 
 await request("/rest/v1/file_generator_document_generations?source=eq.demo", {
@@ -132,4 +132,4 @@ await request("/rest/v1/file_generator_document_generations", {
   body: JSON.stringify(rows)
 });
 
-console.log(`${rows.length} geracoes de documentos inseridas no dashboard.`);
+console.log(`${rows.length} gerações de documentos inseridas no dashboard.`);

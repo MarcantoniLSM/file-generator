@@ -12,57 +12,57 @@ export type MarketingPage = {
 export const executivePages: MarketingPage[] = [
   {
     slug: "gerador-etp",
-    title: "Gerador de Estudo Tecnico Preliminar (ETP) Lei 14.133",
+    title: "Gerador de Estudo Técnico Preliminar (ETP) Lei 14.133",
     category: "Executivo",
-    description: "Estruture necessidades, alternativas, riscos e conclusao de viabilidade para compras municipais.",
+    description: "Estruture necessidades, alternativas, riscos e conclusão de viabilidade para compras municipais.",
     cta: "Gerar ETP",
     documentKind: "etp"
   },
   {
     slug: "gerador-termo-de-referencia",
-    title: "Gerador de Termo de Referencia (TR) Automatico",
+    title: "Gerador de Termo de Referência (TR) Automático",
     category: "Executivo",
-    description: "Transforme a demanda em requisitos, condicoes de entrega, fiscalizacao e criterios de aceitacao.",
+    description: "Transforme a demanda em requisitos, condições de entrega, fiscalização e critérios de aceitação.",
     cta: "Gerar TR",
     documentKind: "tr"
   },
   {
     slug: "gerador-edital-licitacao",
-    title: "Gerador de Minutas de Edital de Licitacao",
+    title: "Gerador de Minutas de Edital de Licitação",
     category: "Executivo",
-    description: "Prepare uma base inicial de edital com campos controlados e pendencias para revisao tecnica.",
+    description: "Prepare uma base inicial de edital com campos controlados e pendências para revisão técnica.",
     cta: "Preparar edital",
     documentKind: "edital_licitacao"
   },
   {
     slug: "gerador-mapa-de-riscos",
-    title: "Gerador de Mapa e Matriz de Riscos para Licitacoes",
+    title: "Gerador de Mapa e Matriz de Riscos para Licitações",
     category: "Executivo",
-    description: "Mapeie riscos, probabilidade, impacto, medidas preventivas e responsaveis.",
+    description: "Mapeie riscos, probabilidade, impacto, medidas preventivas e responsáveis.",
     cta: "Mapear riscos",
     documentKind: "mapa_riscos"
   },
   {
     slug: "gerador-pesquisa-de-precos",
-    title: "Automacao de Relatorio de Pesquisa de Precos Publicos",
+    title: "Automação de Relatório de Pesquisa de Preços Públicos",
     category: "Executivo",
-    description: "Organize fontes, metodologia, analise critica e justificativa de preco para o processo.",
-    cta: "Montar relatorio",
+    description: "Organize fontes, metodologia, análise crítica e justificativa de preço para o processo.",
+    cta: "Montar relatório",
     documentKind: "pesquisa_precos"
   },
   {
     slug: "gerador-minuta-de-contrato",
     title: "Gerador de Minutas de Contratos Administrativos",
     category: "Executivo",
-    description: "Crie uma primeira minuta de contrato com objeto, prazos, obrigacoes e gestao contratual.",
+    description: "Crie uma primeira minuta de contrato com objeto, prazos, obrigações e gestão contratual.",
     cta: "Gerar contrato",
     documentKind: "minuta_contrato"
   },
   {
     slug: "gerador-parecer-juridico",
-    title: "Gerador de Minuta de Parecer Juridico de Compras",
+    title: "Gerador de Minuta de Parecer Jurídico de Compras",
     category: "Executivo",
-    description: "Elabore uma minuta preliminar para revisao da assessoria juridica responsavel.",
+    description: "Elabore uma minuta preliminar para revisão da assessoria jurídica responsável.",
     cta: "Preparar parecer",
     documentKind: "parecer_juridico"
   },
@@ -70,7 +70,7 @@ export const executivePages: MarketingPage[] = [
     slug: "gerador-processo-dispensa",
     title: "Gerador de Processo de Dispensa e Inexigibilidade",
     category: "Executivo",
-    description: "Organize justificativa, fornecedor, preco, riscos e encaminhamentos da contratacao direta.",
+    description: "Organize justificativa, fornecedor, preço, riscos e encaminhamentos da contratação direta.",
     cta: "Gerar processo",
     documentKind: "processo_dispensa"
   },
@@ -89,7 +89,7 @@ export const legislativePages: MarketingPage[] = [
     slug: "gerador-projeto-de-lei",
     title: "Gerador de Projetos de Lei (PL) com IA",
     category: "Legislativo",
-    description: "Crie minutas de proposicoes com ementa, articulado, clausulas finais e justificativa.",
+    description: "Crie minutas de proposicoes com ementa, articulado, cláusulas finais e justificativa.",
     cta: "Gerar PL",
     documentKind: "projeto_lei"
   },
@@ -102,10 +102,10 @@ export const legislativePages: MarketingPage[] = [
     documentKind: "justificativa_projeto_lei"
   },
   {
-    slug: "gerador-parecer-comissao",
-    title: "Gerador de Parecer de Comissao Legislativa",
+    slug: "gerador-parecer-comissão",
+    title: "Gerador de Parecer de Comissão Legislativa",
     category: "Legislativo",
-    description: "Estruture relatorio, analise preliminar, voto e conclusao para comissoes.",
+    description: "Estruture relatório, análise preliminar, voto e conclusão para comissões.",
     cta: "Gerar parecer",
     documentKind: "parecer_comissao"
   },
@@ -113,7 +113,7 @@ export const legislativePages: MarketingPage[] = [
     slug: "gerador-emenda-parlamentar",
     title: "Gerador de Emendas Modificativas e Aditivas",
     category: "Legislativo",
-    description: "Prepare emendas com identificacao do dispositivo, nova redacao e justificativa.",
+    description: "Prepare emendas com identificacao do dispositivo, nova redação e justificativa.",
     cta: "Gerar emenda",
     documentKind: "emenda_parlamentar"
   },
@@ -130,30 +130,30 @@ export const legislativePages: MarketingPage[] = [
 export const modelPages: MarketingPage[] = [
   {
     slug: "etp-compra-merenda-escolar",
-    title: "Modelo de ETP para Aquisicao de Merenda Escolar",
+    title: "Modelo de ETP para Aquisição de Merenda Escolar",
     category: "Modelos",
-    description: "Modelo editavel para planejamento de aquisicao de generos alimenticios da rede municipal.",
+    description: "Modelo editável para planejamento de aquisição de gêneros alimentícios da rede municipal.",
     cta: "Usar modelo"
   },
   {
     slug: "tr-servicos-de-limpeza",
-    title: "Modelo de Termo de Referencia para Servicos de Limpeza",
+    title: "Modelo de Termo de Referência para Serviços de Limpeza",
     category: "Modelos",
-    description: "Estrutura inicial para servicos continuados de limpeza em predios publicos.",
+    description: "Estrutura inicial para serviços continuados de limpeza em prédios públicos.",
     cta: "Usar modelo"
   },
   {
     slug: "tr-locacao-de-veiculos",
-    title: "Modelo de TR para Locacao de Veiculos Municipais",
+    title: "Modelo de TR para Locação de Veículos Municipais",
     category: "Modelos",
-    description: "Base editavel para locacao de veiculos destinados a secretarias e unidades municipais.",
+    description: "Base editável para locação de veículos destinados a secretarias e unidades municipais.",
     cta: "Usar modelo"
   },
   {
     slug: "projeto-de-lei-utilidade-publica",
-    title: "Modelo de Projeto de Lei de Utilidade Publica",
+    title: "Modelo de Projeto de Lei de Utilidade Pública",
     category: "Modelos",
-    description: "Estrutura de proposicao legislativa para declaracao de utilidade publica.",
+    description: "Estrutura de proposição legislativa para declaracao de utilidade pública.",
     cta: "Usar modelo"
   }
 ];
@@ -163,22 +163,22 @@ export const toolPages: MarketingPage[] = [
     slug: "calculadora-limite-dispensa",
     title: "Calculadora de Limites de Dispensa de Licitacao Atualizados",
     category: "Ferramentas",
-    description: "Ferramenta planejada para apoiar conferencias preliminares de limites e enquadramentos.",
+    description: "Ferramenta planejada para apoiar conferências preliminares de limites e enquadramentos.",
     cta: "Abrir calculadora"
   },
   {
     slug: "consultador-prazos-lei-14133",
     title: "Calculadora de Prazos Processuais da Lei 14.133/21",
     category: "Ferramentas",
-    description: "Planejada para organizar prazos, marcos e alertas de processos de contratacao.",
+    description: "Planejada para organizar prazos, marcos e alertas de processos de contratação.",
     cta: "Consultar prazos"
   },
   {
     slug: "validador-redacao-legislativa",
     title: "Validador Gratuito de Regras da Lei Complementar 95/98",
     category: "Ferramentas",
-    description: "Planejado para apontar problemas formais de tecnica legislativa em minutas.",
-    cta: "Validar redacao"
+    description: "Planejado para apontar problemas formais de técnica legislativa em minutas.",
+    cta: "Validar redação"
   }
 ];
 

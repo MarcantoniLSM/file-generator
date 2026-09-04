@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Minutas Publicas IA",
-  description: "Gerador simples de minutas administrativas para gestao publica."
+  description: "Gerador simples de minutas administrativas para gestão pública."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

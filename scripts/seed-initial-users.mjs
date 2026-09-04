@@ -9,21 +9,21 @@ const users = [
     role: "admin"
   },
   {
-    email: "usuario1@teste.com",
+    email: "usuário1@teste.com",
     password: "Senha@123",
-    fullName: "Usuario Teste 1",
+    fullName: "Usuário Teste 1",
     role: "user"
   },
   {
-    email: "usuario2@teste.com",
+    email: "usuário2@teste.com",
     password: "Senha@123",
-    fullName: "Usuario Teste 2",
+    fullName: "Usuário Teste 2",
     role: "user"
   },
   {
-    email: "usuario3@teste.com",
+    email: "usuário3@teste.com",
     password: "Senha@123",
-    fullName: "Usuario Teste 3",
+    fullName: "Usuário Teste 3",
     role: "user"
   },
   {
@@ -35,11 +35,11 @@ const users = [
   {
     email: "licitacao@prefeitura.gov.br",
     password: "Senha@123",
-    fullName: "Bruno Almeida - Comissao de Licitacao",
+    fullName: "Bruno Almeida - Comissão de Licitacao",
     role: "user"
   },
   {
-    email: "juridico@prefeitura.gov.br",
+    email: "jurídico@prefeitura.gov.br",
     password: "Senha@123",
     fullName: "Carla Menezes - Procuradoria Municipal",
     role: "admin"
@@ -57,7 +57,7 @@ const users = [
     role: "user"
   },
   {
-    email: "saude@prefeitura.gov.br",
+    email: "saúde@prefeitura.gov.br",
     password: "Senha@123",
     fullName: "Fabio Martins - Secretaria de Saude",
     role: "user"
@@ -89,7 +89,7 @@ const users = [
   {
     email: "bloqueado@prefeitura.gov.br",
     password: "Senha@123",
-    fullName: "Usuario Bloqueado - Demonstracao",
+    fullName: "Usuário Bloqueado - Demonstração",
     role: "user",
     accessStatus: "blocked"
   }
@@ -208,4 +208,4 @@ for (const user of users) {
   console.log(`${user.email} criado/atualizado como ${user.role}.`);
 }
 
-console.log("Usuarios iniciais prontos.");
+console.log("Usuários iniciais prontos.");
