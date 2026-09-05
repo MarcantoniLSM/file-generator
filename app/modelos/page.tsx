@@ -8,7 +8,7 @@ export default function ModelsHubPage() {
       <div className="fixed left-0 top-0 z-20 h-full w-2 bg-civic md:w-3" aria-hidden="true" />
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6">
-          <Link href="/" className="font-serif text-xl font-semibold">
+          <Link href="/login" className="font-serif text-xl font-semibold">
             Gerador de Documentos Públicos
           </Link>
           <Link href="/gerador" className="bg-civic px-4 py-2 text-sm font-semibold text-white">

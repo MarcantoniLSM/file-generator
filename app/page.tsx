@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, FileText, Landmark, Scale, ShieldCheck } from "lucide-react";
+import { redirect } from "next/navigation";
 import { executivePages, legislativePages, modelPages, toolPages } from "@/lib/site-pages";
 
 const generatedExamples = [
@@ -81,6 +82,8 @@ function PageGroup({
 }
 
 export default function Home() {
+  redirect("/login");
+
   return (
     <main className="min-h-screen bg-paper text-ink">
       <header className="sticky top-0 z-50 border-b border-line bg-white">

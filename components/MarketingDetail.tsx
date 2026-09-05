@@ -49,7 +49,7 @@ export default function MarketingDetail({ page }: { page: MarketingPage }) {
     <main className="min-h-screen bg-white text-ink">
       <header className="sticky top-0 z-40 border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4 md:px-10">
-          <Link href="/" className="inline-flex items-center gap-3">
+          <Link href="/login" className="inline-flex items-center gap-3">
             <svg viewBox="0 0 100 100" fill="none" aria-hidden="true" className="h-7 w-7 shrink-0">
               <path d="M0 26 L18 0 L18 82 L76 82 L76 100 L0 100 Z" fill="#4A2E7F" />
               <rect x="34" y="16" width="66" height="11" fill="#171A21" />

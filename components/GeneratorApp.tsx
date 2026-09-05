@@ -400,7 +400,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
         <aside className="border-r border-line bg-white text-ink">
           <div className="sticky top-0 flex h-screen flex-col">
             <div className="border-b border-line p-5">
-              <Link href="/" className="flex items-center gap-3">
+              <Link href="/gerador" className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center text-civic">
                   <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
                     <path d="M0 26 L18 0 L18 82 L76 82 L76 100 L0 100 Z" fill="#4A2E7F" />
@@ -419,11 +419,11 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
 
             <nav className="flex-1 overflow-y-auto px-3 py-4">
               <Link
-                href="/"
+                href="/login"
                 className="mb-4 flex items-center gap-2 border border-line bg-paper px-3 py-2 text-sm text-muted hover:text-ink"
               >
                 <Home size={16} />
-                Landing page
+                Login
               </Link>
               <div className="mb-4 grid grid-cols-2 gap-2">
                 <Link

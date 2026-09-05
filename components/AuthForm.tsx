@@ -101,8 +101,8 @@ export default function AuthForm({ mode, error }: AuthFormProps) {
           </button>
 
           <div className="flex items-center justify-between border-t border-line pt-4 text-sm text-muted">
-            <Link href="/" className="hover:text-ink">
-              Voltar ao site
+            <Link href="/login" className="hover:text-ink">
+              Acesso
             </Link>
             <Link href={mode === "login" ? "/cadastro" : "/login"} className="font-semibold text-civic">
               {mode === "login" ? "Criar conta" : "Já tenho conta"}
