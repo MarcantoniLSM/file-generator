@@ -124,6 +124,13 @@ const rulesByKind: Record<DocumentKind, ChecklistRule[]> = {
     rule("Beneficiarios", ["beneficiario", "populacao", "município", "cidadao"], "Beneficiarios aparecem.", "Falta indicar beneficiários ou impacto social."),
     rule("Interesse publico", ["interesse público", "relevancia", "beneficio"], "Interesse publico aparece.", "Falta demonstrar interesse público."),
     rule("Pedido de apoio", ["aprovação", "apoio", "apreciacao"], "Pedido de apoio aparece.", "Falta fechamento pedindo apreciacao ou apoio.")
+  ],
+  trt: [
+    rule("Contrato ou processo", ["contrato", "processo", "empenho"], "Contrato ou processo aparecem.", "Falta identificar contrato, ata, empenho ou processo."),
+    rule("Contratada", ["contratada", "cnpj", "representante"], "Contratada aparece.", "Falta identificar a contratada ou representante."),
+    rule("Responsável técnico", ["responsável técnico", "registro profissional", "crea", "cau", "conselho"], "Responsável técnico aparece.", "Falta responsável técnico, registro ou conselho profissional."),
+    rule("Escopo técnico", ["responsabilidade técnica", "escopo", "atividade", "execução"], "Escopo da responsabilidade aparece.", "Falta delimitar o escopo da responsabilidade técnica."),
+    rule("Ressalvas de aceite", ["pendente", "fiscal", "gestor", "recebimento", "validação"], "Ressalvas ou validação administrativa aparecem.", "Falta diferenciar responsabilidade técnica de aceite pela Administração.")
   ]
 };
 

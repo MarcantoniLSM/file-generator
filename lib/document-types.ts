@@ -12,10 +12,11 @@ export type DocumentKind =
   | "requerimento_legislativo"
   | "parecer_comissao"
   | "emenda_parlamentar"
-  | "justificativa_projeto_lei";
+  | "justificativa_projeto_lei"
+  | "trt";
 
-export type DocumentCategory = "Compras e licitações" | "Atos administrativos" | "Legislativo";
-export type DocumentModule = "compras_licitacoes" | "atos_administrativos" | "legislativo";
+export type DocumentCategory = "Compras e licitações" | "Atos administrativos" | "Legislativo" | "Execução contratual";
+export type DocumentModule = "compras_licitacoes" | "atos_administrativos" | "legislativo" | "execucao_contratual";
 export type DocumentMaturity = "stable" | "beta";
 
 export type FormField = {
@@ -358,17 +359,90 @@ export const documentDefinitions: Record<DocumentKind, DocumentDefinition> = {
       { key: "argumentos", label: "Argumentos principais", placeholder: "Razões políticas, sociais, administrativas ou jurídicas.", type: "textarea" }
     ],
     sections: ["Contextualização", "Finalidade pública", "Beneficiários", "Adequação da proposta", "Conclusão e pedido de apoio"]
+  },
+  trt: {
+    kind: "trt",
+    slug: "gerador-termo-responsabilidade-tecnica",
+    shortName: "TRT",
+    name: "Termo de Responsabilidade Técnica",
+    description: "Minuta para declaração técnica vinculada à execução contratual e às responsabilidades assumidas.",
+    category: "Execução contratual",
+    maturity: "beta",
+    context:
+      "Elaborar Termo de Responsabilidade Técnica no contexto de execução contratual municipal, separando declarações do contratado de validações da Administração.",
+    promptFocus: [
+      "Identificar contrato, objeto, contratado, responsável técnico, atividade executada e escopo da responsabilidade assumida.",
+      "Não declarar aceite definitivo, conformidade plena ou quitação pela Administração sem informação expressa do fiscal/gestor.",
+      "Distinguir informação declarada pelo contratado, responsabilidade técnica assumida e pendências para validação pelo fiscal do contrato.",
+      "Sinalizar documentos comprobatórios pendentes, registro profissional, ART/RRT/TRT equivalente, relatórios, medições e evidências de execução.",
+      ...legalCare
+    ],
+    fields: [
+      { key: "orgao", label: "Órgão contratante", placeholder: "Secretaria Municipal responsável pelo contrato", required: true },
+      { key: "contrato", label: "Contrato ou processo", placeholder: "Número do contrato, ata, empenho ou processo administrativo", required: true },
+      { key: "contratada", label: "Contratada", placeholder: "Razão social, CNPJ e representante, se disponível", required: true },
+      { key: "responsavel_tecnico", label: "Responsável técnico", placeholder: "Nome, cargo/função, registro profissional e entidade de classe", required: true },
+      { key: "objeto", label: "Objeto contratual", placeholder: "Objeto executado ou em execução", type: "textarea", required: true },
+      {
+        key: "escopo_responsabilidade",
+        label: "Escopo da responsabilidade técnica",
+        placeholder: "Atividades, serviços, entregas, laudos, acompanhamento, supervisão ou execução sob responsabilidade técnica.",
+        type: "textarea",
+        required: true
+      },
+      {
+        key: "periodo_execucao",
+        label: "Período de execução",
+        placeholder: "Datas, vigência, etapa ou medição relacionada ao termo."
+      },
+      {
+        key: "evidencias",
+        label: "Evidências e documentos anexos",
+        placeholder: "ART/RRT, relatórios, medições, fotos, notas, laudos, ordens de serviço ou outros comprovantes.",
+        type: "textarea"
+      },
+      {
+        key: "declaracoes",
+        label: "Declarações do responsável/contratada",
+        placeholder: "Declarações que devem constar no termo, limites da responsabilidade e ciência das obrigações.",
+        type: "textarea"
+      },
+      {
+        key: "validacao_administracao",
+        label: "Validação pela Administração",
+        placeholder: "Informe se haverá campo para fiscal, gestor, recebimento provisório ou apenas ciência administrativa.",
+        type: "textarea"
+      }
+    ],
+    sections: [
+      "Identificação do contrato ou processo",
+      "Identificação da contratada",
+      "Responsável técnico",
+      "Objeto e escopo da responsabilidade",
+      "Período ou etapa abrangida",
+      "Declarações técnicas",
+      "Documentos comprobatórios",
+      "Ressalvas e pendências",
+      "Ciência do fiscal ou gestor",
+      "Assinaturas"
+    ]
   }
 };
 
 export const documentKinds = Object.keys(documentDefinitions) as DocumentKind[];
 export const documentCatalog = documentKinds.map((kind) => documentDefinitions[kind]);
-export const documentModules: DocumentModule[] = ["compras_licitacoes", "atos_administrativos", "legislativo"];
+export const documentModules: DocumentModule[] = [
+  "compras_licitacoes",
+  "atos_administrativos",
+  "legislativo",
+  "execucao_contratual"
+];
 
 export const documentModuleLabels: Record<DocumentModule, DocumentCategory> = {
   compras_licitacoes: "Compras e licitações",
   atos_administrativos: "Atos administrativos",
-  legislativo: "Legislativo"
+  legislativo: "Legislativo",
+  execucao_contratual: "Execução contratual"
 };
 
 export function getDocumentModule(category: DocumentCategory): DocumentModule {

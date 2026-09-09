@@ -521,6 +521,42 @@ const profiles: Record<DocumentKind, PromptProfile> = {
       "Verificar se ha exageros ou dados inventados.",
       "Apontar falta de impacto orçamentário ou competência quando relevante."
     ]
+  },
+  trt: {
+    persona: "especialista em execução contratual municipal e documentação técnica de responsabilidade do contratado",
+    objective:
+      "produzir Termo de Responsabilidade Técnica claro e cauteloso, delimitando contrato, contratado, responsável técnico, escopo da responsabilidade, evidências e validação administrativa.",
+    mustDo: [
+      ...sharedMustDo,
+      "Separe informações declaradas pela contratada das verificações que cabem ao fiscal ou gestor do contrato.",
+      "Identifique contrato/processo, órgão contratante, contratada, responsável técnico, registro profissional, objeto e período abrangido.",
+      "Delimite o escopo da responsabilidade técnica sem ampliar obrigações além dos dados fornecidos.",
+      "Inclua espaço para ciência ou validação da Administração, deixando claro que isso não substitui recebimento definitivo quando não informado.",
+      "Marque como pendentes documentos comprobatórios, ART/RRT/TRT equivalente, relatórios, medições, laudos, ordens de serviço e evidências não informadas."
+    ],
+    mustAvoid: [
+      ...sharedMustAvoid,
+      "Não declarar aceite definitivo, quitação, conformidade plena ou execução integral sem informação expressa da Administração.",
+      "Não assumir que o responsável possui registro profissional específico se o dado não foi informado.",
+      "Não transformar o termo em relatório de fiscalização ou termo de recebimento."
+    ],
+    structureNotes: [
+      "Comece com identificação do órgão, contrato/processo e contratada.",
+      "Crie seção própria para responsável técnico e registro profissional.",
+      "Descreva objeto, período e escopo da responsabilidade assumida.",
+      "Inclua declarações técnicas em linguagem formal.",
+      "Finalize com ressalvas, pendências documentais, ciência da Administração e assinaturas."
+    ],
+    qualityBar: [
+      "O termo deve ser útil para anexar ao processo de execução contratual.",
+      "A responsabilidade técnica deve ficar delimitada e verificável.",
+      "As pendências devem reduzir risco de alucinação e de aceite administrativo indevido."
+    ],
+    reviewCriteria: [
+      "Verificar se contrato, contratada, responsável técnico e objeto foram identificados.",
+      "Verificar se o escopo técnico está delimitado.",
+      "Verificar se o texto evita aceite definitivo ou conformidade plena sem dados."
+    ]
   }
 };
 

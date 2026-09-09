@@ -38,7 +38,8 @@ const criticalFieldsByKind: Record<DocumentKind, string[]> = {
   requerimento_legislativo: ["autor", "tipo", "destinatario", "pedido", "justificativa"],
   parecer_comissao: ["comissao", "proposicao", "ementa", "posicao"],
   emenda_parlamentar: ["autor", "tipo_emenda", "proposicao", "dispositivo", "redacao"],
-  justificativa_projeto_lei: ["autor", "tema", "objetivo", "beneficiarios", "argumentos"]
+  justificativa_projeto_lei: ["autor", "tema", "objetivo", "beneficiarios", "argumentos"],
+  trt: ["orgao", "contrato", "contratada", "responsavel_tecnico", "objeto", "escopo_responsabilidade"]
 };
 
 const fieldQuestions: Record<string, string> = {
@@ -90,7 +91,14 @@ const fieldQuestions: Record<string, string> = {
   dispositivo: "Qual dispositivo será alterado, acrescido ou suprimido?",
   redacao: "Qual redação proposta deve constar na emenda?",
   beneficiarios: "Quem será beneficiado pela proposta?",
-  argumentos: "Quais argumentos principais devem sustentar a justificativa?"
+  argumentos: "Quais argumentos principais devem sustentar a justificativa?",
+  contrato: "Qual contrato, ata, empenho ou processo administrativo será relacionado ao termo?",
+  responsavel_tecnico: "Quem é o responsável técnico e qual registro profissional ou vínculo deve constar?",
+  escopo_responsabilidade: "Qual atividade, entrega ou serviço fica sob responsabilidade técnica?",
+  periodo_execucao: "Qual período, etapa, medição ou vigência o termo deve abranger?",
+  evidencias: "Quais evidências, laudos, relatórios, ART/RRT ou documentos comprovam a execução?",
+  declaracoes: "Quais declarações devem ser assumidas pelo responsável técnico ou pela contratada?",
+  validacao_administracao: "Como a Administração fará ciência, fiscalização, validação ou recebimento relacionado ao termo?"
 };
 
 function hasValue(values: Record<string, string>, key: string) {

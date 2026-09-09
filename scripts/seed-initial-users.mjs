@@ -7,7 +7,7 @@ const users = [
     password: "Admin@123",
     fullName: "Administrador With No Code",
     role: "admin",
-    allowedModules: ["compras_licitacoes", "atos_administrativos", "legislativo"]
+    allowedModules: ["compras_licitacoes", "atos_administrativos", "legislativo", "execucao_contratual"]
   },
   {
     email: "teste@withnocode.com",

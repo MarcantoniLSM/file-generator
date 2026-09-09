@@ -1,14 +1,19 @@
 alter table public.file_generator_profiles
 add column if not exists allowed_modules text[] not null
-default array['compras_licitacoes', 'atos_administrativos', 'legislativo'];
+default array['compras_licitacoes', 'atos_administrativos', 'legislativo', 'execucao_contratual'];
 
 update public.file_generator_profiles
-set allowed_modules = array['compras_licitacoes', 'atos_administrativos', 'legislativo']
+set allowed_modules = array['compras_licitacoes', 'atos_administrativos', 'legislativo', 'execucao_contratual']
 where role = 'admin'
   and (
     allowed_modules is null
     or array_length(allowed_modules, 1) is null
   );
+
+update public.file_generator_profiles
+set allowed_modules = array_append(allowed_modules, 'execucao_contratual')
+where role = 'admin'
+  and not ('execucao_contratual' = any(allowed_modules));
 
 update public.file_generator_profiles
 set allowed_modules = array['compras_licitacoes']
@@ -41,7 +46,7 @@ begin
     'active'::public.file_generator_access_status,
     case
       when assigned_role = 'admin'::public.file_generator_user_role
-        then array['compras_licitacoes', 'atos_administrativos', 'legislativo']
+        then array['compras_licitacoes', 'atos_administrativos', 'legislativo', 'execucao_contratual']
       else array['compras_licitacoes']
     end
   )

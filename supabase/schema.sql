@@ -20,6 +20,7 @@ create table if not exists public.file_generator_profiles (
   full_name text,
   role public.file_generator_user_role not null default 'user',
   access_status public.file_generator_access_status not null default 'active',
+  allowed_modules text[] not null default array['compras_licitacoes', 'atos_administrativos', 'legislativo', 'execucao_contratual'],
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -47,17 +48,26 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+  assigned_role public.file_generator_user_role;
 begin
-  insert into public.file_generator_profiles (id, email, full_name, role, access_status)
+  assigned_role := case
+    when not exists (select 1 from public.file_generator_profiles where role = 'admin') then 'admin'::public.file_generator_user_role
+    else 'user'::public.file_generator_user_role
+  end;
+
+  insert into public.file_generator_profiles (id, email, full_name, role, access_status, allowed_modules)
   values (
     new.id,
     coalesce(new.email, ''),
     coalesce(nullif(new.raw_user_meta_data ->> 'full_name', ''), 'Sem nome'),
+    assigned_role,
+    'active'::public.file_generator_access_status,
     case
-      when not exists (select 1 from public.file_generator_profiles where role = 'admin') then 'admin'::public.file_generator_user_role
-      else 'user'::public.file_generator_user_role
-    end,
-    'active'::public.file_generator_access_status
+      when assigned_role = 'admin'::public.file_generator_user_role
+        then array['compras_licitacoes', 'atos_administrativos', 'legislativo', 'execucao_contratual']
+      else array['compras_licitacoes']
+    end
   )
   on conflict (id) do update
   set

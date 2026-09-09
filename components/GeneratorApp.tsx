@@ -27,7 +27,8 @@ import {
   FormField,
   canAccessDocumentKind,
   documentCatalog,
-  documentDefinitions
+  documentDefinitions,
+  getDocumentModule
 } from "@/lib/document-types";
 
 type Mode = "generate" | "review";
@@ -72,6 +73,10 @@ type NavItem = {
   kind: DocumentKind;
   maturity: "stable" | "beta";
 };
+type ComingSoonItem = {
+  label: string;
+  description: string;
+};
 
 const defaultKind: DocumentKind = "etp";
 const institutionalFields: FormField[] = [
@@ -95,11 +100,25 @@ const institutionalFields: FormField[] = [
 const groupIcons: Record<DocumentCategory, typeof FolderKanban> = {
   "Compras e licitações": FolderKanban,
   "Atos administrativos": Landmark,
-  Legislativo: Gavel
+  Legislativo: Gavel,
+  "Execução contratual": FileText
 };
 
-const documentGroups = (["Compras e licitações", "Atos administrativos", "Legislativo"] as DocumentCategory[]).map(
-  (category) => ({
+const comingSoonByCategory: Partial<Record<DocumentCategory, ComingSoonItem[]>> = {
+  "Execução contratual": [
+    { label: "Execução", description: "Relatório de execução" },
+    { label: "Receb. provisório", description: "Termo de recebimento provisório" },
+    { label: "Receb. definitivo", description: "Termo de recebimento definitivo" },
+    { label: "Fiscalização", description: "Relatório de fiscalização contratual" },
+    { label: "Notificação", description: "Notificação ao contratado" },
+    { label: "Aditivo", description: "Justificativa de aditivo" },
+    { label: "OS", description: "Ordem de serviço" }
+  ]
+};
+
+const documentGroups = (
+  ["Compras e licitações", "Atos administrativos", "Legislativo", "Execução contratual"] as DocumentCategory[]
+).map((category) => ({
     title: category,
     icon: groupIcons[category],
     items: documentCatalog
@@ -109,9 +128,9 @@ const documentGroups = (["Compras e licitações", "Atos administrativos", "Legi
         description: document.name,
         kind: document.kind,
         maturity: document.maturity
-      }))
-  })
-);
+      })),
+    comingSoon: comingSoonByCategory[category] || []
+  }));
 
 export default function GeneratorApp({
   initialKind = defaultKind,
@@ -144,9 +163,10 @@ export default function GeneratorApp({
   const visibleDocumentGroups = documentGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => canAccessDocumentKind(item.kind, allowedModules))
+      items: group.items.filter((item) => canAccessDocumentKind(item.kind, allowedModules)),
+      comingSoon: allowedModules.includes(getDocumentModule(group.title)) ? group.comingSoon : []
     }))
-    .filter((group) => group.items.length > 0);
+    .filter((group) => group.items.length > 0 || group.comingSoon.length > 0);
 
   const missingRequired = useMemo(
     () => definition.fields.filter((field) => field.required && !values[field.key]?.trim()),
@@ -502,6 +522,20 @@ export default function GeneratorApp({
                             </button>
                           );
                         })}
+                        {group.comingSoon.map((item) => (
+                          <div
+                            key={item.description}
+                            className="w-full cursor-not-allowed border border-transparent px-3 py-2 text-left text-muted opacity-55"
+                          >
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold">{item.label}</span>
+                              <span className="border border-line bg-white px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-muted">
+                                Em breve
+                              </span>
+                            </span>
+                            <span className="mt-0.5 block text-xs opacity-70">{item.description}</span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   );

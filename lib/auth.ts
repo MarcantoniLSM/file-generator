@@ -22,7 +22,7 @@ export function getProfileAllowedModules(profile: Pick<UserProfile, "role"> & { 
   if (profile.allowed_modules?.length) return profile.allowed_modules;
 
   return profile.role === "admin"
-    ? (["compras_licitacoes", "atos_administrativos", "legislativo"] satisfies DocumentModule[])
+    ? (["compras_licitacoes", "atos_administrativos", "legislativo", "execucao_contratual"] satisfies DocumentModule[])
     : (["compras_licitacoes"] satisfies DocumentModule[]);
 }
 
