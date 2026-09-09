@@ -20,7 +20,15 @@ import {
 } from "lucide-react";
 import DocumentEditor from "@/components/DocumentEditor";
 import { exportDocx } from "@/lib/docx-export";
-import { DocumentCategory, DocumentKind, FormField, documentCatalog, documentDefinitions } from "@/lib/document-types";
+import {
+  DocumentCategory,
+  DocumentKind,
+  DocumentModule,
+  FormField,
+  canAccessDocumentKind,
+  documentCatalog,
+  documentDefinitions
+} from "@/lib/document-types";
 
 type Mode = "generate" | "review";
 type ProcessModalState = "closed" | "validating" | "generating" | "compliance" | "insufficient" | "error";
@@ -105,8 +113,17 @@ const documentGroups = (["Compras e licitações", "Atos administrativos", "Legi
   })
 );
 
-export default function GeneratorApp({ initialKind = defaultKind }: { initialKind?: DocumentKind }) {
-  const [kind, setKind] = useState<DocumentKind>(initialKind);
+export default function GeneratorApp({
+  initialKind = defaultKind,
+  allowedModules
+}: {
+  initialKind?: DocumentKind;
+  allowedModules: DocumentModule[];
+}) {
+  const accessibleInitialKind = canAccessDocumentKind(initialKind, allowedModules)
+    ? initialKind
+    : documentCatalog.find((document) => canAccessDocumentKind(document.kind, allowedModules))?.kind || defaultKind;
+  const [kind, setKind] = useState<DocumentKind>(accessibleInitialKind);
   const [mode, setMode] = useState<Mode>("generate");
   const [values, setValues] = useState<Record<string, string>>({});
   const [headerTemplate, setHeaderTemplate] = useState("");
@@ -124,6 +141,12 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
   const institutionPayload = { headerTemplate };
   const requiredFields = definition.fields.filter((field) => field.required);
   const optionalFields = definition.fields.filter((field) => !field.required);
+  const visibleDocumentGroups = documentGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => canAccessDocumentKind(item.kind, allowedModules))
+    }))
+    .filter((group) => group.items.length > 0);
 
   const missingRequired = useMemo(
     () => definition.fields.filter((field) => field.required && !values[field.key]?.trim()),
@@ -445,7 +468,7 @@ export default function GeneratorApp({ initialKind = defaultKind }: { initialKin
               </div>
 
               <div className="space-y-5">
-                {documentGroups.map((group) => {
+                {visibleDocumentGroups.map((group) => {
                   const Icon = group.icon;
                   return (
                     <div key={group.title}>

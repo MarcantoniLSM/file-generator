@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
   const supabase = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : await createSupabaseServerClient();
   const { data } = await supabase
     .from("file_generator_profiles")
-    .select("id,email,full_name,role,access_status,created_at")
+    .select("*")
     .order("created_at", { ascending: false });
   const { data: generationData, error: generationsError } = await supabase
     .from("file_generator_document_generations")

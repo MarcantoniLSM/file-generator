@@ -45,7 +45,7 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
   const profileClient = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : supabase;
   const { data: profile } = await profileClient
     .from("file_generator_profiles")
-    .select("id,email,full_name,role,access_status,created_at,updated_at")
+    .select("*")
     .eq("id", data.user.id)
     .single<UserProfile>();
 

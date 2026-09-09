@@ -6,13 +6,15 @@ const users = [
     email: "admin@withnocode.com",
     password: "Admin@123",
     fullName: "Administrador With No Code",
-    role: "admin"
+    role: "admin",
+    allowedModules: ["compras_licitacoes", "atos_administrativos", "legislativo"]
   },
   {
     email: "teste@withnocode.com",
     password: "Senha@123",
     fullName: "Usuário de Teste With No Code",
-    role: "user"
+    role: "user",
+    allowedModules: ["compras_licitacoes"]
   }
 ];
 
@@ -108,7 +110,8 @@ async function upsertProfile(id, seedUser) {
       email: seedUser.email,
       full_name: seedUser.fullName,
       role: seedUser.role,
-      access_status: seedUser.accessStatus || "active"
+      access_status: seedUser.accessStatus || "active",
+      allowed_modules: seedUser.allowedModules || ["compras_licitacoes"]
     })
   });
 }

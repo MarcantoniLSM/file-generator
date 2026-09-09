@@ -4,6 +4,7 @@ import { getCurrentUserProfile } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hasSupabaseAdminConfig } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { documentModules } from "@/lib/document-types";
 
 export const dynamic = "force-dynamic";
 
@@ -45,12 +46,23 @@ export async function POST(request: NextRequest) {
   const id = getString(formData, "id");
   const role = getString(formData, "role");
   const accessStatus = getString(formData, "access_status");
+  const allowedModules = formData
+    .getAll("allowed_modules")
+    .filter((value): value is string => typeof value === "string")
+    .filter((value) => documentModules.includes(value as (typeof documentModules)[number]));
 
   if (!id || !["admin", "user"].includes(role) || !["active", "blocked"].includes(accessStatus)) {
     console.warn("[admin:update-user] Dados inválidos na atualização de usuário.", {
       id: Boolean(id),
       role,
       accessStatus
+    });
+    return redirectTo(request, "/admin/usuarios");
+  }
+
+  if (allowedModules.length === 0) {
+    console.warn("[admin:update-user] Nenhum módulo selecionado para usuário.", {
+      targetUserId: id
     });
     return redirectTo(request, "/admin/usuarios");
   }
@@ -68,7 +80,8 @@ export async function POST(request: NextRequest) {
     .from("file_generator_profiles")
     .update({
       role,
-      access_status: accessStatus
+      access_status: accessStatus,
+      allowed_modules: allowedModules
     })
     .eq("id", id);
 

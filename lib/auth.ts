@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { hasSupabaseAdminConfig, hasSupabaseConfig } from "./supabase/config";
 import { createSupabaseAdminClient } from "./supabase/admin";
 import { createSupabaseServerClient } from "./supabase/server";
+import type { DocumentModule } from "./document-types";
 
 export type UserRole = "admin" | "user";
 export type AccessStatus = "active" | "blocked";
@@ -12,9 +13,18 @@ export type UserProfile = {
   full_name: string | null;
   role: UserRole;
   access_status: AccessStatus;
+  allowed_modules: DocumentModule[];
   created_at: string;
   updated_at: string;
 };
+
+export function getProfileAllowedModules(profile: Pick<UserProfile, "role"> & { allowed_modules?: DocumentModule[] | null }) {
+  if (profile.allowed_modules?.length) return profile.allowed_modules;
+
+  return profile.role === "admin"
+    ? (["compras_licitacoes", "atos_administrativos", "legislativo"] satisfies DocumentModule[])
+    : (["compras_licitacoes"] satisfies DocumentModule[]);
+}
 
 export async function getCurrentUserProfile() {
   if (!hasSupabaseConfig()) {
@@ -33,11 +43,13 @@ export async function getCurrentUserProfile() {
   const profileClient = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : supabase;
   const { data: profile } = await profileClient
     .from("file_generator_profiles")
-    .select("id,email,full_name,role,access_status,created_at,updated_at")
+    .select("*")
     .eq("id", user.id)
     .single<UserProfile>();
 
-  return { user, profile, configured: true };
+  const normalizedProfile = profile ? { ...profile, allowed_modules: getProfileAllowedModules(profile) } : null;
+
+  return { user, profile: normalizedProfile, configured: true };
 }
 
 export async function requireUser() {

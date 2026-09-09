@@ -1,9 +1,12 @@
+import { documentModuleLabels, documentModules, type DocumentModule } from "@/lib/document-types";
+
 type Profile = {
   id: string;
   email: string;
   full_name: string | null;
   role: "admin" | "user";
   access_status: "active" | "blocked";
+  allowed_modules?: DocumentModule[] | null;
   created_at: string;
 };
 
@@ -28,6 +31,7 @@ export function AdminUsersTable({
               <th className="border-b border-line px-4 py-3 font-semibold">Usuário</th>
               <th className="border-b border-line px-4 py-3 font-semibold">Papel</th>
               <th className="border-b border-line px-4 py-3 font-semibold">Acesso</th>
+              <th className="border-b border-line px-4 py-3 font-semibold">Módulos</th>
               <th className="border-b border-line px-4 py-3 font-semibold">Cadastro</th>
               <th className="border-b border-line px-4 py-3 font-semibold">Ação</th>
             </tr>
@@ -35,6 +39,12 @@ export function AdminUsersTable({
           <tbody>
             {profiles.map((profile) => {
               const isSelf = profile.id === currentUserId;
+              const allowedModules =
+                profile.allowed_modules?.length
+                  ? profile.allowed_modules
+                  : profile.role === "admin"
+                    ? documentModules
+                    : (["compras_licitacoes"] satisfies DocumentModule[]);
 
               return (
                 <tr key={profile.id} className="border-b border-line last:border-b-0">
@@ -49,9 +59,32 @@ export function AdminUsersTable({
                   <td className="px-4 py-3">
                     <span>{profile.access_status === "active" ? "Ativo" : "Bloqueado"}</span>
                   </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1.5">
+                      {documentModules.map((module) => (
+                        <label key={module} className="flex items-center gap-2 text-xs font-semibold text-muted">
+                          <input
+                            type="checkbox"
+                            name="allowed_modules"
+                            value={module}
+                            form={`user-access-${profile.id}`}
+                            defaultChecked={allowedModules.includes(module)}
+                            disabled={isSelf}
+                            className="h-4 w-4 accent-civic disabled:opacity-50"
+                          />
+                          {documentModuleLabels[module]}
+                        </label>
+                      ))}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-muted">{new Date(profile.created_at).toLocaleDateString("pt-BR")}</td>
                   <td className="px-4 py-3">
-                    <form action="/admin/usuarios/atualizar" method="post" className="flex items-center gap-2">
+                    <form
+                      id={`user-access-${profile.id}`}
+                      action="/admin/usuarios/atualizar"
+                      method="post"
+                      className="flex items-center gap-2"
+                    >
                       <input type="hidden" name="id" value={profile.id} />
                       <select
                         name="role"

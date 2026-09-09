@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   const profileClient = hasSupabaseAdminConfig() ? createSupabaseAdminClient() : supabase;
   const { data: profile, error: profileError } = await profileClient
     .from("file_generator_profiles")
-    .select("id,email,full_name,role,access_status,created_at,updated_at")
+    .select("*")
     .eq("id", data.user.id)
     .single<UserProfile>();
 

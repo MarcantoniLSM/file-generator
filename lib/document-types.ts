@@ -15,6 +15,7 @@ export type DocumentKind =
   | "justificativa_projeto_lei";
 
 export type DocumentCategory = "Compras e licitações" | "Atos administrativos" | "Legislativo";
+export type DocumentModule = "compras_licitacoes" | "atos_administrativos" | "legislativo";
 export type DocumentMaturity = "stable" | "beta";
 
 export type FormField = {
@@ -362,6 +363,25 @@ export const documentDefinitions: Record<DocumentKind, DocumentDefinition> = {
 
 export const documentKinds = Object.keys(documentDefinitions) as DocumentKind[];
 export const documentCatalog = documentKinds.map((kind) => documentDefinitions[kind]);
+export const documentModules: DocumentModule[] = ["compras_licitacoes", "atos_administrativos", "legislativo"];
+
+export const documentModuleLabels: Record<DocumentModule, DocumentCategory> = {
+  compras_licitacoes: "Compras e licitações",
+  atos_administrativos: "Atos administrativos",
+  legislativo: "Legislativo"
+};
+
+export function getDocumentModule(category: DocumentCategory): DocumentModule {
+  const documentModule = documentModules.find((item) => documentModuleLabels[item] === category);
+  return documentModule || "compras_licitacoes";
+}
+
+export function canAccessDocumentKind(kind: DocumentKind, allowedModules: DocumentModule[] | null | undefined) {
+  const definition = documentDefinitions[kind];
+  if (!definition || !allowedModules?.length) return false;
+
+  return allowedModules.includes(getDocumentModule(definition.category));
+}
 
 export function isDocumentKind(value: unknown): value is DocumentKind {
   return typeof value === "string" && documentKinds.includes(value as DocumentKind);

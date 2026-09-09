@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { documentKinds, type DocumentKind } from "@/lib/document-types";
+import { canAccessDocumentKind, documentKinds, type DocumentKind } from "@/lib/document-types";
 import { reviewDraft } from "@/lib/ai";
 import { getCurrentUserProfile } from "@/lib/auth";
 
@@ -15,6 +15,10 @@ export async function POST(request: Request) {
 
   if (!documentKinds.includes(kind)) {
     return NextResponse.json({ error: "Tipo documental inválido." }, { status: 400 });
+  }
+
+  if (!canAccessDocumentKind(kind, profile?.allowed_modules)) {
+    return NextResponse.json({ error: "Você não tem acesso a este módulo." }, { status: 403 });
   }
 
   const text = typeof body.text === "string" ? body.text : "";
