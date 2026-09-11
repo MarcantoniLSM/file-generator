@@ -2,11 +2,17 @@
 
 import {
   AlignmentType,
+  BorderStyle,
   Document,
   HeadingLevel,
+  ImageRun,
   Packer,
   Paragraph,
-  TextRun
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType
 } from "docx";
 
 type ExportDocxInput = {
@@ -14,6 +20,7 @@ type ExportDocxInput = {
   filename: string;
   body: string;
   header?: string;
+  logoDataUrl?: string;
 };
 
 function cleanMarkdown(value: string) {
@@ -22,6 +29,73 @@ function cleanMarkdown(value: string) {
     .replace(/_(.*?)_/g, "$1")
     .replace(/`(.*?)`/g, "$1")
     .trim();
+}
+
+function isMarkdownTableDivider(line: string) {
+  const trimmed = line.trim();
+  if (!trimmed.includes("|")) return false;
+
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(trimmed);
+}
+
+function splitMarkdownTableRow(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cleanMarkdown(cell.trim()));
+}
+
+function tableFromLines(lines: string[]) {
+  const rows = [splitMarkdownTableRow(lines[0]), ...lines.slice(2).map(splitMarkdownTableRow)];
+  const columnCount = Math.max(...rows.map((row) => row.length));
+
+  return new Table({
+    width: {
+      size: 100,
+      type: WidthType.PERCENTAGE
+    },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
+      left: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
+      right: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
+      insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "D7DBE3" },
+      insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "D7DBE3" }
+    },
+    rows: rows.map(
+      (row, rowIndex) =>
+        new TableRow({
+          tableHeader: rowIndex === 0,
+          children: Array.from({ length: columnCount }, (_, index) => {
+            const text = row[index] || "";
+
+            return new TableCell({
+              shading: rowIndex === 0 ? { fill: "F1F3F6" } : undefined,
+              margins: {
+                top: 90,
+                bottom: 90,
+                left: 90,
+                right: 90
+              },
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text,
+                      bold: rowIndex === 0,
+                      size: 20
+                    })
+                  ],
+                  spacing: { after: 0 }
+                })
+              ]
+            });
+          })
+        })
+    )
+  });
 }
 
 function paragraphFromLine(line: string) {
@@ -83,16 +157,63 @@ function paragraphFromLine(line: string) {
   });
 }
 
-function linesToParagraphs(text: string) {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map(paragraphFromLine);
+function bodyToDocxBlocks(text: string) {
+  const lines = text.split("\n");
+  const blocks: Array<Paragraph | Table> = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index].trim();
+
+    if (!line) continue;
+
+    if (line.includes("|") && lines[index + 1] && isMarkdownTableDivider(lines[index + 1])) {
+      const tableLines = [lines[index], lines[index + 1]];
+      index += 2;
+
+      while (index < lines.length && lines[index].trim().includes("|") && lines[index].trim()) {
+        tableLines.push(lines[index]);
+        index += 1;
+      }
+
+      index -= 1;
+      blocks.push(tableFromLines(tableLines));
+      blocks.push(new Paragraph({ text: "", spacing: { after: 120 } }));
+      continue;
+    }
+
+    blocks.push(paragraphFromLine(line));
+  }
+
+  return blocks;
+}
+
+async function logoParagraph(logoDataUrl?: string) {
+  if (!logoDataUrl?.trim()) return [];
+
+  const response = await fetch(logoDataUrl);
+  const data = new Uint8Array(await response.arrayBuffer());
+  const type = logoDataUrl.startsWith("data:image/jpeg") ? "jpg" : "png";
+
+  return [
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 180 },
+      children: [
+        new ImageRun({
+          type,
+          data,
+          transformation: {
+            width: 84,
+            height: 84
+          }
+        })
+      ]
+    })
+  ];
 }
 
 function headerParagraphs(header?: string) {
-  if (!header?.trim()) return [];
+  if (!header?.trim()) return [new Paragraph({ text: "", spacing: { after: 120 } })];
 
   return [
     ...header
@@ -111,7 +232,9 @@ function headerParagraphs(header?: string) {
   ];
 }
 
-export async function exportDocx({ title, filename, body, header }: ExportDocxInput) {
+export async function exportDocx({ title, filename, body, header, logoDataUrl }: ExportDocxInput) {
+  const logoBlocks = await logoParagraph(logoDataUrl);
+
   const doc = new Document({
     numbering: {
       config: [
@@ -141,6 +264,7 @@ export async function exportDocx({ title, filename, body, header }: ExportDocxIn
           }
         },
         children: [
+          ...logoBlocks,
           ...headerParagraphs(header),
           new Paragraph({
             text: title,
@@ -148,7 +272,7 @@ export async function exportDocx({ title, filename, body, header }: ExportDocxIn
             alignment: AlignmentType.CENTER,
             spacing: { after: 360 }
           }),
-          ...linesToParagraphs(body)
+          ...bodyToDocxBlocks(body)
         ]
       }
     ]

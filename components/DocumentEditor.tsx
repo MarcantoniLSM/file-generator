@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table, TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
 import {
   AlignCenter,
@@ -46,6 +47,35 @@ function inlineMarkdown(value: string) {
     .replace(/_(.*?)_/g, "<em>$1</em>");
 }
 
+function isMarkdownTableDivider(line: string) {
+  const trimmed = line.trim();
+  if (!trimmed.includes("|")) return false;
+
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(trimmed);
+}
+
+function splitMarkdownTableRow(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function renderMarkdownTable(lines: string[]) {
+  const header = splitMarkdownTableRow(lines[0]);
+  const bodyRows = lines.slice(2).map(splitMarkdownTableRow);
+
+  return [
+    '<table><thead><tr>',
+    ...header.map((cell) => `<th>${inlineMarkdown(cell)}</th>`),
+    "</tr></thead><tbody>",
+    ...bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkdown(cell)}</td>`).join("")}</tr>`),
+    "</tbody></table>"
+  ].join("");
+}
+
 export function markdownToHtml(markdown: string) {
   const lines = markdown.split("\n");
   const html: string[] = [];
@@ -57,11 +87,27 @@ export function markdownToHtml(markdown: string) {
     listType = null;
   }
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
     const trimmed = line.trim();
 
     if (!trimmed) {
       closeList();
+      continue;
+    }
+
+    if (trimmed.includes("|") && lines[index + 1] && isMarkdownTableDivider(lines[index + 1])) {
+      closeList();
+      const tableLines = [line, lines[index + 1]];
+      index += 2;
+
+      while (index < lines.length && lines[index].trim().includes("|") && lines[index].trim()) {
+        tableLines.push(lines[index]);
+        index += 1;
+      }
+
+      index -= 1;
+      html.push(renderMarkdownTable(tableLines));
       continue;
     }
 
@@ -112,11 +158,52 @@ export function markdownToHtml(markdown: string) {
   return html.join("");
 }
 
-function htmlToPlainText(html: string) {
+function serializeTable(table: HTMLTableElement) {
+  const rows = Array.from(table.querySelectorAll("tr")).map((row) =>
+    Array.from(row.children).map((cell) => cell.textContent?.trim().replace(/\s+/g, " ") || "")
+  );
+
+  if (!rows.length) return "";
+
+  const columnCount = Math.max(...rows.map((row) => row.length));
+  const normalizedRows = rows.map((row) => Array.from({ length: columnCount }, (_, index) => row[index] || ""));
+  const header = normalizedRows[0];
+  const divider = header.map(() => "---");
+  const body = normalizedRows.slice(1);
+  const formatRow = (row: string[]) => `| ${row.join(" | ")} |`;
+
+  return [formatRow(header), formatRow(divider), ...body.map(formatRow)].join("\n");
+}
+
+function htmlToDocumentText(html: string) {
   if (typeof window === "undefined") return html;
   const element = document.createElement("div");
   element.innerHTML = html;
-  return element.innerText.trim();
+  const blocks: string[] = [];
+
+  Array.from(element.children).forEach((child) => {
+    const tag = child.tagName.toLowerCase();
+    const text = child.textContent?.trim() || "";
+
+    if (!text && tag !== "table") return;
+
+    if (tag === "h1") blocks.push(`# ${text}`);
+    else if (tag === "h2") blocks.push(`## ${text}`);
+    else if (tag === "h3") blocks.push(`### ${text}`);
+    else if (tag === "ul") {
+      Array.from(child.querySelectorAll("li")).forEach((item) => blocks.push(`- ${item.textContent?.trim() || ""}`));
+    } else if (tag === "ol") {
+      Array.from(child.querySelectorAll("li")).forEach((item, index) =>
+        blocks.push(`${index + 1}. ${item.textContent?.trim() || ""}`)
+      );
+    } else if (tag === "table") {
+      blocks.push(serializeTable(child as HTMLTableElement));
+    } else {
+      blocks.push(text);
+    }
+  });
+
+  return blocks.join("\n\n").trim();
 }
 
 function ToolbarButton({
@@ -159,6 +246,12 @@ export default function DocumentEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
+      Table.configure({
+        resizable: true
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       TextAlign.configure({
         types: ["heading", "paragraph"]
       }),
@@ -170,17 +263,17 @@ export default function DocumentEditor({
     editorProps: {
       attributes: {
         class:
-          `${minHeightClass} focus:outline-none font-serif text-[15px] leading-7 text-ink [&_h1]:text-center [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:uppercase [&_h1]:tracking-wide [&_h1]:mb-8 [&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-semibold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-6 [&_ul]:list-disc [&_ol]:mb-4 [&_ol]:ml-6 [&_ol]:list-decimal [&_li]:mb-1`
+          `${minHeightClass} focus:outline-none font-serif text-[15px] leading-7 text-ink [&_h1]:text-center [&_h1]:text-xl [&_h1]:font-semibold [&_h1]:uppercase [&_h1]:tracking-wide [&_h1]:mb-8 [&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-semibold [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:ml-6 [&_ul]:list-disc [&_ol]:mb-4 [&_ol]:ml-6 [&_ol]:list-decimal [&_li]:mb-1 [&_table]:mb-5 [&_table]:w-full [&_table]:border-collapse [&_table]:text-[13px] [&_th]:border [&_th]:border-line [&_th]:bg-paper [&_th]:px-2 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-line [&_td]:px-2 [&_td]:py-2 [&_td_p]:m-0`
       }
     },
     onUpdate({ editor: currentEditor }) {
-      onChange(htmlToPlainText(currentEditor.getHTML()));
+      onChange(htmlToDocumentText(currentEditor.getHTML()));
     }
   });
 
   useEffect(() => {
     if (!editor) return;
-    const currentText = htmlToPlainText(editor.getHTML());
+    const currentText = htmlToDocumentText(editor.getHTML());
 
     if (currentText === value.trim()) return;
     editor.commands.setContent(value ? markdownToHtml(value) : "", { emitUpdate: false });

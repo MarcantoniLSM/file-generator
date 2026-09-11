@@ -34,7 +34,7 @@ const sharedMustDo = [
   "Adapte termos informais para redação administrativa, preservando os fatos informados pelo usuário.",
   "Use os dados institucionais para cabeçalho e contexto quando eles forem suficientes.",
   "Quando faltar informação relevante, marque exatamente no ponto adequado com [PENDENTE: detalhe da informação].",
-  "Deixe claro, ao final, que a minuta exige revisão da área competente antes de uso oficial."
+  "Entregue o texto como documento institucional profissional, sem comentários externos, avisos de IA ou explicações fora da peça."
 ];
 
 const sharedMustAvoid = [
@@ -606,7 +606,10 @@ export function buildGeneratePrompt(input: PromptInput) {
     "- Organize em seções numeradas ou cláusulas, conforme o documento.",
     "- Desenvolva parágrafos substantivos; não entregue apenas um esqueleto.",
     "- Use tabelas Markdown quando isso melhorar matriz, pesquisa de preços, riscos ou comparativos.",
-    "- Termine com observacao curta de minuta preliminar sujeita a revisão humana."
+    "- Não use títulos coloridos, tom de chat, emojis, notas ao usuário ou avisos finais sobre IA/revisão.",
+    "- Não escreva frases como 'minuta preliminar', 'sujeito a revisão', 'não substitui revisão' ou equivalentes no corpo final.",
+    "- Quando faltarem dados, registre apenas pendências objetivas no ponto exato do documento, sem transformar isso em aviso genérico.",
+    "- Não inclua uma observação final genérica. Termine como um documento oficial terminaria: com fecho, local/data ou assinaturas pendentes quando aplicável."
   ].join("\n");
 }
 

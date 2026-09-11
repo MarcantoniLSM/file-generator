@@ -146,6 +146,8 @@ export default function GeneratorApp({
   const [mode, setMode] = useState<Mode>("generate");
   const [values, setValues] = useState<Record<string, string>>({});
   const [headerTemplate, setHeaderTemplate] = useState("");
+  const [logoDataUrl, setLogoDataUrl] = useState("");
+  const [logoError, setLogoError] = useState("");
   const [reviewText, setReviewText] = useState("");
   const [output, setOutput] = useState("");
   const [source, setSource] = useState<"openai" | null>(null);
@@ -352,8 +354,28 @@ export default function GeneratorApp({
       title: definition.name,
       filename: `${definition.shortName.toLowerCase()}-minuta.docx`,
       body: output,
-      header: headerTemplate
+      header: headerTemplate,
+      logoDataUrl
     });
+  }
+
+  function attachLogo(file: File | undefined) {
+    if (!file) return;
+    if (!["image/png", "image/jpeg"].includes(file.type)) {
+      setLogoError("Use uma imagem PNG ou JPG para compor o cabeçalho do documento.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setLogoDataUrl(reader.result);
+        setLogoError("");
+      }
+    };
+
+    reader.readAsDataURL(file);
   }
 
   function complianceStatusLabel(status: ComplianceResult["status"]) {
@@ -766,6 +788,45 @@ export default function GeneratorApp({
                     <p className="mt-1 text-sm leading-6 text-muted">
                       Cole ou edite aqui o cabeçalho da Prefeitura/Camara. Ele será usado pela IA e exportado no DOCX.
                     </p>
+                  </div>
+                  <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-16 w-16 items-center justify-center border border-line bg-paper">
+                        {logoDataUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={logoDataUrl} alt="Brasão ou logotipo anexado" className="max-h-14 max-w-14 object-contain" />
+                        ) : (
+                          <span className="px-2 text-center font-mono text-[9px] uppercase tracking-wide text-muted">
+                            Brasão
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">Brasão ou logotipo</p>
+                        <p className="text-xs text-muted">PNG ou JPG para compor o cabeçalho e o DOCX.</p>
+                        {logoError ? <p className="mt-1 text-xs font-semibold text-red-700">{logoError}</p> : null}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <label className="flex h-9 cursor-pointer items-center border border-line bg-white px-3 text-sm font-semibold hover:bg-paper">
+                        Anexar imagem
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg"
+                          className="sr-only"
+                          onChange={(event) => attachLogo(event.target.files?.[0])}
+                        />
+                      </label>
+                      {logoDataUrl ? (
+                        <button
+                          type="button"
+                          onClick={() => setLogoDataUrl("")}
+                          className="h-9 border border-line bg-white px-3 text-sm font-semibold hover:bg-paper"
+                        >
+                          Remover
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                   <DocumentEditor
                     value={headerTemplate}
