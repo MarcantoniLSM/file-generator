@@ -9,6 +9,7 @@ import {
   Paragraph,
   Table,
   TableCell,
+  TableLayoutType,
   TableRow,
   TextRun,
   WidthType
@@ -21,6 +22,8 @@ type ExportDocxInput = {
   header?: string;
   logoDataUrl?: string;
 };
+
+const DOCX_CONTENT_WIDTH = 9020;
 
 function cleanMarkdown(value: string) {
   return value
@@ -88,15 +91,33 @@ function splitMarkdownTableRow(line: string) {
     .map((cell) => cleanMarkdown(cell.trim()));
 }
 
+function columnWidthsForRows(rows: string[][], columnCount: number) {
+  const weights = Array.from({ length: columnCount }, (_, columnIndex) => {
+    const longestCell = rows.reduce((longest, row) => Math.max(longest, (row[columnIndex] || "").length), 0);
+
+    return Math.min(Math.max(longestCell, 12), 48);
+  });
+  const totalWeight = weights.reduce((total, weight) => total + weight, 0) || columnCount;
+  const widths = weights.map((weight) => Math.max(720, Math.floor((DOCX_CONTENT_WIDTH * weight) / totalWeight)));
+  const currentTotal = widths.reduce((total, width) => total + width, 0);
+
+  widths[widths.length - 1] += DOCX_CONTENT_WIDTH - currentTotal;
+
+  return widths;
+}
+
 function tableFromLines(lines: string[]) {
   const rows = [splitMarkdownTableRow(lines[0]), ...lines.slice(2).map(splitMarkdownTableRow)];
   const columnCount = Math.max(...rows.map((row) => row.length));
+  const columnWidths = columnWidthsForRows(rows, columnCount);
 
   return new Table({
     width: {
-      size: 100,
-      type: WidthType.PERCENTAGE
+      size: DOCX_CONTENT_WIDTH,
+      type: WidthType.DXA
     },
+    columnWidths,
+    layout: TableLayoutType.FIXED,
     borders: {
       top: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
       bottom: { style: BorderStyle.SINGLE, size: 1, color: "B8BDC7" },
@@ -113,6 +134,10 @@ function tableFromLines(lines: string[]) {
             const text = row[index] || "";
 
             return new TableCell({
+              width: {
+                size: columnWidths[index],
+                type: WidthType.DXA
+              },
               shading: rowIndex === 0 ? { fill: "F1F3F6" } : undefined,
               margins: {
                 top: 90,
