@@ -800,9 +800,9 @@ export default function GeneratorApp({
       </div>
 
       {processModal !== "closed" ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 px-4">
-          <div className="w-full max-w-xl border border-line bg-white shadow-2xl">
-            <div className="border-b border-line px-5 py-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 px-4 py-4">
+          <div className="flex max-h-[calc(100vh-2rem)] w-full max-w-xl flex-col border border-line bg-white shadow-2xl">
+            <div className="shrink-0 border-b border-line px-5 py-4">
               <p className="font-mono text-xs uppercase tracking-[0.16em] text-civic">IA documental</p>
               <h2 className="mt-1 font-serif text-2xl font-semibold">
                 {processModal === "validating"
@@ -817,7 +817,8 @@ export default function GeneratorApp({
               </h2>
             </div>
 
-            <div className="space-y-4 px-5 py-5 text-sm leading-6">
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 text-sm leading-6">
+              <div className="space-y-4">
               {processModal === "validating" || processModal === "generating" ? (
                 <div className="space-y-4">
                   <div className="border border-line bg-paper p-3">
@@ -926,6 +927,7 @@ export default function GeneratorApp({
                   <p className="mt-1">{output || "Tente novamente mais tarde."}</p>
                 </div>
               ) : null}
+              </div>
             </div>
 
             {processModal === "compliance" ? (
