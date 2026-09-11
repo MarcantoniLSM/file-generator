@@ -132,6 +132,24 @@ const documentGroups = (
     comingSoon: comingSoonByCategory[category] || []
   }));
 
+function cleanMarkdownLine(value: string) {
+  return value
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/_(.*?)_/g, "$1")
+    .replace(/`(.*?)`/g, "$1")
+    .trim();
+}
+
+function comparableLine(value: string) {
+  return cleanMarkdownLine(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
 export default function GeneratorApp({
   initialKind = defaultKind,
   allowedModules
@@ -175,6 +193,53 @@ export default function GeneratorApp({
     [definition.fields, values]
   );
 
+  function cleanGeneratedText(text: string) {
+    const headerLines = new Set(
+      headerTemplate
+        .split("\n")
+        .map(comparableLine)
+        .filter(Boolean)
+    );
+    const titleLines = new Set([definition.name, definition.shortName].map(comparableLine).filter(Boolean));
+    const lines = text.split("\n");
+    let index = 0;
+
+    while (index < lines.length && !lines[index].trim()) index += 1;
+
+    while (index < lines.length) {
+      const line = comparableLine(lines[index]);
+
+      if (!line) {
+        index += 1;
+        continue;
+      }
+
+      if (headerLines.has(line)) {
+        index += 1;
+        continue;
+      }
+
+      break;
+    }
+
+    let cleaned = lines.slice(index).join("\n").trimStart();
+    const cleanedLines = cleaned.split("\n");
+    let headingCount = 0;
+
+    while (headingCount < cleanedLines.length && !cleanedLines[headingCount].trim()) headingCount += 1;
+
+    if (headingCount < cleanedLines.length && titleLines.has(comparableLine(cleanedLines[headingCount]))) {
+      const nextLine = cleanedLines[headingCount + 1];
+
+      if (nextLine && titleLines.has(comparableLine(nextLine))) {
+        cleanedLines.splice(headingCount + 1, 1);
+        cleaned = cleanedLines.join("\n").trimStart();
+      }
+    }
+
+    return cleaned;
+  }
+
   function selectDocument(item: NavItem) {
     setKind(item.kind);
     setOutput("");
@@ -202,7 +267,7 @@ export default function GeneratorApp({
       throw new Error(data.error || "Não foi possível gerar a minuta.");
     }
 
-    setOutput(data.text);
+    setOutput(cleanGeneratedText(data.text));
     setSource("openai");
     setDebug(data.debug || null);
     setCompliance(data.compliance || null);
@@ -288,7 +353,7 @@ export default function GeneratorApp({
         throw new Error(data.error || "Não foi possível revisar o documento.");
       }
 
-      setOutput(data.text);
+      setOutput(cleanGeneratedText(data.text));
       setSource("openai");
       setDebug(data.debug || null);
       setFormCollapsed(true);
@@ -318,7 +383,7 @@ export default function GeneratorApp({
         throw new Error(data.error || "Não foi possível revisar o documento.");
       }
 
-      setOutput(data.text);
+      setOutput(cleanGeneratedText(data.text));
       setSource("openai");
       setDebug(data.debug || null);
     } catch (error) {

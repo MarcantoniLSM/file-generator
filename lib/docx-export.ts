@@ -4,7 +4,6 @@ import {
   AlignmentType,
   BorderStyle,
   Document,
-  HeadingLevel,
   ImageRun,
   Packer,
   Paragraph,
@@ -25,10 +24,52 @@ type ExportDocxInput = {
 
 function cleanMarkdown(value: string) {
   return value
+    .replace(/^#{1,6}\s+/, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/_(.*?)_/g, "$1")
     .replace(/`(.*?)`/g, "$1")
     .trim();
+}
+
+function comparableText(value: string) {
+  return cleanMarkdown(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function stripLeadingHeaderAndTitle(body: string, title: string, header?: string) {
+  const headerLines = new Set(
+    (header || "")
+      .split("\n")
+      .map(comparableText)
+      .filter(Boolean)
+  );
+  const titleLine = comparableText(title);
+  const lines = body.split("\n");
+  let index = 0;
+
+  while (index < lines.length && !lines[index].trim()) index += 1;
+
+  while (index < lines.length) {
+    const line = comparableText(lines[index]);
+
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    if (headerLines.has(line) || line === titleLine) {
+      index += 1;
+      continue;
+    }
+
+    break;
+  }
+
+  return lines.slice(index).join("\n").trimStart();
 }
 
 function isMarkdownTableDivider(line: string) {
@@ -103,8 +144,14 @@ function paragraphFromLine(line: string) {
 
   if (trimmed.startsWith("# ")) {
     return new Paragraph({
-      text: cleanMarkdown(trimmed.slice(2)),
-      heading: HeadingLevel.HEADING_1,
+      children: [
+        new TextRun({
+          text: cleanMarkdown(trimmed.slice(2)).toUpperCase(),
+          bold: true,
+          size: 28,
+          color: "111827"
+        })
+      ],
       alignment: AlignmentType.CENTER,
       spacing: { before: 240, after: 240 }
     });
@@ -112,16 +159,28 @@ function paragraphFromLine(line: string) {
 
   if (trimmed.startsWith("## ")) {
     return new Paragraph({
-      text: cleanMarkdown(trimmed.slice(3)),
-      heading: HeadingLevel.HEADING_2,
+      children: [
+        new TextRun({
+          text: cleanMarkdown(trimmed.slice(3)),
+          bold: true,
+          size: 24,
+          color: "111827"
+        })
+      ],
       spacing: { before: 220, after: 120 }
     });
   }
 
   if (trimmed.startsWith("### ")) {
     return new Paragraph({
-      text: cleanMarkdown(trimmed.slice(4)),
-      heading: HeadingLevel.HEADING_3,
+      children: [
+        new TextRun({
+          text: cleanMarkdown(trimmed.slice(4)),
+          bold: true,
+          size: 22,
+          color: "111827"
+        })
+      ],
       spacing: { before: 180, after: 100 }
     });
   }
@@ -234,6 +293,7 @@ function headerParagraphs(header?: string) {
 
 export async function exportDocx({ title, filename, body, header, logoDataUrl }: ExportDocxInput) {
   const logoBlocks = await logoParagraph(logoDataUrl);
+  const normalizedBody = stripLeadingHeaderAndTitle(body, title, header);
 
   const doc = new Document({
     numbering: {
@@ -267,12 +327,18 @@ export async function exportDocx({ title, filename, body, header, logoDataUrl }:
           ...logoBlocks,
           ...headerParagraphs(header),
           new Paragraph({
-            text: title,
-            heading: HeadingLevel.TITLE,
+            children: [
+              new TextRun({
+                text: title.toUpperCase(),
+                bold: true,
+                size: 30,
+                color: "111827"
+              })
+            ],
             alignment: AlignmentType.CENTER,
             spacing: { after: 360 }
           }),
-          ...bodyToDocxBlocks(body)
+          ...bodyToDocxBlocks(normalizedBody)
         ]
       }
     ]
